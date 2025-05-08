@@ -1,0 +1,103 @@
+[versions]
+agp = "8.7.3"
+kotlin = "2.0.20"
+ksp = "2.0.20-1.0.25"
+coreKtx = "1.13.1"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.9.2"
+composeBom = "2024.09.00"
+hilt = "2.52"
+retrofit = "2.11.0"
+kotlin-serialization = "1.6.0"
+composePlugin = "1.6.11"
+okhttp = "4.12.0"
+retrofitKotlinxSerializationJson = "1.0.0"
+navigation = "2.8.9"
+composeCompiler = "1.5.14"
+appcompat = "1.7.0"
+material = "1.12.0"
+androidx_hilt = "1.2.0"
+jetbrainsKotlinJvm = "2.0.20"
+kotlinxCoroutinesTest = "1.9.0"
+paging = "3.3.6"
+
+[libraries]
+gradlePlugin-android = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+gradlePlugin-kotlin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+gradlePlugin-ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-gradle-plugin", version.ref = "ksp" }
+gradlePlugin-compose = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidx_hilt" }
+
+retrofit-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+retrofit-serializationConverter = { group = "com.jakewharton.retrofit", name = "retrofit2-kotlinx-serialization-converter", version.ref = "retrofitKotlinxSerializationJson" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlin-serialization" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
+
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+
+paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+
+[plugins]
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "jetbrainsKotlinJvm" }
+hilt-plugin = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "composePlugin" }
+
+studify-hilt = { id = "studify.hilt", version = "unspecified" }
+studify-compose-app = { id = "studify.compose.app", version = "unspecified" }
+studify-compose-module = { id = "studify.compose.module", version = "unspecified" }
+studify-retrofit = { id = "studify.retrofit", version = "unspecified" }
+studify-serialization = { id = "studify.serialization", version = "unspecified" }
+studify-app = { id = "studify.app", version = "unspecified" }
+studify-module = { id = "studify.module", version = "unspecified" }
+studify-paging = { id = "studify.paging", version = "unspecified" }
+
+[bundles]
+compose = [
+    "androidx-ui",
+    "androidx-ui-graphics",
+    "androidx-ui-tooling-preview",
+    "androidx-material3",
+    "androidx-activity-compose",
+    "compose-navigation",
+    "hilt-navigation-compose",
+    "androidx-lifecycle-runtime-ktx",
+]
+compose-debug = [
+    "androidx-ui-tooling",
+    "androidx-ui-test-manifest"
+]
+retrofit = [
+    "retrofit-retrofit",
+    "retrofit-okhttp",
+    "retrofit-serializationConverter"
+]
