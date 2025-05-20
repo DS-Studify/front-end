@@ -7,6 +7,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.navigation
+import com.ds.studify.feature.camera.navigation.cameraScreen
+import com.ds.studify.feature.camera.navigation.navigateToCamera
+import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -33,8 +36,12 @@ fun StudifyNavHost(
         ) {
 
             mainScreen(
-
+                homeNavigationDelegator = HomeNavigationDelegator(
+                    onStartToStudyClick = { navController.navigateToCamera() }
+                )
             )
+
+            cameraScreen(navController)
         }
     }
 }
