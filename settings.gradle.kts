@@ -34,3 +34,4 @@ include(":core:domain")
 include(":core:resources")
 
 include(":feature:home")
+include(":feature:camera")

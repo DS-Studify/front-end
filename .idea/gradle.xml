@@ -31,6 +31,7 @@
             <option value="$PROJECT_DIR$/core/domain" />
             <option value="$PROJECT_DIR$/core/resources" />
             <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/camera" />
             <option value="$PROJECT_DIR$/feature/home" />
           </set>
         </option>
