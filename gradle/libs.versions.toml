@@ -23,6 +23,7 @@ androidx_hilt = "1.2.0"
 jetbrainsKotlinJvm = "2.0.20"
 kotlinxCoroutinesTest = "1.9.0"
 paging = "3.3.6"
+camera = "1.4.2"
 
 [libraries]
 gradlePlugin-android = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -60,6 +61,12 @@ hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", v
 
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+
+camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camera" }
+camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camera" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
+camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
+camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "camera" }
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
@@ -100,4 +107,12 @@ retrofit = [
     "retrofit-retrofit",
     "retrofit-okhttp",
     "retrofit-serializationConverter"
+]
+
+camera = [
+    "camera-core",
+    "camera2",
+    "camera-lifecycle",
+    "camera-view",
+    "camera-video"
 ]
