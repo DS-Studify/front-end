@@ -4,4 +4,7 @@
     <string name="studify">Studify</string>
     <string name="back">뒤로가기</string>
 
+    <!--  카메라 규격 가이드  -->
+    <string name="camera_guide_title">카메라 규격 가이드</string>
+
 </resources>
