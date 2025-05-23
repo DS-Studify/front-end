@@ -34,6 +34,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navOptions
 import com.ds.studify.core.designsystem.theme.StudifyColors
+import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.feature.calendar.navigation.RouteStats
@@ -148,6 +149,7 @@ private fun NavigationBarItem(
                 } else {
                     Color(0xFF6F6F6F)
                 },
+                style = Typography.titleSmall,
                 fontSize = 15.sp
             )
         }
