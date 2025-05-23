@@ -2,7 +2,6 @@ package com.ds.studify.feature.camera.component
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ds.studify.core.ui.extension.clickableWithoutRippleEffect
 import com.ds.studify.feature.camera.RecordingState
 
 @Composable
@@ -26,8 +26,9 @@ internal fun RecordButton(
 ) {
     Box(
         modifier = modifier
-            .clickable(onClick = onClick)
-            ,
+            .clickableWithoutRippleEffect(
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center
     ) {
         Canvas(

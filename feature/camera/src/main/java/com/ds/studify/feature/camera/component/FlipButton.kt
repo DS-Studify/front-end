@@ -2,7 +2,6 @@ package com.ds.studify.feature.camera.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -14,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ds.studify.core.ui.extension.clickableWithoutRippleEffect
 
 @Composable
 internal fun FlipButton(
@@ -27,7 +27,9 @@ internal fun FlipButton(
             .background(
                 Color.Black.copy(alpha = 0.31f)
             )
-            .clickable(onClick = onClick),
+            .clickableWithoutRippleEffect(
+                onClick = onClick
+            ),
         contentAlignment = Alignment.Center
     ) {
         Image(
