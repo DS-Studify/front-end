@@ -12,8 +12,6 @@ interface CameraX {
     fun startCamera(lifecycleOwner: LifecycleOwner)
     fun startRecordVideo()
     fun stopRecordVideo()
-    fun resumeRecordVideo()
-    fun pauseRecordVideo()
     fun closeRecordVideo()
     fun flipCameraFacing()
     fun unBindCamera()

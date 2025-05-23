@@ -149,16 +149,6 @@ internal class CameraXImpl : CameraX {
         _recordingState.value = RecordingState.Idle
     }
 
-    override fun resumeRecordVideo() {
-        recording.resume()
-        _recordingState.value = RecordingState.OnRecord
-    }
-
-    override fun pauseRecordVideo() {
-        recording.pause()
-        _recordingState.value = RecordingState.Paused
-    }
-
     override fun closeRecordVideo() {
         Log.e("record", "close")
         recording.close()
