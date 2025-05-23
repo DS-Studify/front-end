@@ -43,20 +43,23 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 internal fun CameraRoute(
-
+    onRecordCloseClick: () -> Unit
 ) {
     val uiState =
         MutableStateFlow<CameraPermissionState>(CameraPermissionState.PermissionNotGranted)
 
-    CheckCameraPermission(uiState.collectAsState()) {
-        uiState.value = it
-    }
+    CheckCameraPermission(
+        cameraState = uiState.collectAsState(),
+        onRecordCloseClick = onRecordCloseClick,
+        setState = { uiState.value = it }
+    )
 }
 
 @Composable
 internal fun CheckCameraPermission(
     cameraState: State<CameraPermissionState>,
-    setState: (CameraPermissionState) -> Unit
+    setState: (CameraPermissionState) -> Unit,
+    onRecordCloseClick: () -> Unit
 ) {
     when (cameraState.value) {
         is CameraPermissionState.PermissionNotGranted -> {
@@ -64,14 +67,14 @@ internal fun CheckCameraPermission(
         }
 
         is CameraPermissionState.Success -> {
-            CameraScreen()
+            CameraScreen(onRecordCloseClick)
         }
     }
 }
 
 @Composable
 internal fun CameraScreen(
-
+    onRecordCloseClick: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraScope = rememberCoroutineScope()
@@ -162,6 +165,7 @@ internal fun CameraScreen(
                         recordingState = recordingState.value,
                         onClick = {
                             cameraX.stopRecordVideo()
+                            onRecordCloseClick()
                         }
                     )
                 }
@@ -193,5 +197,7 @@ private fun RequestPermission(
 @Preview
 @Composable
 private fun CameraScreenPreview() {
-    CameraScreen()
+    CameraScreen(
+        onRecordCloseClick = {}
+    )
 }
