@@ -1,5 +1,9 @@
 package com.ds.studify.ui
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -25,12 +29,23 @@ fun MainScreen(
     homeNavigationDelegator: HomeNavigationDelegator,
     navController: NavHostController,
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = RouteHome
-    ) {
-        homeScreen(
-            homeNavigationDelegator
-        )
+    Scaffold(
+        bottomBar = {
+
+        }
+    ) { innerPadding ->
+        Box {
+            NavHost(
+                navController = navController,
+                startDestination = RouteHome,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None }
+            ) {
+                homeScreen(
+                    homeNavigationDelegator,
+                    innerPadding
+                )
+            }
+        }
     }
 }

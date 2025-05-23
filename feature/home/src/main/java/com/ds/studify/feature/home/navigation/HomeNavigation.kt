@@ -1,5 +1,6 @@
 package com.ds.studify.feature.home.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.ds.studify.feature.home.HomeRoute
@@ -9,11 +10,13 @@ import kotlinx.serialization.Serializable
 data object RouteHome
 
 fun NavGraphBuilder.homeScreen(
-    homeNavigationDelegator: HomeNavigationDelegator
+    homeNavigationDelegator: HomeNavigationDelegator,
+    paddingValues: PaddingValues,
 ) {
     composable<RouteHome> {
         HomeRoute(
-            navigationDelegator = homeNavigationDelegator
+            navigationDelegator = homeNavigationDelegator,
+            paddingValues = paddingValues
         )
     }
 }
