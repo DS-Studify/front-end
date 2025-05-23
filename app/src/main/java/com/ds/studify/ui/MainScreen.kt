@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.ds.studify.feature.calendar.navigation.statsScreen
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
 import com.ds.studify.feature.home.navigation.RouteHome
 import com.ds.studify.feature.home.navigation.homeScreen
@@ -31,7 +32,7 @@ fun MainScreen(
 ) {
     Scaffold(
         bottomBar = {
-
+            MainBottomNavigationBar(navController)
         }
     ) { innerPadding ->
         Box {
@@ -45,6 +46,8 @@ fun MainScreen(
                     homeNavigationDelegator,
                     innerPadding
                 )
+
+                statsScreen(innerPadding)
             }
         }
     }

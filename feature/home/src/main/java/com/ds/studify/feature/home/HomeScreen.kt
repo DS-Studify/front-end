@@ -66,7 +66,7 @@ internal fun HomeScreen(
                 start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                 end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
                 top = 0.dp,
-                bottom = 0.dp
+                bottom = paddingValues.calculateBottomPadding()
             )
             .fillMaxSize()
     ) {
