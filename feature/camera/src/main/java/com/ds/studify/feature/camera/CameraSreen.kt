@@ -7,12 +7,9 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
 import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -34,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.ds.studify.feature.camera.component.FlipButton
+import com.ds.studify.feature.camera.component.RecordButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -123,81 +122,49 @@ internal fun CameraScreen(
             )
         }
 
-        Row(
+        FlipButton(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 20.dp)
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                when (recordingState.value) {
-                    is RecordingState.OnRecord -> {
-                        Button(
-                            modifier = Modifier
-                                .padding(10.dp),
-                            onClick = {
-                                cameraX.closeRecordVideo()
-                            }
-                        ) {
-                            Text("close")
-                        }
-                        Button(
-                            modifier = Modifier
-                                .padding(10.dp),
-                            onClick = {
-                                cameraX.stopRecordVideo()
-                            }
-                        ) {
-                            Text("stop")
-                        }
-                        Button(
-                            modifier = Modifier
-                                .padding(10.dp),
-                            onClick = {
-                                cameraX.pauseRecordVideo()
-                            }
-                        ) {
-                            Text("pause")
-                        }
-                    }
-
-                    is RecordingState.Idle -> {
-                        Button(
-                            modifier = Modifier
-                                .padding(10.dp),
-                            onClick = {
-                                cameraX.startRecordVideo()
-                            }
-                        ) {
-                            Text("record")
-                        }
-                    }
-
-                    is RecordingState.Paused -> {
-                        Button(
-                            modifier = Modifier
-                                .padding(10.dp),
-                            onClick = {
-                                cameraX.resumeRecordVideo()
-                            }
-                        ) {
-                            Text("resume")
-                        }
-                    }
-                }
+                .align(Alignment.TopEnd)
+                .padding(top = 32.dp, end = 38.dp),
+            onClick = {
+                cameraX.flipCameraFacing()
             }
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    modifier = Modifier
-                        .padding(10.dp),
-                    onClick = {
-                        cameraX.flipCameraFacing()
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 22.dp)
+        ) {
+            when (recordingState.value) {
+                is RecordingState.Idle -> {
+                    RecordButton(
+                        recordingState = recordingState.value,
+                        onClick = {
+                            cameraX.startRecordVideo()
+                        }
+                    )
+                }
+
+                is RecordingState.OnRecord -> {
+                    RecordButton(
+                        recordingState = recordingState.value,
+                        onClick = {
+                            cameraX.stopRecordVideo()
+                        }
+                    )
+                }
+
+                is RecordingState.Paused -> {
+                    Button(
+                        modifier = Modifier
+                            .padding(10.dp),
+                        onClick = {
+                            cameraX.resumeRecordVideo()
+                        }
+                    ) {
+                        Text("resume")
                     }
-                ) {
-                    Text(if (facing.value == CameraSelector.LENS_FACING_FRONT) "back" else "front")
                 }
             }
         }
