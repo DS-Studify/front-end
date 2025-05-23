@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--  공통  -->
+    <string name="studify">Studify</string>
+    <string name="back">뒤로가기</string>
+    
+    <!--  Bottom Navigation  -->
+    <string name="navigation_study">공부 측정</string>
+    <string name="navigation_calendar">통계</string>
+
+    <!--  카메라 규격 가이드  -->
+    <string name="camera_guide_title">카메라 규격 가이드</string>
 
 </resources>

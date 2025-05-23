@@ -1,9 +1,14 @@
 package com.ds.studify.ui
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.ds.studify.feature.calendar.navigation.statsScreen
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
 import com.ds.studify.feature.home.navigation.RouteHome
 import com.ds.studify.feature.home.navigation.homeScreen
@@ -25,12 +30,25 @@ fun MainScreen(
     homeNavigationDelegator: HomeNavigationDelegator,
     navController: NavHostController,
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = RouteHome
-    ) {
-        homeScreen(
-            homeNavigationDelegator
-        )
+    Scaffold(
+        bottomBar = {
+            MainBottomNavigationBar(navController)
+        }
+    ) { innerPadding ->
+        Box {
+            NavHost(
+                navController = navController,
+                startDestination = RouteHome,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None }
+            ) {
+                homeScreen(
+                    homeNavigationDelegator,
+                    innerPadding
+                )
+
+                statsScreen(innerPadding)
+            }
+        }
     }
 }

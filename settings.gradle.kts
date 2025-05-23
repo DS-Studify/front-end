@@ -36,3 +36,4 @@ include(":core:ui-extension")
 
 include(":feature:home")
 include(":feature:camera")
+include(":feature:statistics")

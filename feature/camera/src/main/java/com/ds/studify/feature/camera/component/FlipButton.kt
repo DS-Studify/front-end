@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.ui.extension.clickableWithoutRippleEffect
 
 @Composable
@@ -33,7 +34,7 @@ internal fun FlipButton(
         contentAlignment = Alignment.Center
     ) {
         Image(
-            painter = painterResource(id = com.ds.studify.core.resources.R.drawable.ic_flip),
+            painter = painterResource(id = StudifyDrawable.ic_flip),
             contentDescription = "flip",
             modifier = Modifier
                 .size(24.dp)
