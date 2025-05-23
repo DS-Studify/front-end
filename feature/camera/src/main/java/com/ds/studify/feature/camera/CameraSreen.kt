@@ -121,14 +121,16 @@ internal fun CameraScreen(
             )
         }
 
-        FlipButton(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 32.dp, end = 38.dp),
-            onClick = {
-                cameraX.flipCameraFacing()
-            }
-        )
+        if (recordingState.value == RecordingState.Idle) {
+            FlipButton(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 32.dp, end = 38.dp),
+                onClick = {
+                    cameraX.flipCameraFacing()
+                }
+            )
+        }
 
         Column(
             modifier = Modifier
