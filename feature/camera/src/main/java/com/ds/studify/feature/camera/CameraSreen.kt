@@ -8,10 +8,12 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -23,13 +25,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.ds.studify.core.designsystem.theme.StudifyColors
+import com.ds.studify.core.ui.extension.formatRecordDuration
 import com.ds.studify.feature.camera.component.FlipButton
 import com.ds.studify.feature.camera.component.RecordButton
 import kotlinx.coroutines.Dispatchers
@@ -109,15 +113,21 @@ internal fun CameraScreen(
                 factory = { preview }) {}
         }
 
-        Column(
+        Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 25.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(StudifyColors.PK03),
+            contentAlignment = Alignment.Center
         ) {
             Text(
-                "${(recordingInfo.value.duration / 1000000000.0)} second",
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .padding(horizontal = 9.dp),
+                text = formatRecordDuration(recordingInfo.value.duration),
                 fontSize = 20.sp,
-                color = Color.White
+                color = StudifyColors.WHITE
             )
         }
 
