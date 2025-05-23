@@ -13,5 +13,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:resources"))
+    implementation(projects.core.resources)
+    implementation(projects.core.uiExtension)
 }

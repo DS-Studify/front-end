@@ -13,6 +13,7 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.designsystem)
     implementation(projects.core.resources)
+    implementation(projects.core.uiExtension)
 
     implementation(libs.bundles.camera)
 }
