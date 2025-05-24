@@ -11,5 +11,21 @@
 
     <!--  카메라 규격 가이드  -->
     <string name="camera_guide_title">카메라 규격 가이드</string>
+    <string name="camera_guide_setting_title">✅ 올바른 카메라 설정</string>
+    <string name="camera_guide_setting_angle_title">각도: </string>
+    <string name="camera_guide_setting_angle_body_and_hand">상체와 손</string>
+    <string name="camera_guide_setting_angle_content1">이 화면에 잘 보이도록</string>
+    <string name="camera_guide_setting_angle_angle">오른쪽 혹은 왼쪽 45도 각도</string>
+    <string name="camera_guide_setting_angle_content2">에서 촬영하세요.</string>
+    <string name="camera_guide_setting_distance">거리: 카메라와 사용자의 거리는 적절한 프레임(가슴 이상이 보이도록) 유지하세요.</string>
+    <string name="camera_guide_setting_light">조명: 너무 어둡거나 밝지 않도록, 자연광 또는 균형 잡힌 조명을 사용하세요.</string>
+    <string name="camera_guide_setting_background">배경: 복잡한 배경보다는 단순하고 방해 요소가 적은 환경에서 촬영하세요.</string>
+    <string name="camera_guide_setting_fix">고정된 위치: 삼각대 또는 고정된 거치대를 활용해 흔들림 없이 설정하세요.</string>
+    <string name="camera_guide_precautions_title">📢 주의사항</string>
+    <string name="camera_guide_precautions_content_1">화면이 너무 어둡거나 흐리면 분석이 원활하지 않을 수 있습니다.</string>
+    <string name="camera_guide_precautions_content_2">상체와 손이 화면에 포함되지 않을 경우 감지 성능이 떨어질 수 있습니다.</string>
+    <string name="camera_guide_done_content_1">📌 위 가이드를 따라 설정한 후</string>
+    <string name="camera_guide_done_content_2">[공부 시작]</string>
+    <string name="camera_guide_done_content_3">버튼을 눌러주세요!</string>
 
 </resources>
