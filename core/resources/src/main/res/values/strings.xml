@@ -9,6 +9,9 @@
     <string name="navigation_study">공부 측정</string>
     <string name="navigation_calendar">통계</string>
 
+    <!--  Home  -->
+    <string name="home_today_study_time">님의 오늘 공부 시간</string>
+
     <!--  카메라 규격 가이드  -->
     <string name="camera_guide_title">카메라 규격 가이드</string>
     <string name="camera_guide_setting_title">✅ 올바른 카메라 설정</string>
