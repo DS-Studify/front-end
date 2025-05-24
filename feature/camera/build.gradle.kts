@@ -16,4 +16,5 @@ dependencies {
     implementation(projects.core.uiExtension)
 
     implementation(libs.bundles.camera)
+    implementation(libs.bundles.orbit)
 }
