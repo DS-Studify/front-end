@@ -2,8 +2,25 @@ package com.ds.studify.core.ui.extension
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
+
+@Composable
+inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModelOnGraph(
+    navController: NavController
+): T {
+    val navGraphRoute = destination.parent?.route ?: return hiltViewModel()
+    val parentEntry = remember(this) {
+        navController.getBackStackEntry(navGraphRoute)
+    }
+    return hiltViewModel(parentEntry)
+}
 
 @SuppressLint("DefaultLocale")
 fun formatRecordDuration(duration: Long): String {

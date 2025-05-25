@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithLogo
 import com.ds.studify.core.designsystem.component.StudifyStartButton
 import com.ds.studify.core.designsystem.theme.StudifyColors
@@ -33,13 +35,18 @@ import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.core.ui.extension.formatRecordDuration
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 internal fun HomeRoute(
     paddingValues: PaddingValues,
-    navigationDelegator: HomeNavigationDelegator
+    navigationDelegator: HomeNavigationDelegator,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.collectAsState()
+
     StudifyScaffoldWithLogo(
         paddingValues = paddingValues,
         leftActionButton = {
@@ -56,6 +63,7 @@ internal fun HomeRoute(
         }
     ) { innerPadding ->
         HomeScreen(
+            todayStudyTime = uiState.todayStudyTime,
             paddingValues = innerPadding,
             navigationDelegator = navigationDelegator
         )
@@ -64,6 +72,7 @@ internal fun HomeRoute(
 
 @Composable
 internal fun HomeScreen(
+    todayStudyTime: Long,
     paddingValues: PaddingValues,
     navigationDelegator: HomeNavigationDelegator
 ) {
@@ -98,7 +107,8 @@ internal fun HomeScreen(
             }
 
             Text(
-                text = "00:00:00", // TODO
+                text = formatRecordDuration(todayStudyTime),
+                //text = "00:00:00", // TODO
                 fontFamily = pretendard,
                 fontWeight = FontWeight.Bold,
                 fontSize = 58.sp,
@@ -126,6 +136,7 @@ internal fun HomeScreen(
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(
+        todayStudyTime = 0L,
         paddingValues = PaddingValues(top = 56.dp),
         navigationDelegator = HomeNavigationDelegator()
     )
