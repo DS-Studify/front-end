@@ -25,6 +25,7 @@ kotlinxCoroutinesTest = "1.9.0"
 paging = "3.3.6"
 orbit = "9.0.0"
 camera = "1.4.2"
+mediapipeTasks = "0.10.14"
 
 [libraries]
 gradlePlugin-android = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -71,6 +72,8 @@ camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "c
 camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camera" }
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
 camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "camera" }
+
+mediapipe-vision = {group = "com.google.mediapipe", name = "tasks-vision", version.ref = "mediapipeTasks" }
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
