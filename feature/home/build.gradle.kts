@@ -1,3 +1,5 @@
+import com.ds.studify.convention.implementation
+
 plugins {
     alias(libs.plugins.studify.module)
     alias(libs.plugins.studify.hilt)
@@ -10,7 +12,10 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:data"))
-    implementation(project(":core:designsystem"))
-    implementation(project(":core:resources"))
+    implementation(projects.core.data)
+    implementation(projects.core.designsystem)
+    implementation(projects.core.resources)
+    implementation(projects.core.uiExtension)
+
+    implementation(libs.bundles.orbit)
 }

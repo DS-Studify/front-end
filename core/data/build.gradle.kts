@@ -1,3 +1,5 @@
+import com.ds.studify.convention.implementation
+
 plugins {
     alias(libs.plugins.studify.module)
     alias(libs.plugins.studify.hilt)
@@ -10,5 +12,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:resources"))
+    implementation(projects.core.resources)
 }
