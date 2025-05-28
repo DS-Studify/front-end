@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,7 +72,7 @@ internal fun CheckCameraPermission(
         }
 
         is CameraPermissionState.Success -> {
-            CameraScreen(onRecordCloseClick)
+            CameraScreen(onRecordCloseClick = onRecordCloseClick)
         }
     }
 }
@@ -84,6 +89,8 @@ internal fun CameraScreen(
     val facing = cameraX.getFacingState().collectAsState()
     val recordingState = cameraX.getRecordingState().collectAsState()
     val recordingInfo = cameraX.getRecordingInfo().collectAsState(RecordingInfo(0, 0))
+    val handLandmarks = cameraX.getHandLandmarks().collectAsState(emptyList())
+    val poseLandmarks = cameraX.getPoseLandmarks().collectAsState(emptyList())
 
     LaunchedEffect(Unit) {
         cameraX.initialize(context = context)
@@ -115,6 +122,17 @@ internal fun CameraScreen(
                 modifier = Modifier.fillMaxSize(),
                 factory = { preview }) {}
         }
+
+        // 손 랜드마크 오버레이 (임시)
+        HandLandmarkOverlay(
+            landmarks = handLandmarks.value,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        PoseLandmarkOverlay(
+            landmarks = poseLandmarks.value,
+            modifier = Modifier.fillMaxSize()
+        )
 
         Box(
             modifier = Modifier
@@ -170,6 +188,122 @@ internal fun CameraScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun HandLandmarkOverlay(
+    landmarks: List<HandLandmark>,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+
+        landmarks.forEach { landmark ->
+            val x = landmark.x * size.width
+            val y = landmark.y * size.height
+            drawCircle(
+                color = if (landmark.handIndex == 0) Color.Red else Color.Blue,
+                radius = 6f,
+                center = Offset(x, y)
+            )
+        }
+
+        drawHandConnections(landmarks, size)
+    }
+}
+
+@Composable
+fun PoseLandmarkOverlay(
+    landmarks: List<PoseLandmark>,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+
+        landmarks.forEach { landmark ->
+            val x = landmark.x * size.width
+            val y = landmark.y * size.height
+            drawCircle(
+                color = Color.Yellow,
+                radius = 6f,
+                center = Offset(x, y)
+            )
+        }
+
+        drawPoseConnections(landmarks, size)
+    }
+}
+
+private fun DrawScope.drawHandConnections(landmarks: List<HandLandmark>, size: Size) {
+
+    val connections = listOf(
+        // 엄지
+        listOf(0, 1, 2, 3, 4),
+        // 검지
+        listOf(0, 5, 6, 7, 8),
+        // 중지
+        listOf(0, 9, 10, 11, 12),
+        // 약지
+        listOf(0, 13, 14, 15, 16),
+        // 새끼
+        listOf(0, 17, 18, 19, 20),
+        // 손바닥
+        listOf(0, 5, 9, 13, 17, 0)
+    )
+
+    landmarks.groupBy { it.handIndex }.forEach { (handIndex, handLandmarks) ->
+        val landmarkMap = handLandmarks.associateBy { it.landmarkIndex }
+        val color = if (handIndex == 0) Color.Red else Color.Blue
+
+        connections.forEach { connection ->
+            for (i in 0 until connection.size - 1) {
+                val start = landmarkMap[connection[i]]
+                val end = landmarkMap[connection[i + 1]]
+
+                if (start != null && end != null) {
+                    drawLine(
+                        color = color,
+                        start = Offset(start.x * size.width, start.y * size.height),
+                        end = Offset(end.x * size.width, end.y * size.height),
+                        strokeWidth = 4f
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun DrawScope.drawPoseConnections(landmarks: List<PoseLandmark>, size: Size) {
+    val landmarkMap = landmarks.associateBy { it.landmarkIndex }
+
+    val connections = listOf(
+        // 상체
+        11 to 13, 13 to 15,        // 왼쪽 팔
+        12 to 14, 14 to 16,        // 오른쪽 팔
+        11 to 12,                  // 어깨
+        11 to 23, 12 to 24,        // 어깨 ↔ 골반
+
+        // 하체
+        23 to 25, 25 to 27,        // 왼쪽 다리
+        24 to 26, 26 to 28,        // 오른쪽 다리
+
+        // 척추 & 몸통
+        23 to 24,                  // 골반 좌우
+        24 to 12, 23 to 11,        // 골반 → 어깨
+        27 to 31, 28 to 32         // 발끝
+    )
+
+    connections.forEach { (startIdx, endIdx) ->
+        val start = landmarkMap[startIdx]
+        val end = landmarkMap[endIdx]
+
+        if (start != null && end != null) {
+            drawLine(
+                color = Color.Green,
+                start = Offset(start.x * size.width, start.y * size.height),
+                end = Offset(end.x * size.width, end.y * size.height),
+                strokeWidth = 4f
+            )
         }
     }
 }
