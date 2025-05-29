@@ -151,12 +151,6 @@ internal fun CameraScreen(
                 factory = { preview }) {}
         }
 
-        // 손 랜드마크 오버레이 (임시)
-        HandLandmarkOverlay(
-            landmarks = handLandmarks.value,
-            modifier = Modifier.fillMaxSize()
-        )
-
         PoseLandmarkOverlay(
             landmarks = poseLandmarks.value,
             modifier = Modifier.fillMaxSize()
@@ -242,27 +236,6 @@ internal fun CameraScreen(
 }
 
 @Composable
-fun HandLandmarkOverlay(
-    landmarks: List<HandLandmark>,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-
-        landmarks.forEach { landmark ->
-            val x = landmark.x * size.width
-            val y = landmark.y * size.height
-            drawCircle(
-                color = if (landmark.handIndex == 0) Color.Red else Color.Blue,
-                radius = 6f,
-                center = Offset(x, y)
-            )
-        }
-
-        drawHandConnections(landmarks, size)
-    }
-}
-
-@Composable
 fun PoseLandmarkOverlay(
     landmarks: List<PoseLandmark>,
     modifier: Modifier = Modifier
@@ -280,45 +253,6 @@ fun PoseLandmarkOverlay(
         }
 
         drawPoseConnections(landmarks, size)
-    }
-}
-
-private fun DrawScope.drawHandConnections(landmarks: List<HandLandmark>, size: Size) {
-
-    val connections = listOf(
-        // 엄지
-        listOf(0, 1, 2, 3, 4),
-        // 검지
-        listOf(0, 5, 6, 7, 8),
-        // 중지
-        listOf(0, 9, 10, 11, 12),
-        // 약지
-        listOf(0, 13, 14, 15, 16),
-        // 새끼
-        listOf(0, 17, 18, 19, 20),
-        // 손바닥
-        listOf(0, 5, 9, 13, 17, 0)
-    )
-
-    landmarks.groupBy { it.handIndex }.forEach { (handIndex, handLandmarks) ->
-        val landmarkMap = handLandmarks.associateBy { it.landmarkIndex }
-        val color = if (handIndex == 0) Color.Red else Color.Blue
-
-        connections.forEach { connection ->
-            for (i in 0 until connection.size - 1) {
-                val start = landmarkMap[connection[i]]
-                val end = landmarkMap[connection[i + 1]]
-
-                if (start != null && end != null) {
-                    drawLine(
-                        color = color,
-                        start = Offset(start.x * size.width, start.y * size.height),
-                        end = Offset(end.x * size.width, end.y * size.height),
-                        strokeWidth = 4f
-                    )
-                }
-            }
-        }
     }
 }
 
