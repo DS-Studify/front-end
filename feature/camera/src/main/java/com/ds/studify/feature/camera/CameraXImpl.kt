@@ -150,7 +150,6 @@ internal class CameraXImpl : CameraX {
 
             poseLandmarker = PoseLandmarker.createFromOptions(context, options)
             enablePoseDetection()
-            Log.d("MediaPipe", "Pose landmarker initialized successfully")
         } catch (e: Exception) {
             Log.e("MediaPipe", "Failed to initialize Pose landmarker", e)
             disablePoseDetection()
@@ -160,17 +159,14 @@ internal class CameraXImpl : CameraX {
     // 손 검출 결과 처리
     private fun processHandsResult(result: HandLandmarkerResult) {
         val landmarks = mutableListOf<HandLandmark>()
-        val isFrontCamera = _facing.value == CameraSelector.LENS_FACING_FRONT
 
         result.landmarks().forEachIndexed { handIndex, handLandmarks ->
             handLandmarks.forEachIndexed { landmarkIndex, landmark ->
-                val x =
-                    if (isFrontCamera) 1.0f - landmark.x() else landmark.x() // 전면 카메라일 때 X 좌표 반전
                 landmarks.add(
                     HandLandmark(
                         handIndex = handIndex,
                         landmarkIndex = landmarkIndex,
-                        x = x,
+                        x = landmark.x(),
                         y = landmark.y(),
                         z = landmark.z()
                     )

@@ -10,6 +10,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import kotlin.math.acos
+import kotlin.math.sqrt
 
 @Composable
 inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModelOnGraph(
@@ -45,3 +47,15 @@ fun Modifier.clickableWithoutRippleEffect(
     role = role,
     onClick = onClick
 )
+
+fun calculateAngle3D(a: FloatArray, b: FloatArray, c: FloatArray): Float {
+    val ab = floatArrayOf(a[0] - b[0], a[1] - b[1], a[2] - b[2])
+    val cb = floatArrayOf(c[0] - b[0], c[1] - b[1], c[2] - b[2])
+
+    val dot = ab[0] * cb[0] + ab[1] * cb[1] + ab[2] * cb[2]
+    val abNorm = sqrt((ab[0] * ab[0] + ab[1] * ab[1] + ab[2] * ab[2]).toDouble())
+    val cbNorm = sqrt((cb[0] * cb[0] + cb[1] * cb[1] + cb[2] * cb[2]).toDouble())
+
+    val cosine = (dot / (abNorm * cbNorm + 1e-6)).coerceIn(-1.0, 1.0)
+    return Math.toDegrees(acos(cosine)).toFloat()
+}
