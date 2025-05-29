@@ -111,6 +111,12 @@ internal fun CameraScreen(
         }
     }
 
+    LaunchedEffect(poseLandmarks.value) {
+        if (poseLandmarks.value.isNotEmpty()) {
+            viewModel.classifyPose(poseLandmarks.value)
+        }
+    }
+
     DisposableEffect(facing.value) {
         cameraScope.launch(Dispatchers.Main) {
             cameraX.startCamera(lifecycleOwner = lifecycleOwner)
@@ -175,14 +181,24 @@ internal fun CameraScreen(
         }
 
         if (recordingState.value == RecordingState.OnRecord) {
-            Text(
+            Column(
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(top = 20.dp, start = 30.dp),
-                text = if (uiState.isPenInHand) "Studying" else "Not stuyding",
-                style = Typography.titleMedium,
-                color = if (uiState.isPenInHand) StudifyColors.PK03 else Color.DarkGray
-            )
+                    .padding(top = 20.dp, start = 30.dp)
+            ) {
+                Text(
+                    text = if (uiState.isPenInHand) "Studying" else "Not studying",
+                    style = Typography.titleMedium,
+                    color = if (uiState.isPenInHand) StudifyColors.PK03 else Color.DarkGray
+                )
+                if (uiState.poseLabel != null) {
+                    Text(
+                        text = uiState.poseLabel!!.label,
+                        style = Typography.titleMedium,
+                        color = Color.White
+                    )
+                }
+            }
         }
 
         if (recordingState.value == RecordingState.Idle) {
