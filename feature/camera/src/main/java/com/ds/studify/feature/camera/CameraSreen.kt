@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
@@ -21,6 +22,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,16 +36,18 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.ds.studify.core.designsystem.theme.StudifyColors
+import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.ui.extension.formatRecordDuration
 import com.ds.studify.feature.camera.component.FlipButton
 import com.ds.studify.feature.camera.component.RecordButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.compose.collectAsState
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -79,11 +83,14 @@ internal fun CheckCameraPermission(
 
 @Composable
 internal fun CameraScreen(
+    viewModel: CameraViewModel = hiltViewModel(),
     onRecordCloseClick: () -> Unit
 ) {
+    val uiState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraScope = rememberCoroutineScope()
     val context = LocalContext.current as Activity
+
     val cameraX = remember { CameraXFactory.create() }
     val previewView = remember { mutableStateOf<PreviewView?>(null) }
     val facing = cameraX.getFacingState().collectAsState()
@@ -95,6 +102,19 @@ internal fun CameraScreen(
     LaunchedEffect(Unit) {
         cameraX.initialize(context = context)
         previewView.value = cameraX.getPreviewView()
+    }
+
+    LaunchedEffect(handLandmarks.value) {
+        if (handLandmarks.value.isNotEmpty()) {
+            val singleHand = handLandmarks.value.filter { it.handIndex == 0 }
+            viewModel.classifyHand(singleHand)
+        }
+    }
+
+    LaunchedEffect(poseLandmarks.value) {
+        if (poseLandmarks.value.isNotEmpty()) {
+            viewModel.classifyPose(poseLandmarks.value)
+        }
     }
 
     DisposableEffect(facing.value) {
@@ -114,6 +134,14 @@ internal fun CameraScreen(
         }
     }
 
+    DisposableEffect(Unit) {
+        context.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) // 화면 켜짐 유지
+
+        onDispose {
+            context.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -122,12 +150,6 @@ internal fun CameraScreen(
                 modifier = Modifier.fillMaxSize(),
                 factory = { preview }) {}
         }
-
-        // 손 랜드마크 오버레이 (임시)
-        HandLandmarkOverlay(
-            landmarks = handLandmarks.value,
-            modifier = Modifier.fillMaxSize()
-        )
 
         PoseLandmarkOverlay(
             landmarks = poseLandmarks.value,
@@ -147,9 +169,30 @@ internal fun CameraScreen(
                     .padding(vertical = 4.dp)
                     .padding(horizontal = 9.dp),
                 text = formatRecordDuration(recordingInfo.value.duration),
-                fontSize = 20.sp,
+                style = Typography.titleMedium,
                 color = StudifyColors.WHITE
             )
+        }
+
+        if (recordingState.value == RecordingState.OnRecord) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 20.dp, start = 30.dp)
+            ) {
+                Text(
+                    text = if (uiState.isPenInHand) "Studying" else "Not studying",
+                    style = Typography.titleMedium,
+                    color = if (uiState.isPenInHand) StudifyColors.PK03 else Color.DarkGray
+                )
+                if (uiState.poseLabel != null) {
+                    Text(
+                        text = uiState.poseLabel!!.label,
+                        style = Typography.titleMedium,
+                        color = Color.White
+                    )
+                }
+            }
         }
 
         if (recordingState.value == RecordingState.Idle) {
@@ -193,27 +236,6 @@ internal fun CameraScreen(
 }
 
 @Composable
-fun HandLandmarkOverlay(
-    landmarks: List<HandLandmark>,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier = modifier) {
-
-        landmarks.forEach { landmark ->
-            val x = landmark.x * size.width
-            val y = landmark.y * size.height
-            drawCircle(
-                color = if (landmark.handIndex == 0) Color.Red else Color.Blue,
-                radius = 6f,
-                center = Offset(x, y)
-            )
-        }
-
-        drawHandConnections(landmarks, size)
-    }
-}
-
-@Composable
 fun PoseLandmarkOverlay(
     landmarks: List<PoseLandmark>,
     modifier: Modifier = Modifier
@@ -231,45 +253,6 @@ fun PoseLandmarkOverlay(
         }
 
         drawPoseConnections(landmarks, size)
-    }
-}
-
-private fun DrawScope.drawHandConnections(landmarks: List<HandLandmark>, size: Size) {
-
-    val connections = listOf(
-        // 엄지
-        listOf(0, 1, 2, 3, 4),
-        // 검지
-        listOf(0, 5, 6, 7, 8),
-        // 중지
-        listOf(0, 9, 10, 11, 12),
-        // 약지
-        listOf(0, 13, 14, 15, 16),
-        // 새끼
-        listOf(0, 17, 18, 19, 20),
-        // 손바닥
-        listOf(0, 5, 9, 13, 17, 0)
-    )
-
-    landmarks.groupBy { it.handIndex }.forEach { (handIndex, handLandmarks) ->
-        val landmarkMap = handLandmarks.associateBy { it.landmarkIndex }
-        val color = if (handIndex == 0) Color.Red else Color.Blue
-
-        connections.forEach { connection ->
-            for (i in 0 until connection.size - 1) {
-                val start = landmarkMap[connection[i]]
-                val end = landmarkMap[connection[i + 1]]
-
-                if (start != null && end != null) {
-                    drawLine(
-                        color = color,
-                        start = Offset(start.x * size.width, start.y * size.height),
-                        end = Offset(end.x * size.width, end.y * size.height),
-                        strokeWidth = 4f
-                    )
-                }
-            }
-        }
     }
 }
 

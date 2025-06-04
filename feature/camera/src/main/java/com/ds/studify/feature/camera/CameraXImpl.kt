@@ -150,7 +150,6 @@ internal class CameraXImpl : CameraX {
 
             poseLandmarker = PoseLandmarker.createFromOptions(context, options)
             enablePoseDetection()
-            Log.d("MediaPipe", "Pose landmarker initialized successfully")
         } catch (e: Exception) {
             Log.e("MediaPipe", "Failed to initialize Pose landmarker", e)
             disablePoseDetection()
@@ -160,17 +159,14 @@ internal class CameraXImpl : CameraX {
     // 손 검출 결과 처리
     private fun processHandsResult(result: HandLandmarkerResult) {
         val landmarks = mutableListOf<HandLandmark>()
-        val isFrontCamera = _facing.value == CameraSelector.LENS_FACING_FRONT
 
         result.landmarks().forEachIndexed { handIndex, handLandmarks ->
             handLandmarks.forEachIndexed { landmarkIndex, landmark ->
-                val x =
-                    if (isFrontCamera) 1.0f - landmark.x() else landmark.x() // 전면 카메라일 때 X 좌표 반전
                 landmarks.add(
                     HandLandmark(
                         handIndex = handIndex,
                         landmarkIndex = landmarkIndex,
-                        x = x,
+                        x = landmark.x(),
                         y = landmark.y(),
                         z = landmark.z()
                     )
@@ -190,15 +186,13 @@ internal class CameraXImpl : CameraX {
     // 포즈 검출 결과 처리
     private fun processPoseResult(result: PoseLandmarkerResult) {
         val landmarks = mutableListOf<PoseLandmark>()
-        val isFrontCamera = _facing.value == CameraSelector.LENS_FACING_FRONT
 
         result.landmarks().firstOrNull()?.let { poseLandmarks ->
             poseLandmarks.forEachIndexed { index, landmark ->
-                val x = if (isFrontCamera) 1.0f - landmark.x() else landmark.x()
                 landmarks.add(
                     PoseLandmark(
                         landmarkIndex = index,
-                        x = x,
+                        x = landmark.x(),
                         y = landmark.y(),
                         z = landmark.z(),
                         visibility = if (result.landmarks().isNotEmpty())
@@ -211,25 +205,7 @@ internal class CameraXImpl : CameraX {
 
         CoroutineScope(Dispatchers.Default).launch {
             _poseLandmarks.emit(landmarks)
-            Log.d(
-                "PoseDetection",
-                "Detected ${landmarks.size} pose landmarks"
-            )
         }
-    }
-
-    // 상체 랜드마크만 필터링하는 함수
-    fun getUpperBodyLandmarks(): SharedFlow<List<PoseLandmark>> {
-        // 상체 관련 랜드마크 인덱스들
-        val upperBodyIndices = setOf(
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, // 얼굴 및 머리
-            11, 12, 13, 14, 15, 16, // 어깨, 팔꿈치, 손목
-            17, 18, 19, 20, 21, 22 // 손가락
-        )
-
-        // 기존 포즈 랜드마크에서 상체만 필터링해서 새로운 Flow 생성
-        // 실제 구현에서는 transform 또는 map 연산자를 사용하여 필터링
-        return _poseLandmarks.asSharedFlow()
     }
 
     // 이미지 분석기 초기화

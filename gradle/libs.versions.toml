@@ -26,6 +26,7 @@ paging = "3.3.6"
 orbit = "9.0.0"
 camera = "1.4.2"
 mediapipeTasks = "0.10.14"
+tensorflow = "2.13.0"
 
 [libraries]
 gradlePlugin-android = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -73,7 +74,8 @@ camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", versi
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
 camera-video = { group = "androidx.camera", name = "camera-video", version.ref = "camera" }
 
-mediapipe-vision = {group = "com.google.mediapipe", name = "tasks-vision", version.ref = "mediapipeTasks" }
+mediapipe-vision = { group = "com.google.mediapipe", name = "tasks-vision", version.ref = "mediapipeTasks" }
+tensorflow-lite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tensorflow" }
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

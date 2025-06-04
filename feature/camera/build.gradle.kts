@@ -19,4 +19,5 @@ dependencies {
     implementation(libs.bundles.orbit)
 
     implementation(libs.mediapipe.vision)
+    implementation(libs.tensorflow.lite)
 }
