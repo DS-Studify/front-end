@@ -269,7 +269,7 @@ fun FaceLandmarkOverlay(
 ) {
     Canvas(modifier = modifier) {
         landmarks.forEach { landmark ->
-            val x = (1 - landmark.x) * size.width
+            val x = landmark.x * size.width
             val y = landmark.y * size.height
             drawCircle(
                 color = Color.Cyan,
