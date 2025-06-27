@@ -36,6 +36,8 @@ import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
+import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarker
+import com.google.mediapipe.tasks.vision.facelandmarker.FaceLandmarkerResult
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
@@ -61,6 +63,7 @@ internal class CameraXImpl : CameraX {
     companion object {
         private const val MP_HAND_LANDMARKER_TASK = "hand_landmarker.task"
         private const val MP_POSE_LANDMARKER_TASK = "pose_landmarker_lite.task"
+        private const val MP_FACE_LANDMARKER_TASK = "face_landmarker.task"
         const val DEFAULT_NUM_HANDS = 2
         const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.3F
         const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.3F
@@ -69,6 +72,9 @@ internal class CameraXImpl : CameraX {
         const val DEFAULT_POSE_DETECTION_CONFIDENCE = 0.5F
         const val DEFAULT_POSE_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_POSE_PRESENCE_CONFIDENCE = 0.5F
+        const val DEFAULT_FACE_DETECTION_CONFIDENCE = 0.5F
+        const val DEFAULT_FACE_PRESENCE_CONFIDENCE = 0.5F
+        const val DEFAULT_FACE_TRACKING_CONFIDENCE = 0.5F
     }
 
     private val _facing = MutableStateFlow(CameraSelector.LENS_FACING_FRONT)
@@ -101,9 +107,15 @@ internal class CameraXImpl : CameraX {
     private val _poseLandmarks = MutableSharedFlow<List<PoseLandmark>>()
     override fun getPoseLandmarks(): SharedFlow<List<PoseLandmark>> = _poseLandmarks.asSharedFlow()
 
+    private var faceLandmarker: FaceLandmarker? = null
+    private var isFaceDetectionEnabled = true
+    private val _faceLandmarks = MutableSharedFlow<List<FaceLandmark>>()
+    override fun getFaceLandmarks(): SharedFlow<List<FaceLandmark>> = _faceLandmarks.asSharedFlow()
+
     private fun initializeMediaPipe() {
         initializeHands()
         initializePose()
+        initializeFace()
     }
 
     // 손 탐지 초기화
@@ -153,6 +165,30 @@ internal class CameraXImpl : CameraX {
         } catch (e: Exception) {
             Log.e("MediaPipe", "Failed to initialize Pose landmarker", e)
             disablePoseDetection()
+        }
+    }
+
+    // 얼굴 탐지 초기화
+    private fun initializeFace() {
+        try {
+            val baseOptions = BaseOptions.builder()
+                .setDelegate(Delegate.CPU)
+                .setModelAssetPath(MP_FACE_LANDMARKER_TASK)
+                .build()
+
+            val options = FaceLandmarker.FaceLandmarkerOptions.builder()
+                .setBaseOptions(baseOptions)
+                .setRunningMode(RunningMode.VIDEO)
+                .setMinFaceDetectionConfidence(DEFAULT_FACE_DETECTION_CONFIDENCE)
+                .setMinFacePresenceConfidence(DEFAULT_FACE_PRESENCE_CONFIDENCE)
+                .setMinTrackingConfidence(DEFAULT_FACE_TRACKING_CONFIDENCE)
+                .build()
+
+            faceLandmarker = FaceLandmarker.createFromOptions(context, options)
+            enableFaceDetection()
+        } catch (e: Exception) {
+            Log.e("MediaPipe", "Failed to initialize Face landmarker", e)
+            disableFaceDetection()
         }
     }
 
@@ -208,6 +244,28 @@ internal class CameraXImpl : CameraX {
         }
     }
 
+    // 얼굴 검출 결과 처리
+    private fun processFaceResult(result: FaceLandmarkerResult) {
+        val landmarks = mutableListOf<FaceLandmark>()
+
+        result.faceLandmarks().firstOrNull()?.let { faceLandmarks ->
+            faceLandmarks.forEachIndexed { index, landmark ->
+                landmarks.add(
+                    FaceLandmark(
+                        landmarkIndex = index,
+                        x = landmark.x(),
+                        y = landmark.y(),
+                        z = landmark.z()
+                    )
+                )
+            }
+        }
+
+        CoroutineScope(Dispatchers.Default).launch {
+            _faceLandmarks.emit(landmarks)
+        }
+    }
+
     // 이미지 분석기 초기화
     private fun initializeImageAnalyzer() {
         imageAnalyzer = ImageAnalysis.Builder()
@@ -254,6 +312,16 @@ internal class CameraXImpl : CameraX {
                         processPoseResult(result)
                     } catch (e: Exception) {
                         Log.e("PoseDetection", "Error detecting pose", e)
+                    }
+                }
+
+                // 얼굴 탐지 실행
+                if (_recordingState.value == RecordingState.OnRecord && isFaceDetectionEnabled && faceLandmarker != null) {
+                    try {
+                        val result = faceLandmarker!!.detectForVideo(mpImage, timestampMs)
+                        processFaceResult(result)
+                    } catch (e: Exception) {
+                        Log.e("FaceDetection", "Error detecting face", e)
                     }
                 }
             } else {
@@ -386,6 +454,14 @@ internal class CameraXImpl : CameraX {
 
     private fun disableHandDetection() {
         isHandDetectionEnabled = false
+    }
+
+    private fun enableFaceDetection() {
+        isFaceDetectionEnabled = true
+    }
+
+    private fun disableFaceDetection() {
+        isFaceDetectionEnabled = false
     }
 
     // 리소스 정리
