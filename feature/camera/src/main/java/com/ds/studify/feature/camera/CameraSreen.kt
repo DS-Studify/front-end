@@ -98,6 +98,7 @@ internal fun CameraScreen(
     val recordingInfo = cameraX.getRecordingInfo().collectAsState(RecordingInfo(0, 0))
     val handLandmarks = cameraX.getHandLandmarks().collectAsState(emptyList())
     val poseLandmarks = cameraX.getPoseLandmarks().collectAsState(emptyList())
+    val faceLandmarks = cameraX.getFaceLandmarks().collectAsState(emptyList())
 
     LaunchedEffect(Unit) {
         cameraX.initialize(context = context)
@@ -153,6 +154,11 @@ internal fun CameraScreen(
 
         PoseLandmarkOverlay(
             landmarks = poseLandmarks.value,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        FaceLandmarkOverlay(
+            landmarks = faceLandmarks.value,
             modifier = Modifier.fillMaxSize()
         )
 
@@ -253,6 +259,24 @@ fun PoseLandmarkOverlay(
         }
 
         drawPoseConnections(landmarks, size)
+    }
+}
+
+@Composable
+fun FaceLandmarkOverlay(
+    landmarks: List<FaceLandmark>,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        landmarks.forEach { landmark ->
+            val x = landmark.x * size.width
+            val y = landmark.y * size.height
+            drawCircle(
+                color = Color.Cyan,
+                radius = 4f,
+                center = Offset(x, y)
+            )
+        }
     }
 }
 

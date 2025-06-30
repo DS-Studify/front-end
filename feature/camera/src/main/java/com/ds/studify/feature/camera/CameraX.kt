@@ -22,11 +22,19 @@ data class PoseLandmark(
     val visibility: Float
 )
 
+data class FaceLandmark(
+    val landmarkIndex: Int,
+    val x: Float,
+    val y: Float,
+    val z: Float
+)
+
 interface CameraX {
 
     fun initialize(context: Context)
     fun getHandLandmarks(): SharedFlow<List<HandLandmark>>
     fun getPoseLandmarks(): SharedFlow<List<PoseLandmark>>
+    fun getFaceLandmarks(): SharedFlow<List<FaceLandmark>>
     fun startCamera(lifecycleOwner: LifecycleOwner)
     fun startRecordVideo()
     fun stopRecordVideo()
