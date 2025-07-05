@@ -4,6 +4,13 @@
     <string name="studify">Studify</string>
     <string name="back">뒤로가기</string>
     <string name="study_start">공부 시작</string>
+    <string name="sunday">일</string>
+    <string name="monday">월</string>
+    <string name="tuesday">화</string>
+    <string name="wednesday">수</string>
+    <string name="thursday">목</string>
+    <string name="friday">금</string>
+    <string name="saturday">토</string>
     
     <!--  Bottom Navigation  -->
     <string name="navigation_study">공부 측정</string>
