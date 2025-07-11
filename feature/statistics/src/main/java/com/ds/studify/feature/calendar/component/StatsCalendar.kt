@@ -34,6 +34,7 @@ import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.feature.calendar.StatsUiEvent
 import java.time.LocalDate
 import java.time.YearMonth
 import kotlin.math.ceil
@@ -44,7 +45,7 @@ fun StatsCalendar(
     yearMonthState: YearMonth,
     studyTimeInMonth: List<String>,
     onMonthPickerClick: () -> Unit,
-    onEvent: () -> Unit
+    onEvent: (StatsUiEvent) -> Unit
 ) {
     val yearMonth = remember(yearMonthState) {
         yearMonthState
@@ -61,14 +62,20 @@ fun StatsCalendar(
             onPreviousClick = {
                 yearMonth.minusMonths(1).run {
                     onEvent(
-
+                        StatsUiEvent.ChangeYearMonth(
+                            year = year,
+                            month = monthValue
+                        )
                     )
                 }
             },
             onNextClick = {
                 yearMonth.plusMonths(1).run {
                     onEvent(
-
+                        StatsUiEvent.ChangeYearMonth(
+                            year = year,
+                            month = monthValue
+                        )
                     )
                 }
             },
@@ -77,7 +84,12 @@ fun StatsCalendar(
 
         CalendarDate(
             currentMonth = yearMonth,
-            studyTimeInMonth = studyTimeInMonth
+            studyTimeInMonth = studyTimeInMonth,
+            onDateClick = { date ->
+                onEvent(
+                    StatsUiEvent.ChangeDate(date)
+                )
+            }
         )
     }
 }
@@ -131,7 +143,8 @@ internal fun CalendarHeader(
 @Composable
 internal fun CalendarDate(
     currentMonth: YearMonth,
-    studyTimeInMonth: List<String>
+    studyTimeInMonth: List<String>,
+    onDateClick: (Int) -> Unit
 ) {
     val currentDate = LocalDate.now()
     val daysInMonth = currentMonth.lengthOfMonth()
@@ -184,6 +197,9 @@ internal fun CalendarDate(
                                 .weight(1f)
                                 .padding(bottom = 8.dp)
                                 .height(38.dp)
+                                .clickable {
+                                    onDateClick(day)
+                                }
                         ) {
                             Box(
                                 modifier = Modifier

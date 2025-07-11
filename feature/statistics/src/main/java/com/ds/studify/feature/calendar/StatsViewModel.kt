@@ -34,6 +34,11 @@ sealed interface StatsUiState {
     ) : StatsUiState
 }
 
+sealed class StatsUiEvent {
+    data class ChangeYearMonth(val year: Int, val month: Int) : StatsUiEvent()
+    data class ChangeDate(val date: Int) : StatsUiEvent()
+}
+
 @HiltViewModel
 class StatsViewModel @Inject constructor(
     private val statsRepository: StatsRepository
@@ -46,13 +51,30 @@ class StatsViewModel @Inject constructor(
             .map { yearMonth ->
                 val history = StudyHistoryUiState(
                     yearMonth = yearMonth,
-                    studyHistoryInMonth = statsRepository.getStudyHistoryInMonth(yearMonth.year, yearMonth.monthValue)
+                    studyHistoryInMonth = statsRepository.getStudyHistoryInMonth(
+                        yearMonth.year,
+                        yearMonth.monthValue
+                    )
                 )
                 val daily = DailyStatsUiState(
-                    date = formatDateWithDayOfWeek(yearMonth.year, yearMonth.monthValue, LocalDate.now().dayOfMonth),
-                    focusTime = statsRepository.getDailyFocusTime(yearMonth.year, yearMonth.monthValue),
-                    studyTime = statsRepository.getDailyStudyTime(yearMonth.year, yearMonth.monthValue, LocalDate.now().dayOfMonth),
-                    studyTimeLine = statsRepository.getDailyStudyTimeLine(yearMonth.year, yearMonth.monthValue)
+                    date = formatDateWithDayOfWeek(
+                        yearMonth.year,
+                        yearMonth.monthValue,
+                        LocalDate.now().dayOfMonth
+                    ),
+                    focusTime = statsRepository.getDailyFocusTime(
+                        yearMonth.year,
+                        yearMonth.monthValue
+                    ),
+                    studyTime = statsRepository.getDailyStudyTime(
+                        yearMonth.year,
+                        yearMonth.monthValue,
+                        LocalDate.now().dayOfMonth
+                    ),
+                    studyTimeLine = statsRepository.getDailyStudyTimeLine(
+                        yearMonth.year,
+                        yearMonth.monthValue
+                    )
                 )
                 StatsUiState.Data(history = history, daily = daily)
             }
@@ -75,5 +97,43 @@ class StatsViewModel @Inject constructor(
             else -> "일"
         }
         return "${month}월 ${day}일 ($dayOfWeekKorean)"
+    }
+
+    fun onEvent(event: StatsUiEvent) {
+        when (event) {
+            is StatsUiEvent.ChangeYearMonth -> {
+                yearMonthState.value = YearMonth.of(event.year, event.month)
+            }
+
+            is StatsUiEvent.ChangeDate -> intent {
+                if (state !is StatsUiState.Data) return@intent
+
+                val dataState = state as StatsUiState.Data
+                val yearMonth = yearMonthState.value
+
+                val formattedDate =
+                    formatDateWithDayOfWeek(yearMonth.year, yearMonth.monthValue, event.date)
+                val focusTime =
+                    statsRepository.getDailyFocusTime(yearMonth.year, yearMonth.monthValue)
+                val studyTime = statsRepository.getDailyStudyTime(
+                    yearMonth.year,
+                    yearMonth.monthValue,
+                    event.date
+                )
+                val studyTimeLine =
+                    statsRepository.getDailyStudyTimeLine(yearMonth.year, yearMonth.monthValue)
+
+                reduce {
+                    dataState.copy(
+                        daily = DailyStatsUiState(
+                            date = formattedDate,
+                            focusTime = focusTime,
+                            studyTime = studyTime,
+                            studyTimeLine = studyTimeLine
+                        )
+                    )
+                }
+            }
+        }
     }
 }

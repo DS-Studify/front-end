@@ -63,7 +63,8 @@ internal fun StatsRoute(
                 val state = uiState as StatsUiState.Data
                 StatsScreen(
                     paddingValues = innerPadding,
-                    uiState = state
+                    uiState = state,
+                    onEvent = viewModel::onEvent
                 )
             }
 
@@ -81,7 +82,8 @@ internal fun StatsRoute(
 @Composable
 internal fun StatsScreen(
     paddingValues: PaddingValues,
-    uiState: StatsUiState.Data
+    uiState: StatsUiState.Data,
+    onEvent: (StatsUiEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -98,10 +100,10 @@ internal fun StatsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = paddingValues.calculateTopPadding()),
-            yearMonthState = YearMonth.now(),
+            yearMonthState = uiState.history.yearMonth,
             studyTimeInMonth = uiState.history.studyHistoryInMonth,
             onMonthPickerClick = {},
-            onEvent = {}
+            onEvent = onEvent
         )
 
         HorizontalDivider(
@@ -191,6 +193,7 @@ private fun StatsScreenPreview() {
                 studyTime = "6시간",
                 studyTimeLine = listOf("10:00~13:00", "14:30~18:33", "19:40~23:04")
             )
-        )
+        ),
+        onEvent = {}
     )
 }
