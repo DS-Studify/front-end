@@ -2,6 +2,7 @@ package com.ds.studify.feature.calendar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -23,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithLogo
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
@@ -30,12 +33,16 @@ import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.feature.calendar.component.StatsCalendar
 import com.ds.studify.feature.calendar.component.StatsTimeLine
+import org.orbitmvi.orbit.compose.collectAsState
 import java.time.YearMonth
 
 @Composable
 internal fun StatsRoute(
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    viewModel: StatsViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.collectAsState()
+
     StudifyScaffoldWithLogo(
         paddingValues = paddingValues,
         leftActionButton = {
@@ -51,15 +58,30 @@ internal fun StatsRoute(
             }
         }
     ) { innerPadding ->
-        StatsScreen(
-            paddingValues = innerPadding
-        )
+        when (uiState) {
+            is StatsUiState.Data -> {
+                val state = uiState as StatsUiState.Data
+                StatsScreen(
+                    paddingValues = innerPadding,
+                    uiState = state
+                )
+            }
+
+            is StatsUiState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(color = StudifyColors.WHITE)
+                )
+            }
+        }
     }
 }
 
 @Composable
 internal fun StatsScreen(
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    uiState: StatsUiState.Data
 ) {
     Column(
         modifier = Modifier
@@ -77,7 +99,7 @@ internal fun StatsScreen(
                 .fillMaxWidth()
                 .padding(top = paddingValues.calculateTopPadding()),
             yearMonthState = YearMonth.now(),
-            studyTimeInMonth = emptyList(),
+            studyTimeInMonth = uiState.history.studyHistoryInMonth,
             onMonthPickerClick = {},
             onEvent = {}
         )
@@ -98,7 +120,7 @@ internal fun StatsScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "7월 6일 (일)",
+                text = uiState.daily.date,
                 color = StudifyColors.BLACK,
                 style = Typography.headlineSmall,
             )
@@ -114,12 +136,12 @@ internal fun StatsScreen(
                     verticalArrangement = Arrangement.spacedBy(9.dp)
                 ) {
                     Text(
-                        text = stringResource(StudifyString.stats_total_focus_time),
+                        text = stringResource(StudifyString.stats_total_study_time),
                         color = StudifyColors.PK03,
                         style = Typography.headlineSmall,
                     )
                     Text(
-                        text = "10시간 34분",
+                        text = uiState.daily.studyTime,
                         color = StudifyColors.BLACK,
                         style = Typography.bodySmall,
                     )
@@ -130,12 +152,12 @@ internal fun StatsScreen(
                     verticalArrangement = Arrangement.spacedBy(9.dp)
                 ) {
                     Text(
-                        text = stringResource(StudifyString.stats_total_study_time),
+                        text = stringResource(StudifyString.stats_total_focus_time),
                         color = StudifyColors.PK03,
                         style = Typography.headlineSmall,
                     )
                     Text(
-                        text = "7시간 34분",
+                        text = uiState.daily.focusTime,
                         color = StudifyColors.BLACK,
                         style = Typography.bodySmall,
                     )
@@ -147,7 +169,7 @@ internal fun StatsScreen(
             modifier = Modifier
                 .padding(top = 60.dp)
                 .padding(horizontal = 40.dp),
-            studyTimes = listOf("10:00~13:00", "14:30~18:33", "19:40~23:04"),
+            studyTimes = uiState.daily.studyTimeLine,
             onClick = {}
         )
     }
@@ -157,6 +179,18 @@ internal fun StatsScreen(
 @Composable
 private fun StatsScreenPreview() {
     StatsScreen(
-        paddingValues = PaddingValues(0.dp)
+        paddingValues = PaddingValues(0.dp),
+        uiState = StatsUiState.Data(
+            history = StudyHistoryUiState(
+                yearMonth = YearMonth.now(),
+                studyHistoryInMonth = listOf("1H 20M", "2H 30M")
+            ),
+            daily = DailyStatsUiState(
+                date = "7월 12일 (토)",
+                focusTime = "5시간 30분",
+                studyTime = "6시간",
+                studyTimeLine = listOf("10:00~13:00", "14:30~18:33", "19:40~23:04")
+            )
+        )
     )
 }
