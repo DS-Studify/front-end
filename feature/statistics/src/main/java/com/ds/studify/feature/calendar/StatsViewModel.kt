@@ -5,6 +5,7 @@ import com.ds.studify.core.data.repository.StatsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -47,7 +48,29 @@ class StatsViewModel @Inject constructor(
     override val container: Container<StatsUiState, Nothing> = container(
         initialState = StatsUiState.Loading
     ) {
+        val now = LocalDate.now()
+        val initialDaily = DailyStatsUiState(
+            date = formatDateWithDayOfWeek(now.year, now.monthValue, now.dayOfMonth),
+            focusTime = statsRepository.getDailyFocusTime(now.year, now.monthValue),
+            studyTime = statsRepository.getDailyStudyTime(now.year, now.monthValue, now.dayOfMonth),
+            studyTimeLine = statsRepository.getDailyStudyTimeLine(now.year, now.monthValue)
+        )
+
+        val initialState = StatsUiState.Data(
+            history = StudyHistoryUiState(
+                yearMonth = YearMonth.now(),
+                studyHistoryInMonth = statsRepository.getStudyHistoryInMonth(
+                    now.year,
+                    now.monthValue
+                )
+            ),
+            daily = initialDaily
+        )
+
+        reduce { initialState }
+
         yearMonthState
+            .drop(1)
             .map { yearMonth ->
                 val history = StudyHistoryUiState(
                     yearMonth = yearMonth,
@@ -56,27 +79,11 @@ class StatsViewModel @Inject constructor(
                         yearMonth.monthValue
                     )
                 )
-                val daily = DailyStatsUiState(
-                    date = formatDateWithDayOfWeek(
-                        yearMonth.year,
-                        yearMonth.monthValue,
-                        LocalDate.now().dayOfMonth
-                    ),
-                    focusTime = statsRepository.getDailyFocusTime(
-                        yearMonth.year,
-                        yearMonth.monthValue
-                    ),
-                    studyTime = statsRepository.getDailyStudyTime(
-                        yearMonth.year,
-                        yearMonth.monthValue,
-                        LocalDate.now().dayOfMonth
-                    ),
-                    studyTimeLine = statsRepository.getDailyStudyTimeLine(
-                        yearMonth.year,
-                        yearMonth.monthValue
-                    )
-                )
-                StatsUiState.Data(history = history, daily = daily)
+
+                when (val current = state) {
+                    is StatsUiState.Data -> current.copy(history = history)
+                    else -> current
+                }
             }
             .collectLatest {
                 reduce { it }
