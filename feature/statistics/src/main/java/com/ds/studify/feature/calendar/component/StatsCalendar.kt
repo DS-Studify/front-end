@@ -43,6 +43,7 @@ import kotlin.math.ceil
 fun StatsCalendar(
     modifier: Modifier = Modifier,
     yearMonthState: YearMonth,
+    dateState: LocalDate,
     studyTimeInMonth: List<String>,
     onMonthPickerClick: () -> Unit,
     onEvent: (StatsUiEvent) -> Unit
@@ -84,6 +85,7 @@ fun StatsCalendar(
 
         CalendarDate(
             currentMonth = yearMonth,
+            selectedDate = dateState,
             studyTimeInMonth = studyTimeInMonth,
             onDateClick = { date ->
                 onEvent(
@@ -143,6 +145,7 @@ internal fun CalendarHeader(
 @Composable
 internal fun CalendarDate(
     currentMonth: YearMonth,
+    selectedDate: LocalDate,
     studyTimeInMonth: List<String>,
     onDateClick: (Int) -> Unit
 ) {
@@ -211,7 +214,9 @@ internal fun CalendarDate(
                                     modifier = Modifier
                                         .size(24.dp),
                                     shape = CircleShape,
-                                    color = if (currentDate == currentMonth.atDay(day)) StudifyColors.PK03 else Color.Transparent
+                                    color = if (selectedDate == currentMonth.atDay(day)) StudifyColors.PK03
+                                    else if (currentDate == currentMonth.atDay(day)) StudifyColors.G01
+                                    else Color.Transparent
                                 ) {
                                     Text(
                                         text = day.toString(),
@@ -225,14 +230,14 @@ internal fun CalendarDate(
                                             lineHeight = Typography.titleSmall.lineHeight,
                                             baselineShift = BaselineShift(0f),
                                         ),
-                                        color = if (currentDate == currentMonth.atDay(day)) StudifyColors.WHITE
+                                        color = if (selectedDate == currentMonth.atDay(day)) StudifyColors.WHITE
                                         else if (isSunday) StudifyColors.PK02
                                         else if (isSaturday) StudifyColors.BLUE
                                         else StudifyColors.BLACK
                                     )
                                 }
                             }
-                            if (currentMonth.atDay(day) <= currentDate) {
+                            if (currentMonth.atDay(day) <= selectedDate) {
                                 val studyTimeAtDay = studyTimeInMonth.getOrElse(day - 1) { "" }
                                 Text(
                                     text = studyTimeAtDay,
@@ -259,6 +264,7 @@ internal fun CalendarDate(
 private fun StatsCalendarPreview() {
     StatsCalendar(
         yearMonthState = YearMonth.now(),
+        dateState = LocalDate.now(),
         studyTimeInMonth = listOf("1H 10M", "2H 20M"),
         onMonthPickerClick = {},
         onEvent = {}

@@ -36,6 +36,7 @@ import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.feature.calendar.component.StatsCalendar
 import com.ds.studify.feature.calendar.component.StatsTimeLine
 import org.orbitmvi.orbit.compose.collectAsState
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
@@ -106,6 +107,7 @@ internal fun StatsScreen(
                 .fillMaxWidth()
                 .padding(top = paddingValues.calculateTopPadding()),
             yearMonthState = uiState.history.yearMonth,
+            dateState = uiState.daily.selectedDate,
             studyTimeInMonth = uiState.history.studyHistoryInMonth,
             onMonthPickerClick = {},
             onEvent = onEvent
@@ -127,7 +129,7 @@ internal fun StatsScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = uiState.daily.date,
+                text = uiState.daily.dateWithDayOfWeek,
                 color = StudifyColors.BLACK,
                 style = Typography.headlineSmall,
             )
@@ -193,7 +195,8 @@ private fun StatsScreenPreview() {
                 studyHistoryInMonth = listOf("1H 20M", "2H 30M")
             ),
             daily = DailyStatsUiState(
-                date = "7월 12일 (토)",
+                selectedDate = LocalDate.now(),
+                dateWithDayOfWeek = "7월 12일 (토)",
                 focusTime = "5시간 30분",
                 studyTime = "6시간",
                 studyTimeLine = listOf("10:00~13:00", "14:30~18:33", "19:40~23:04")

@@ -20,7 +20,8 @@ data class StudyHistoryUiState(
 )
 
 data class DailyStatsUiState(
-    val date: String,
+    val selectedDate: LocalDate,
+    val dateWithDayOfWeek: String,
     val focusTime: String,
     val studyTime: String,
     val studyTimeLine: List<String> = emptyList()
@@ -50,7 +51,8 @@ class StatsViewModel @Inject constructor(
     ) {
         val now = LocalDate.now()
         val initialDaily = DailyStatsUiState(
-            date = formatDateWithDayOfWeek(now.year, now.monthValue, now.dayOfMonth),
+            selectedDate = LocalDate.now(),
+            dateWithDayOfWeek = formatDateWithDayOfWeek(now.year, now.monthValue, now.dayOfMonth),
             focusTime = statsRepository.getDailyFocusTime(now.year, now.monthValue),
             studyTime = statsRepository.getDailyStudyTime(now.year, now.monthValue, now.dayOfMonth),
             studyTimeLine = statsRepository.getDailyStudyTimeLine(now.year, now.monthValue)
@@ -117,6 +119,7 @@ class StatsViewModel @Inject constructor(
 
                 val dataState = state as StatsUiState.Data
                 val yearMonth = yearMonthState.value
+                val selectedDate = LocalDate.of(yearMonth.year, yearMonth.monthValue, event.date)
 
                 val formattedDate =
                     formatDateWithDayOfWeek(yearMonth.year, yearMonth.monthValue, event.date)
@@ -133,7 +136,8 @@ class StatsViewModel @Inject constructor(
                 reduce {
                     dataState.copy(
                         daily = DailyStatsUiState(
-                            date = formattedDate,
+                            selectedDate = selectedDate,
+                            dateWithDayOfWeek = formattedDate,
                             focusTime = focusTime,
                             studyTime = studyTime,
                             studyTimeLine = studyTimeLine
