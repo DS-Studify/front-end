@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,6 +87,8 @@ internal fun StatsScreen(
     uiState: StatsUiState.Data,
     onEvent: (StatsUiEvent) -> Unit
 ) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .padding(
@@ -95,6 +99,7 @@ internal fun StatsScreen(
             )
             .fillMaxSize()
             .background(color = StudifyColors.WHITE)
+            .verticalScroll(scrollState)
     ) {
         StatsCalendar(
             modifier = Modifier
@@ -169,7 +174,7 @@ internal fun StatsScreen(
 
         StatsTimeLine(
             modifier = Modifier
-                .padding(top = 60.dp)
+                .padding(top = 60.dp, bottom = 30.dp)
                 .padding(horizontal = 40.dp),
             studyTimes = uiState.daily.studyTimeLine,
             onClick = {}
