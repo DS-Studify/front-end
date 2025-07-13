@@ -92,20 +92,18 @@ internal fun StatsScreen(
 
     Column(
         modifier = Modifier
+            .fillMaxSize()
+            .background(color = StudifyColors.WHITE)
             .padding(
                 start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                 end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                top = 0.dp,
+                top = paddingValues.calculateTopPadding(),
                 bottom = paddingValues.calculateBottomPadding()
             )
-            .fillMaxSize()
-            .background(color = StudifyColors.WHITE)
             .verticalScroll(scrollState)
     ) {
         StatsCalendar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = paddingValues.calculateTopPadding()),
+            modifier = Modifier.fillMaxWidth(),
             yearMonthState = uiState.history.yearMonth,
             dateState = uiState.daily.selectedDate,
             studyTimeInMonth = uiState.history.studyHistoryInMonth,
@@ -137,7 +135,7 @@ internal fun StatsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 32.dp),
+                    .padding(top = 26.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Column(
