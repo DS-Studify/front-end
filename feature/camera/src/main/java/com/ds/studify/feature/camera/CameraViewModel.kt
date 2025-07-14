@@ -8,8 +8,6 @@ import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
-import kotlin.math.acos
-import kotlin.math.sqrt
 
 data class CameraUiState(
     val isPenInHand: Boolean,
@@ -55,8 +53,8 @@ class CameraViewModel @Inject constructor(
         }
     }
 
-    fun classifyPose(poseLandmarks: List<PoseLandmark>) {
-        val input = preparePoseModelInput(poseLandmarks)
+    fun classifyPose(poseLandmarks: List<PoseLandmark>, faceLandmarks: List<FaceLandmark>) {
+        val input = preparePoseModelInput(poseLandmarks, faceLandmarks)
         val result = poseClassifier.predict(input)
 
         val predictedLabel = result.indices.maxByOrNull { result[it] } ?: -1
@@ -93,28 +91,38 @@ class CameraViewModel @Inject constructor(
         return (relativeCoords + angles).toFloatArray()
     }
 
-    private fun preparePoseModelInput(poseLandmarks: List<PoseLandmark>): FloatArray {
-        if (poseLandmarks.size < 23) return FloatArray(94)
+    private fun preparePoseModelInput(poseLandmarks: List<PoseLandmark>, faceLandmarks: List<FaceLandmark>): FloatArray {
+        if (poseLandmarks.size < 23 || faceLandmarks.isEmpty()) return FloatArray(93)
 
         val input = mutableListOf<Float>()
 
-        // 랜드마크 0 ~ 22의 x, y, z, v
-        for (i in 0..22) {
+        // faceMesh 사용 인덱스
+        val faceIndices = listOf(
+            1, 4, 10, 13, 14, 33, 78, 133, 145, 152, 159, 199, 234, 263, 308, 362, 374, 386, 454)
+        // faceMesh 랜드마크 x, y, z
+        for (i in faceIndices) {
+            val lm = faceLandmarks.firstOrNull{ it.landmarkIndex == i } ?: continue
+            input.add(lm.x)
+            input.add(lm.y)
+            input.add(lm.z)
+        }
+
+        // pose 랜드마크 11 ~ 22의 x, y, z, v
+        for (i in 11..22) {
             val lm = poseLandmarks.firstOrNull { it.landmarkIndex == i } ?: continue
             input.add(lm.x)
             input.add(lm.y)
             input.add(lm.z)
-            input.add(lm.visibility)
         }
 
-        // angle 추가
-        val angle1 = calculateAngleBetweenLandmarks(poseLandmarks, 11, 0, 12)  // 왼어깨-머리-오른어깨
-        val angle2 = calculateAngleBetweenLandmarks(poseLandmarks, 12, 0, 11)  // 오른어깨-머리-왼어깨
+//        // angle 추가
+//        val angle1 = calculateAngleBetweenLandmarks(poseLandmarks, 11, 0, 12)  // 왼어깨-머리-오른어깨
+//        val angle2 = calculateAngleBetweenLandmarks(poseLandmarks, 12, 0, 11)  // 오른어깨-머리-왼어깨
+//
+//        input.add(angle1)
+//        input.add(angle2)
 
-        input.add(angle1)
-        input.add(angle2)
-
-        return input.toFloatArray() // 총 92 + 2(각도) = 94개
+        return input.toFloatArray() // pose 36 + faceMesh57 총 93개
     }
 
     private fun calculateJointAngles(landmarks: List<HandLandmark>): List<Float> {
@@ -146,22 +154,22 @@ class CameraViewModel @Inject constructor(
         )
     }
 
-    private fun calculateAngleBetweenLandmarks(
-        landmarks: List<PoseLandmark>,
-        aIndex: Int, bIndex: Int, cIndex: Int
-    ): Float {
-        val a = landmarks.first { it.landmarkIndex == aIndex }
-        val b = landmarks.first { it.landmarkIndex == bIndex }
-        val c = landmarks.first { it.landmarkIndex == cIndex }
-
-        val ab = floatArrayOf(a.x - b.x, a.y - b.y, a.z - b.z)
-        val cb = floatArrayOf(c.x - b.x, c.y - b.y, c.z - b.z)
-
-        val dot = ab[0]*cb[0] + ab[1]*cb[1] + ab[2]*cb[2]
-        val abNorm = sqrt((ab[0]*ab[0] + ab[1]*ab[1] + ab[2]*ab[2]).toDouble())
-        val cbNorm = sqrt((cb[0]*cb[0] + cb[1]*cb[1] + cb[2]*cb[2]).toDouble())
-
-        val cosine = (dot / (abNorm * cbNorm + 1e-6)).coerceIn(-1.0, 1.0)
-        return Math.toDegrees(acos(cosine)).toFloat()
-    }
+//    private fun calculateAngleBetweenLandmarks(
+//        landmarks: List<PoseLandmark>,
+//        aIndex: Int, bIndex: Int, cIndex: Int
+//    ): Float {
+//        val a = landmarks.first { it.landmarkIndex == aIndex }
+//        val b = landmarks.first { it.landmarkIndex == bIndex }
+//        val c = landmarks.first { it.landmarkIndex == cIndex }
+//
+//        val ab = floatArrayOf(a.x - b.x, a.y - b.y, a.z - b.z)
+//        val cb = floatArrayOf(c.x - b.x, c.y - b.y, c.z - b.z)
+//
+//        val dot = ab[0]*cb[0] + ab[1]*cb[1] + ab[2]*cb[2]
+//        val abNorm = sqrt((ab[0]*ab[0] + ab[1]*ab[1] + ab[2]*ab[2]).toDouble())
+//        val cbNorm = sqrt((cb[0]*cb[0] + cb[1]*cb[1] + cb[2]*cb[2]).toDouble())
+//
+//        val cosine = (dot / (abNorm * cbNorm + 1e-6)).coerceIn(-1.0, 1.0)
+//        return Math.toDegrees(acos(cosine)).toFloat()
+//    }
 }

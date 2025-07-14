@@ -113,8 +113,8 @@ internal fun CameraScreen(
     }
 
     LaunchedEffect(poseLandmarks.value) {
-        if (poseLandmarks.value.isNotEmpty()) {
-            viewModel.classifyPose(poseLandmarks.value)
+        if (poseLandmarks.value.isNotEmpty() && faceLandmarks.value.isNotEmpty()) {
+            viewModel.classifyPose(poseLandmarks.value, faceLandmarks.value)
         }
     }
 
