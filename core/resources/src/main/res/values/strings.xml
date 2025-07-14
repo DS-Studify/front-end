@@ -4,6 +4,13 @@
     <string name="studify">Studify</string>
     <string name="back">뒤로가기</string>
     <string name="study_start">공부 시작</string>
+    <string name="sunday">일</string>
+    <string name="monday">월</string>
+    <string name="tuesday">화</string>
+    <string name="wednesday">수</string>
+    <string name="thursday">목</string>
+    <string name="friday">금</string>
+    <string name="saturday">토</string>
     
     <!--  Bottom Navigation  -->
     <string name="navigation_study">공부 측정</string>
@@ -30,5 +37,9 @@
     <string name="camera_guide_done_content_1">📌 위 가이드를 따라 설정한 후</string>
     <string name="camera_guide_done_content_2">[공부 시작]</string>
     <string name="camera_guide_done_content_3">버튼을 눌러주세요!</string>
+
+    <!--  통계  -->
+    <string name="stats_total_study_time">총 공부 시간</string>
+    <string name="stats_total_focus_time">총 집중 시간</string>
 
 </resources>

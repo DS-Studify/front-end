@@ -59,8 +59,9 @@ class CameraViewModel @Inject constructor(
 
         val predictedLabel = result.indices.maxByOrNull { result[it] } ?: -1
         val labels = listOf(
-            PoseLabel.GOOD_POSE, PoseLabel.NFOCUS_LEAN_FOWARD, PoseLabel.NFOCUS_LEAN_BACK,
-            PoseLabel.NFOCUS_LEAN_SIDE, PoseLabel.SLEEP_HEAD_DOWN, PoseLabel.SLEEP_HEAD_BACK
+            PoseLabel.GOOD_POSE, PoseLabel.NFOCUS_LEAN_BACK,
+            PoseLabel.NFOCUS_LEAN_FOWARD, PoseLabel.NFOCUS_LEAN_SIDE,
+            PoseLabel.SLEEP_HEAD_BACK, PoseLabel.SLEEP_HEAD_DOWN,
         )
         intent {
             reduce { state.copy(poseLabel = labels[predictedLabel]) }
