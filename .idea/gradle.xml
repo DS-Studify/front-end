@@ -32,6 +32,7 @@
             <option value="$PROJECT_DIR$/core/resources" />
             <option value="$PROJECT_DIR$/core/ui-extension" />
             <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/analysis" />
             <option value="$PROJECT_DIR$/feature/camera" />
             <option value="$PROJECT_DIR$/feature/home" />
             <option value="$PROJECT_DIR$/feature/statistics" />
