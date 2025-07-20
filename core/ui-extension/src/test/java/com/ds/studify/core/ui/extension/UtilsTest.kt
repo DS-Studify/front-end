@@ -11,7 +11,44 @@ import org.junit.Assert.*
  */
 class UtilsTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun testFormatTime_HoursAndMinutes() {
+        val input = 6 * 3600 + 45 * 60 // 6시간 45분 = 24300초
+        val expected = "6시간 45분"
+        assertEquals(expected, formatTimeInKorean(input))
+    }
+
+    @Test
+    fun testFormatTime_OnlyMinutesAndSeconds() {
+        val input = 1 * 60 + 30 // 1분 30초
+        val expected = "1분 30초"
+        assertEquals(expected, formatTimeInKorean(input))
+    }
+
+    @Test
+    fun testFormatTime_OnlyMinutes() {
+        val input = 3 * 60
+        val expected = "3분"
+        assertEquals(expected, formatTimeInKorean(input))
+    }
+
+    @Test
+    fun testFormatTime_OnlySeconds() {
+        val input = 59
+        val expected = "59초"
+        assertEquals(expected, formatTimeInKorean(input))
+    }
+
+    @Test
+    fun testFormatTime_HoursOnly() {
+        val input = 2 * 3600
+        val expected = "2시간"
+        assertEquals(expected, formatTimeInKorean(input))
+    }
+
+    @Test
+    fun testFormatTime_Zero() {
+        val input = 0
+        val expected = "0초"
+        assertEquals(expected, formatTimeInKorean(input))
     }
 }

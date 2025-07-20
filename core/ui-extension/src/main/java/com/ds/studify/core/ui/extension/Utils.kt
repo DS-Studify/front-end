@@ -34,6 +34,35 @@ fun formatRecordDuration(duration: Long): String {
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
 
+@SuppressLint("DefaultLocale")
+fun formatTimeInKorean(seconds: Int): String {
+    val hours = seconds / 3600
+    val minutes = (seconds % 3600) / 60
+    val remainingSeconds = seconds % 60
+
+    return when {
+        hours > 0 -> {
+            if (minutes > 0) {
+                String.format("%d시간 %d분", hours, minutes)
+            } else {
+                String.format("%d시간", hours)
+            }
+        }
+
+        minutes > 0 -> {
+            if (remainingSeconds > 0) {
+                String.format("%d분 %d초", minutes, remainingSeconds)
+            } else {
+                String.format("%d분", minutes)
+            }
+        }
+
+        else -> {
+            String.format("%d초", remainingSeconds)
+        }
+    }
+}
+
 fun Modifier.clickableWithoutRippleEffect(
     enabled: Boolean = true,
     onClickLabel: String? = null,
