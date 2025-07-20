@@ -30,7 +30,8 @@ dependencies {
 
     implementation(projects.feature.home)
     implementation(projects.feature.camera)
-    implementation(project(":feature:statistics"))
+    implementation(projects.feature.statistics)
+    implementation(projects.feature.analysis)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

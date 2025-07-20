@@ -9,12 +9,21 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object RouteAnalysis
 
-fun NavGraphBuilder.analysisScreen() {
+fun NavGraphBuilder.analysisScreen(
+    analysisNavigationDelegator: AnalysisNavigationDelegator
+) {
     composable<RouteAnalysis> {
-        AnalysisRoute()
+        AnalysisRoute(
+            analysisNavigationDelegator
+        )
     }
 }
 
 fun NavController.navigateToAnalysis() {
     navigate(RouteAnalysis)
 }
+
+class AnalysisNavigationDelegator(
+    val onRestudyClick: () -> Unit = {},
+    val onStudyCloseClick: () -> Unit = {}
+)
