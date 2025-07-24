@@ -44,6 +44,9 @@
     <string name="analysis_record_time">촬영 시간 :</string>
     <string name="analysis_during_record">촬영 시간 중</string>
     <string name="analysis_during_record_study">%d%% 학습</string>
+    <string name="analysis_ai_feedback">AI 피드백</string>
+    <string name="analysis_restudy">다시 공부하기</string>
+    <string name="analysis_finish">종료하기</string>
 
     <!--  통계  -->
     <string name="stats_total_study_time">총 공부 시간</string>

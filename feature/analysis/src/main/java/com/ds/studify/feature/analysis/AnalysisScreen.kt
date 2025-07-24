@@ -2,6 +2,7 @@ package com.ds.studify.feature.analysis
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,8 @@ import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatTimeInKorean
+import com.ds.studify.feature.analysis.component.AnalysisOutlinedButton
+import com.ds.studify.feature.analysis.component.AnalysisPrimaryButton
 import com.ds.studify.feature.analysis.component.AnalysisProgressBar
 import com.ds.studify.feature.analysis.navigation.AnalysisNavigationDelegator
 
@@ -148,6 +151,50 @@ internal fun AnalysisScreen(
                     )
                 }
             }
+        }
+
+        Text(
+            text = stringResource(StudifyString.analysis_ai_feedback),
+            style = Typography.headlineSmall,
+            color = StudifyColors.BLACK,
+            modifier = Modifier
+                .padding(top = 27.dp, start = 24.dp, bottom = 10.dp)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 27.dp)
+                .background(
+                    color = StudifyColors.PK01,
+                    shape = RoundedCornerShape(10)
+                )
+        ) {
+            Text(
+                text = "오늘 학습 태도를 분석한 결과, 전체적으로 집중력이 높은 편이었습니다. 다만, 중간중간 자세가 흐트러지거나 시선이 다른 곳으로 향하는 순간이 몇 번 감지되었습니다. 앞으로는 짧은 휴식을 적절히 활용하면서 자세를 바로잡는 습관을 들이면 더욱 효과적인 학습이 가능할 거에요.",
+                style = Typography.bodySmall,
+                modifier = Modifier
+                    .padding(top = 23.dp, bottom = 40.dp)
+                    .padding(horizontal = 15.dp)
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 70.dp)
+                .padding(horizontal = 30.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            AnalysisOutlinedButton(
+                text = stringResource(StudifyString.analysis_restudy),
+                onClick = navigationDelegator.onRestudyClick
+            )
+            AnalysisPrimaryButton(
+                text = stringResource(StudifyString.analysis_finish),
+                onClick = navigationDelegator.onStudyCloseClick
+            )
         }
     }
 }
