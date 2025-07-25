@@ -1,4 +1,4 @@
-package com.ds.studify.feature.analysis.component
+package com.ds.studify.core.designsystem.component
 
 import android.graphics.Paint
 import androidx.compose.foundation.Canvas
@@ -18,11 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,13 +34,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
-import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatTimeInKorean
 import kotlin.math.cos
 import kotlin.math.sin
@@ -52,7 +47,7 @@ data class ChartSegment(val label: String, val color: Color, val time: Int)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun DonutChartWithState(
+fun StudifyDonutChartWithState(
     chartData: List<ChartSegment>,
     description: String? = null,
     modifier: Modifier = Modifier
@@ -189,44 +184,10 @@ private fun StateItem(color: Color, text: String) {
     }
 }
 
-@Composable
-private fun DescriptionDialog(
-    description: String,
-    showDialog: Boolean,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit = onDismiss
-) {
-    if (showDialog) {
-        AlertDialog(
-            containerColor = StudifyColors.WHITE,
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                TextButton(
-                    onClick = onConfirm,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = StudifyColors.G03
-                    )
-                ) {
-                    Text(
-                        text = stringResource(StudifyString.confirm),
-                        color = StudifyColors.PK03
-                    )
-                }
-            },
-            text = {
-                Text(
-                    text = description,
-                    color = StudifyColors.BLACK
-                )
-            }
-        )
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun DonutChartWithFourStatePreview() {
-    DonutChartWithState(
+    StudifyDonutChartWithState(
         listOf(
             ChartSegment("공부", StudifyColors.PK02, 24300),
             ChartSegment("졸음", StudifyColors.G03, 4200),
@@ -240,7 +201,7 @@ private fun DonutChartWithFourStatePreview() {
 @Preview(showBackground = true)
 @Composable
 private fun DonutChartWithTwoStatePreview() {
-    DonutChartWithState(
+    StudifyDonutChartWithState(
         listOf(
             ChartSegment("집중", StudifyColors.PK02, 24300),
             ChartSegment("비집중", StudifyColors.G01, 12000),
@@ -252,7 +213,7 @@ private fun DonutChartWithTwoStatePreview() {
 @Preview(showBackground = true)
 @Composable
 private fun DonutChartWithTwoStatePreview2() {
-    DonutChartWithState(
+    StudifyDonutChartWithState(
         listOf(
             ChartSegment("바른 자세", StudifyColors.PK02, 24300),
             ChartSegment("나쁜 자세", StudifyColors.G01, 12000),
