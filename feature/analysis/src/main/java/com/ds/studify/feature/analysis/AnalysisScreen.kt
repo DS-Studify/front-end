@@ -6,19 +6,26 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -27,6 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ds.studify.core.designsystem.component.ChartSegment
+import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
+import com.ds.studify.core.designsystem.component.StudifyTabBar
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
@@ -36,6 +46,7 @@ import com.ds.studify.feature.analysis.component.AnalysisOutlinedButton
 import com.ds.studify.feature.analysis.component.AnalysisPrimaryButton
 import com.ds.studify.feature.analysis.component.AnalysisProgressBar
 import com.ds.studify.feature.analysis.navigation.AnalysisNavigationDelegator
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun AnalysisRoute(
@@ -50,14 +61,30 @@ internal fun AnalysisRoute(
 internal fun AnalysisScreen(
     navigationDelegator: AnalysisNavigationDelegator
 ) {
+    val tabList = listOf(
+        stringResource(StudifyString.study_time),
+        stringResource(StudifyString.focus),
+        stringResource(StudifyString.pose)
+    )
+    val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+    val pagerState = rememberPagerState(
+        initialPage = 0
+    ) {
+        tabList.size
+    }
+    val insets = WindowInsets.navigationBars.asPaddingValues()
+
+    LaunchedEffect(pagerState) {
+        pagerState.scrollToPage(pagerState.currentPage)
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(StudifyColors.WHITE)
             .verticalScroll(scrollState)
-            .padding(bottom = 40.dp)
+            .padding(bottom = insets.calculateBottomPadding() + 40.dp)
     ) {
         Surface(
             modifier = Modifier
@@ -178,6 +205,83 @@ internal fun AnalysisScreen(
                     .padding(top = 23.dp, bottom = 40.dp)
                     .padding(horizontal = 15.dp)
             )
+        }
+
+        Column {
+            StudifyTabBar(
+                modifier = Modifier
+                    .padding(horizontal = 30.dp),
+                selectedTabIndex = pagerState.currentPage,
+                onTabSelected = { pageIndex ->
+                    scope.launch {
+                        pagerState.scrollToPage(pageIndex)
+                    }
+                },
+                tabTitles = tabList
+            )
+            HorizontalPager(
+                modifier = Modifier
+                    .padding(top = 24.dp),
+                state = pagerState,
+                userScrollEnabled = false,
+                beyondViewportPageCount = 2
+            ) { page ->
+                when (page) {
+                    0 -> StudifyDonutChartWithState(
+                        listOf(
+                            ChartSegment(
+                                stringResource(StudifyString.study),
+                                StudifyColors.PK02,
+                                24300
+                            ),
+                            ChartSegment(
+                                stringResource(StudifyString.sleep),
+                                StudifyColors.G03,
+                                4200
+                            ),
+                            ChartSegment(
+                                stringResource(StudifyString.emptiness_of_seat),
+                                StudifyColors.G02,
+                                2800
+                            ),
+                            ChartSegment(stringResource(StudifyString.etc), StudifyColors.G01, 4800)
+                        ),
+                        stringResource(StudifyString.analysis_study_time_description)
+                    )
+
+                    1 -> StudifyDonutChartWithState(
+                        listOf(
+                            ChartSegment(
+                                stringResource(StudifyString.focus),
+                                StudifyColors.PK02,
+                                24300
+                            ),
+                            ChartSegment(
+                                stringResource(StudifyString.not_focus),
+                                StudifyColors.G01,
+                                12000
+                            ),
+                        ),
+                        stringResource(StudifyString.analysis_focus_description)
+                    )
+
+                    2 -> StudifyDonutChartWithState(
+                        listOf(
+                            ChartSegment(
+                                stringResource(StudifyString.good_pose),
+                                StudifyColors.PK02,
+                                24300
+                            ),
+                            ChartSegment(
+                                stringResource(StudifyString.bad_pose),
+                                StudifyColors.G01,
+                                12000
+                            ),
+                        ),
+                        stringResource(StudifyString.analysis_pose_description)
+                    )
+                }
+            }
         }
 
         Row(
