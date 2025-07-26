@@ -2,11 +2,19 @@ package com.ds.studify.feature.camera
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ds.studify.core.ui.extension.calculateAngle3D
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+import org.json.JSONArray
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
+import java.time.Duration
+import java.time.Instant
 import javax.inject.Inject
 
 data class CameraUiState(
@@ -25,6 +33,12 @@ enum class PoseLabel(
     SLEEP_HEAD_BACK("머리가 뒤로 넘어간 자세 (수면)")
 }
 
+private var prevState: CameraUiState? = null
+private var currentPeriodStart: Instant? = null
+val logList:MutableList<String> = mutableListOf()
+private var isRecording: Boolean = false
+private var logJob: Job? = null
+
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     application: Application
@@ -39,6 +53,26 @@ class CameraViewModel @Inject constructor(
 
     private val handClassifier = HandClassifier(application)
     private val poseClassifier = PoseClassifier(application)
+
+    // 펜 쥔 손 분류 결과에 따른 공부 상태
+    fun getStudyState(isPenInHand: Boolean): String {
+        return if (isPenInHand) "공부 중" else "공부 중지"
+    }
+    // 자세 분류 결과에 따른 공부 상태
+    fun getPoseState(poseLabel: PoseLabel?): String {
+        return when (poseLabel) {
+            PoseLabel.GOOD_POSE -> "집중상태"
+
+            PoseLabel.NFOCUS_LEAN_BACK,
+            PoseLabel.NFOCUS_LEAN_FOWARD,
+            PoseLabel.NFOCUS_LEAN_SIDE -> "집중력 저하 상태"
+
+            PoseLabel.SLEEP_HEAD_BACK,
+            PoseLabel.SLEEP_HEAD_DOWN -> "수면 상태"
+
+            else -> "알 수 없음"
+        }
+    }
 
     fun classifyHand(handLandmarks: List<HandLandmark>) {
         if (handLandmarks.size != 21) return
@@ -116,13 +150,6 @@ class CameraViewModel @Inject constructor(
             input.add(lm.z)
         }
 
-//        // angle 추가
-//        val angle1 = calculateAngleBetweenLandmarks(poseLandmarks, 11, 0, 12)  // 왼어깨-머리-오른어깨
-//        val angle2 = calculateAngleBetweenLandmarks(poseLandmarks, 12, 0, 11)  // 오른어깨-머리-왼어깨
-//
-//        input.add(angle1)
-//        input.add(angle2)
-
         return input.toFloatArray() // pose 36 + faceMesh57 총 93개
     }
 
@@ -155,22 +182,78 @@ class CameraViewModel @Inject constructor(
         )
     }
 
-//    private fun calculateAngleBetweenLandmarks(
-//        landmarks: List<PoseLandmark>,
-//        aIndex: Int, bIndex: Int, cIndex: Int
-//    ): Float {
-//        val a = landmarks.first { it.landmarkIndex == aIndex }
-//        val b = landmarks.first { it.landmarkIndex == bIndex }
-//        val c = landmarks.first { it.landmarkIndex == cIndex }
-//
-//        val ab = floatArrayOf(a.x - b.x, a.y - b.y, a.z - b.z)
-//        val cb = floatArrayOf(c.x - b.x, c.y - b.y, c.z - b.z)
-//
-//        val dot = ab[0]*cb[0] + ab[1]*cb[1] + ab[2]*cb[2]
-//        val abNorm = sqrt((ab[0]*ab[0] + ab[1]*ab[1] + ab[2]*ab[2]).toDouble())
-//        val cbNorm = sqrt((cb[0]*cb[0] + cb[1]*cb[1] + cb[2]*cb[2]).toDouble())
-//
-//        val cosine = (dot / (abNorm * cbNorm + 1e-6)).coerceIn(-1.0, 1.0)
-//        return Math.toDegrees(acos(cosine)).toFloat()
-//    }
+    // 상태 변화시 로그 저장
+    fun saveLog(currentState: CameraUiState) {
+        val now = Instant.now()
+
+        val hasChanged = prevState?.let {
+            it.isPenInHand != currentState.isPenInHand || getPoseState(it.poseLabel) != getPoseState(
+                currentState.poseLabel
+            )
+        } ?: true // 처음 상태는 무조건 저장
+
+        if (hasChanged) {
+            prevState?.let { prev ->
+                currentPeriodStart?.let { start ->
+                    val studyState = getStudyState(prev.isPenInHand)
+                    val poseState = getPoseState(prev.poseLabel)
+                    val duration = Duration.between(start, now).seconds
+
+                    val json = JSONObject().apply {
+                        put("state_name", studyState)
+                        put("pose_name", poseState)
+                        put("duration", duration)
+
+                        val periods = JSONArray().apply {
+                            put(JSONObject().apply {
+                                put("startTime", start.toString())
+                                put("endTime", now.toString())
+                            })
+                        }
+                        put("periods", periods)
+                    }
+
+                    logList.add(json.toString())
+
+                }
+
+            }
+
+            // 현재 상태 갱신
+            currentPeriodStart = now
+            prevState = currentState
+
+        }
+    }
+
+    fun startRecordingLog() {
+        logList.clear()
+        prevState = null
+        currentPeriodStart = null
+        isRecording = true
+
+        logJob?.cancel()
+
+        logJob = viewModelScope.launch {
+            while(isRecording) {
+                val currentState = container.stateFlow.value
+                saveLog(currentState)
+                delay(1000L)
+            }
+        }
+
+    }
+
+    fun stopRecordingLog() {
+        val currentState = container.stateFlow.value
+        saveLog(currentState)
+
+        isRecording = false
+        logJob?.cancel()
+        logJob = null
+
+        prevState = null
+        currentPeriodStart = null
+    }
+
 }
