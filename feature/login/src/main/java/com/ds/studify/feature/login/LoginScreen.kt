@@ -2,31 +2,15 @@ package com.ds.studify.feature.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.foundation.Image
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -34,20 +18,48 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.feature.login.navigation.LoginNavigationDelegator
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
-internal fun LoginScreen() {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+internal fun LoginRoute(
+    paddingValues: PaddingValues,
+    navigationDelegator: LoginNavigationDelegator,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.collectAsState()
+    LoginScreen(
+        paddingValues = paddingValues,
+        uiState = uiState,
+        onEmailChange = viewModel::updateEmail,
+        onPasswordChange = viewModel::updatePassword,
+        onLoginClick = navigationDelegator.onLoginClick
+    )
+}
 
+@Composable
+internal fun LoginScreen(
+    paddingValues: PaddingValues = PaddingValues(0.dp),
+    uiState: LoginUiState = LoginUiState(),
+    onEmailChange: (String) -> Unit = {},
+    onPasswordChange: (String) -> Unit = {},
+    onLoginClick: () -> Unit = {}
+) {
     Box(
         modifier = Modifier
+            .padding(
+                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                top = 0.dp,
+                bottom = paddingValues.calculateBottomPadding()
+            )
             .fillMaxSize()
-            .background(color = StudifyColors.WHITE)
+            .background(StudifyColors.WHITE)
     ) {
         Column(
             modifier = Modifier
@@ -67,14 +79,14 @@ internal fun LoginScreen() {
                 color = StudifyColors.BLACK,
                 fontSize = 16.sp,
                 style = Typography.titleSmall,
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = uiState.email,
+                onValueChange = onEmailChange,
                 label = {
                     Text(
                         text = stringResource(id = StudifyString.login_email_label),
@@ -82,18 +94,33 @@ internal fun LoginScreen() {
                         style = Typography.bodyMedium
                     )
                 },
+                isError = !uiState.isEmailValid,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Email
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = if (!uiState.isEmailValid) StudifyColors.RED else StudifyColors.PK03,
+                    unfocusedBorderColor = if (!uiState.isEmailValid) StudifyColors.RED else StudifyColors.G03,
+                    cursorColor = StudifyColors.PK03
                 )
             )
+
+            if (!uiState.isEmailValid) {
+                Text(
+                    text = stringResource(id = StudifyString.login_email_warning),
+                    color = StudifyColors.RED,
+                    style = Typography.bodySmall,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(top = 4.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = uiState.password,
+                onValueChange = onPasswordChange,
                 label = {
                     Text(
                         text = stringResource(id = StudifyString.login_password_label),
@@ -101,21 +128,25 @@ internal fun LoginScreen() {
                         style = Typography.bodyMedium
                     )
                 },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Password
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = StudifyColors.PK03,
+                    unfocusedBorderColor = StudifyColors.G03,
+                    cursorColor = StudifyColors.PK03
                 )
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
             Button(
-                onClick = {},
+                onClick = { if (uiState.isEmailValid) onLoginClick() },
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = StudifyColors.PK03),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
+                    .height(50.dp)
             ) {
                 Text(
                     text = stringResource(id = StudifyString.login_button),

@@ -30,4 +30,5 @@ object StudifyColors {
     val PURPLE = Color(0xFF5E2A43)
     val IVORY = Color(0xFFFFF9EC)
     val BLUE = Color(0xFF1E3A8A)
+    val RED = Color(0xFFB71A27)
 }
