@@ -90,7 +90,7 @@ internal fun LoginScreen(
                 onValueChange = onEmailChange,
                 label = {
                     Text(
-                        text = stringResource(id = StudifyString.login_email_label),
+                        text = stringResource(id = StudifyString.auth_email_label),
                         color = StudifyColors.G03,
                         style = Typography.bodyMedium
                     )
@@ -108,23 +108,24 @@ internal fun LoginScreen(
 
             if (!uiState.isEmailValid) {
                 Text(
-                    text = stringResource(id = StudifyString.login_email_warning),
+                    text = stringResource(id = StudifyString.auth_email_warning),
                     color = StudifyColors.RED,
                     style = Typography.bodySmall,
                     modifier = Modifier
                         .align(Alignment.Start)
                         .padding(top = 4.dp)
                 )
+            } else {
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = uiState.password,
                 onValueChange = onPasswordChange,
                 label = {
                     Text(
-                        text = stringResource(id = StudifyString.login_password_label),
+                        text = stringResource(id = StudifyString.auth_password_label),
                         color = StudifyColors.G03,
                         style = Typography.bodyMedium
                     )
@@ -174,7 +175,7 @@ internal fun LoginScreen(
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
                 Text(
-                    text = stringResource(id = StudifyString.login_signup),
+                    text = stringResource(id = StudifyString.auth_signup),
                     color = StudifyColors.PK03,
                     style = Typography.bodyMedium,
                     modifier = Modifier
