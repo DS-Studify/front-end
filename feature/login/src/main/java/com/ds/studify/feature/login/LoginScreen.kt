@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -135,7 +136,8 @@ internal fun LoginScreen(
                     focusedBorderColor = StudifyColors.PK03,
                     unfocusedBorderColor = StudifyColors.G03,
                     cursorColor = StudifyColors.PK03
-                )
+                ),
+                visualTransformation = PasswordVisualTransformation()
             )
 
             Spacer(modifier = Modifier.height(48.dp))
