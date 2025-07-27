@@ -42,4 +42,13 @@
     <string name="stats_total_study_time">총 공부 시간</string>
     <string name="stats_total_focus_time">총 집중 시간</string>
 
+    <!--  로그인  -->
+    <string name="login_description">AI 분석을 통한 학습 관리 도우미</string>
+    <string name="login_email_label">아이디(이메일)</string>
+    <string name="login_email_warning">아이디는 이메일 주소 형태로 입력해주세요.</string>
+    <string name="login_password_label">비밀번호</string>
+    <string name="login_button">로그인</string>
+    <string name="login_no_account">계정이 없으신가요?</string>
+    <string name="login_signup">회원가입</string>
+
 </resources>
