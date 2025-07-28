@@ -223,6 +223,7 @@ internal fun CameraScreen(
                         recordingState = recordingState.value,
                         onClick = {
                             cameraX.startRecordVideo()
+                            viewModel.startRecordingLog()
                         }
                     )
                 }
@@ -233,6 +234,7 @@ internal fun CameraScreen(
                         onClick = {
                             cameraX.stopRecordVideo()
                             onRecordCloseClick()
+                            viewModel.stopRecordingLog()
                         }
                     )
                 }

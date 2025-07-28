@@ -32,6 +32,8 @@ dependencies {
     implementation(projects.feature.camera)
     implementation(projects.feature.statistics)
     implementation(projects.feature.analysis)
+    implementation(project(":feature:login"))
+    implementation(project(":feature:signup"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
