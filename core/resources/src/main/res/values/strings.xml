@@ -48,4 +48,21 @@
     <string name="mypage_menu_change_nickname">닉네임 변경</string>
     <string name="mypage_logout">로그아웃</string>
 
+    <!--  로그인 및 회원가입  -->
+    <string name="login_description">AI 분석을 통한 학습 관리 도우미</string>
+    <string name="login_button">로그인</string>
+    <string name="login_no_account">계정이 없으신가요?</string>
+    <string name="auth_signup">회원가입</string>
+    <string name="auth_email_label">아이디(이메일)</string>
+    <string name="auth_email_warning">아이디는 이메일 주소 형태로 입력해주세요.</string>
+    <string name="auth_password_label">비밀번호</string>
+    <string name="auth_password_confirm_label">비밀번호 재입력</string>
+    <string name="auth_password_warning">비밀번호가 일치하지 않습니다.</string>
+    <string name="auth_nickname_label">닉네임</string>
+    <string name="signup_title_1">로</string>
+    <string name="signup_title_2">학습 시간을 기록해볼까요?</string>
+    <string name="signup_verification_code_button">인증 번호 발송</string>
+    <string name="signup_verification_code_label">인증 번호 확인</string>
+    <string name="signup_verification_code_warning">인증 번호가 일치하지 않습니다.</string>
+
 </resources>
