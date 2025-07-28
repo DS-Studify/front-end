@@ -42,6 +42,12 @@
     <string name="stats_total_study_time">총 공부 시간</string>
     <string name="stats_total_focus_time">총 집중 시간</string>
 
+    <!-- 마이페이지 -->
+    <string name="mypage_greetings">오늘은 어떤 하루를 보낼 건가요?</string>
+    <string name="mypage_menu_change_password">비밀번호 변경</string>
+    <string name="mypage_menu_change_nickname">닉네임 변경</string>
+    <string name="mypage_logout">로그아웃</string>
+
     <!--  로그인 및 회원가입  -->
     <string name="login_description">AI 분석을 통한 학습 관리 도우미</string>
     <string name="login_button">로그인</string>
