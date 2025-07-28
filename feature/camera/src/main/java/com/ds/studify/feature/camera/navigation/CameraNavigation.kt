@@ -19,7 +19,7 @@ data object RouteCamera
 
 fun NavGraphBuilder.cameraScreen(
     navHostController: NavHostController,
-    navigateToMain: () -> Unit
+    navigateToAnalysis: () -> Unit
 ) {
     navigation<NavRouteCamera>(
         startDestination = RouteCameraGuide
@@ -35,7 +35,7 @@ fun NavGraphBuilder.cameraScreen(
 
         composable<RouteCamera> {
             CameraRoute(
-                onRecordCloseClick = navigateToMain
+                onRecordCloseClick = navigateToAnalysis
             )
         }
     }

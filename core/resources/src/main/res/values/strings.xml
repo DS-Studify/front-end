@@ -3,7 +3,18 @@
     <!--  공통  -->
     <string name="studify">Studify</string>
     <string name="back">뒤로가기</string>
+    <string name="confirm">확인</string>
     <string name="study_start">공부 시작</string>
+    <string name="study_time">공부시간</string>
+    <string name="study">공부</string>
+    <string name="sleep">졸음</string>
+    <string name="emptiness_of_seat">자리비움</string>
+    <string name="etc">기타</string>
+    <string name="focus">집중</string>
+    <string name="not_focus">비집중</string>
+    <string name="pose">자세</string>
+    <string name="good_pose">바른 자세</string>
+    <string name="bad_pose">나쁜 자세</string>
     <string name="sunday">일</string>
     <string name="monday">월</string>
     <string name="tuesday">화</string>
@@ -37,6 +48,19 @@
     <string name="camera_guide_done_content_1">📌 위 가이드를 따라 설정한 후</string>
     <string name="camera_guide_done_content_2">[공부 시작]</string>
     <string name="camera_guide_done_content_3">버튼을 눌러주세요!</string>
+
+    <!--  분석 결과  -->
+    <string name="analysis_title">분석 결과</string>
+    <string name="analysis_real_study_time">실제 공부 시간</string>
+    <string name="analysis_record_time">촬영 시간 :</string>
+    <string name="analysis_during_record">촬영 시간 중</string>
+    <string name="analysis_during_record_study">%d%% 학습</string>
+    <string name="analysis_ai_feedback">AI 피드백</string>
+    <string name="analysis_study_time_description">&lt;기타&gt; 는 책상에 앉아있었지만 공부하지 않은 시간으로, 졸음을 제외한 시간입니다.\n\nex.멍때림, 벽보기, 핸드폰 하기</string>
+    <string name="analysis_focus_description">*공부 시간 중 집중 비율</string>
+    <string name="analysis_pose_description">*공부 시간 중 자세의 비율</string>
+    <string name="analysis_restudy">다시 공부하기</string>
+    <string name="analysis_finish">종료하기</string>
 
     <!--  통계  -->
     <string name="stats_total_study_time">총 공부 시간</string>
