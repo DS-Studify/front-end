@@ -40,12 +40,10 @@ import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
-import com.ds.studify.feature.signup.navigation.SignupNavigationDelegator
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 internal fun SignupRoute(
-    navigationDelegator: SignupNavigationDelegator,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     viewModel: SignupViewModel = hiltViewModel()
 ) {

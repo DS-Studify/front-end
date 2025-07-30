@@ -24,13 +24,11 @@ import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
-import com.ds.studify.feature.login.navigation.LoginNavigationDelegator
 import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 internal fun LoginRoute(
     paddingValues: PaddingValues,
-    navigationDelegator: LoginNavigationDelegator,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
@@ -39,7 +37,7 @@ internal fun LoginRoute(
         uiState = uiState,
         onEmailChange = viewModel::updateEmail,
         onPasswordChange = viewModel::updatePassword,
-        onLoginClick = navigationDelegator.onLoginClick
+        onLoginClick = {}
     )
 }
 
