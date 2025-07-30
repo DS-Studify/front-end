@@ -32,14 +32,14 @@ import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 
 @Composable
-internal fun MypageRoute(
+internal fun MyPageRoute(
     paddingValues: PaddingValues
 ) {
 
 }
 
 @Composable
-internal fun MypageScreen(
+internal fun MyPageScreen(
     paddingValues: PaddingValues = PaddingValues(0.dp)
 ) {
     Box(
@@ -183,6 +183,6 @@ internal fun MypageScreen(
 
 @Preview
 @Composable
-private fun MypageScreenPreview() {
-    MypageScreen()
+private fun MyPageScreenPreview() {
+    MyPageScreen()
 }

@@ -5,23 +5,23 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
-import com.ds.studify.feature.mypage.MypageRoute
+import com.ds.studify.feature.mypage.MyPageRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object RouteMypage
+data object RouteMyPage
 
-fun NavController.navigateToMypage(
+fun NavController.navigateToMyPage(
     navOptions: NavOptions
 ) {
-    navigate(RouteMypage, navOptions)
+    navigate(RouteMyPage, navOptions)
 }
 
-fun NavGraphBuilder.mypageScreen(
+fun NavGraphBuilder.myPageScreen(
     paddingValues: PaddingValues
 ) {
-    composable<RouteMypage> {
-        MypageRoute(
+    composable<RouteMyPage> {
+        MyPageRoute(
             paddingValues = paddingValues
         )
     }
