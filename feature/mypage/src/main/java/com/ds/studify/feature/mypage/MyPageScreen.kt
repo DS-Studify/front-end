@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ds.studify.core.designsystem.component.StudifyScaffoldWithTitle
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
@@ -33,14 +34,25 @@ import com.ds.studify.core.resources.StudifyString
 
 @Composable
 internal fun MyPageRoute(
-    paddingValues: PaddingValues
+    onBack: () -> Unit
 ) {
-
+    StudifyScaffoldWithTitle(
+        titleId = StudifyString.mypage_title,
+        onBackButtonClick = onBack
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            MyPageScreen(
+                paddingValues = paddingValues
+            )
+        }
+    }
 }
 
 @Composable
 internal fun MyPageScreen(
-    paddingValues: PaddingValues = PaddingValues(0.dp)
+    paddingValues: PaddingValues
 ) {
     Box(
         modifier = Modifier
@@ -111,7 +123,7 @@ internal fun MyPageScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable{}
+                        .clickable {}
                 ) {
                     Text(
                         text = stringResource(StudifyString.mypage_menu_change_password),
@@ -135,7 +147,7 @@ internal fun MyPageScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable{}
+                        .clickable {}
                 ) {
                     Text(
                         text = stringResource(StudifyString.mypage_menu_change_nickname),
@@ -161,7 +173,7 @@ internal fun MyPageScreen(
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
                     modifier = Modifier
                         .padding(top = 8.dp, start = 5.dp)
-                        .clickable{}
+                        .clickable {}
                 ) {
                     Icon(
                         painter = painterResource(id = StudifyDrawable.ic_logout),
@@ -184,5 +196,7 @@ internal fun MyPageScreen(
 @Preview
 @Composable
 private fun MyPageScreenPreview() {
-    MyPageScreen()
+    MyPageScreen(
+        paddingValues = PaddingValues(0.dp)
+    )
 }

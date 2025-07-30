@@ -1,28 +1,32 @@
 package com.ds.studify.feature.mypage.navigation
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import com.ds.studify.feature.mypage.MyPageRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
+data object NavRouteMyPage
+
+@Serializable
 data object RouteMyPage
 
-fun NavController.navigateToMyPage(
-    navOptions: NavOptions
+fun NavGraphBuilder.myPageScreen(
+    navHostController: NavHostController
 ) {
-    navigate(RouteMyPage, navOptions)
+    navigation<NavRouteMyPage>(
+        startDestination = RouteMyPage
+    ) {
+        composable<RouteMyPage> {
+            MyPageRoute(
+                onBack = { navHostController.popBackStack() }
+            )
+        }
+    }
 }
 
-fun NavGraphBuilder.myPageScreen(
-    paddingValues: PaddingValues
-) {
-    composable<RouteMyPage> {
-        MyPageRoute(
-            paddingValues = paddingValues
-        )
-    }
+fun NavHostController.navigateToMyPage() {
+    navigate(NavRouteMyPage)
 }

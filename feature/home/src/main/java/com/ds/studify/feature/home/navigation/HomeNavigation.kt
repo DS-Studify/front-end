@@ -30,5 +30,6 @@ fun NavGraphBuilder.homeScreen(
 }
 
 class HomeNavigationDelegator(
-    val onStartToStudyClick: () -> Unit = {}
+    val onStartToStudyClick: () -> Unit = {},
+    val onMyPageClick: () -> Unit = {}
 )

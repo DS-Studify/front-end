@@ -15,6 +15,8 @@ import com.ds.studify.feature.analysis.navigation.navigateToAnalysis
 import com.ds.studify.feature.camera.navigation.cameraScreen
 import com.ds.studify.feature.camera.navigation.navigateToCamera
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
+import com.ds.studify.feature.mypage.navigation.myPageScreen
+import com.ds.studify.feature.mypage.navigation.navigateToMyPage
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -42,7 +44,8 @@ fun StudifyNavHost(
 
             mainScreen(
                 homeNavigationDelegator = HomeNavigationDelegator(
-                    onStartToStudyClick = { navController.navigateToCamera() }
+                    onStartToStudyClick = { navController.navigateToCamera() },
+                    onMyPageClick = { navController.navigateToMyPage() }
                 )
             )
 
@@ -62,6 +65,10 @@ fun StudifyNavHost(
                         )
                     }
                 )
+            )
+
+            myPageScreen(
+                navController
             )
         }
     }
