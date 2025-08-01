@@ -1,25 +1,27 @@
 package com.ds.studify.feature.camera
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.ds.studify.core.ui.extension.calculateAngle3D
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.json.JSONObject
 import org.json.JSONArray
+import org.json.JSONObject
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
-import java.time.Duration
-import java.time.Instant
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class CameraUiState(
     val isPenInHand: Boolean,
     val poseLabel: PoseLabel?
+)
+
+data class StableState(
+    var stablePenInHand: Boolean = false,
+    var stablePoseLabel: PoseLabel? = null
 )
 
 enum class PoseLabel(
@@ -33,11 +35,14 @@ enum class PoseLabel(
     SLEEP_HEAD_BACK("머리가 뒤로 넘어간 자세 (수면)")
 }
 
-private var prevState: CameraUiState? = null
-private var currentPeriodStart: Instant? = null
-val logList:MutableList<String> = mutableListOf()
-private var isRecording: Boolean = false
-private var logJob: Job? = null
+data class LogRecordingState(
+    var prevState: CameraUiState? = null,
+    var isRecording: Boolean = false,
+    var overallStart: LocalDateTime? = null,
+    var overallEnd: LocalDateTime? = null,
+    val logMap: MutableMap<Int, MutableList<MutableMap<String, String>>> = mutableMapOf(),
+    val stateStartTimeMap: MutableMap<Int, LocalDateTime> = mutableMapOf()
+)
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
@@ -53,24 +58,61 @@ class CameraViewModel @Inject constructor(
 
     private val handClassifier = HandClassifier(application)
     private val poseClassifier = PoseClassifier(application)
+    private val recordingState = LogRecordingState()
 
-    // 펜 쥔 손 분류 결과에 따른 공부 상태
-    fun getStudyState(isPenInHand: Boolean): String {
-        return if (isPenInHand) "공부 중" else "공부 중지"
-    }
+    private val stableState = StableState()
+    private var penCount = 0
+    private var poseCount = 0
+    private var requiredCount = 3
+    private val timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+
     // 자세 분류 결과에 따른 공부 상태
-    fun getPoseState(poseLabel: PoseLabel?): String {
+    fun getPoseState(poseLabel: PoseLabel?): Int {
         return when (poseLabel) {
-            PoseLabel.GOOD_POSE -> "집중상태"
+            PoseLabel.GOOD_POSE -> 1
 
             PoseLabel.NFOCUS_LEAN_BACK,
             PoseLabel.NFOCUS_LEAN_FOWARD,
-            PoseLabel.NFOCUS_LEAN_SIDE -> "집중력 저하 상태"
+            PoseLabel.NFOCUS_LEAN_SIDE -> 2
 
             PoseLabel.SLEEP_HEAD_BACK,
-            PoseLabel.SLEEP_HEAD_DOWN -> "수면 상태"
+            PoseLabel.SLEEP_HEAD_DOWN -> 3
 
-            else -> "알 수 없음"
+            else -> 0
+        }
+    }
+
+    // 펜 상태 연속 3번 지연 업데이트
+    fun updatePenState(currentValue: Boolean) {
+        if (currentValue == stableState.stablePenInHand) {
+            penCount = 0
+            return
+        }
+        if (penCount == 0 || currentValue != container.stateFlow.value.isPenInHand) {
+            penCount = 1
+        } else {
+            penCount++
+        }
+        if (penCount >= requiredCount) {
+            stableState.stablePenInHand = currentValue
+            penCount = 0
+        }
+    }
+
+    // 자세 상태 연속 3번 지연 업데이트
+    fun updatePoseState(currentValue: PoseLabel?) {
+        if (currentValue == stableState.stablePoseLabel) {
+            poseCount = 0
+            return
+        }
+        if (poseCount == 0 || currentValue != container.stateFlow.value.poseLabel) {
+            poseCount = 1
+        } else {
+            poseCount++
+        }
+        if (poseCount >= requiredCount) {
+            stableState.stablePoseLabel = currentValue
+            poseCount = 0
         }
     }
 
@@ -84,6 +126,8 @@ class CameraViewModel @Inject constructor(
 
         intent {
             reduce { state.copy(isPenInHand = isPen) }
+            updatePenState(isPen)
+            saveLog()
         }
     }
 
@@ -99,6 +143,8 @@ class CameraViewModel @Inject constructor(
         )
         intent {
             reduce { state.copy(poseLabel = labels[predictedLabel]) }
+            updatePoseState(labels[predictedLabel])
+            saveLog()
         }
     }
 
@@ -126,17 +172,21 @@ class CameraViewModel @Inject constructor(
         return (relativeCoords + angles).toFloatArray()
     }
 
-    private fun preparePoseModelInput(poseLandmarks: List<PoseLandmark>, faceLandmarks: List<FaceLandmark>): FloatArray {
+    private fun preparePoseModelInput(
+        poseLandmarks: List<PoseLandmark>,
+        faceLandmarks: List<FaceLandmark>
+    ): FloatArray {
         if (poseLandmarks.size < 23 || faceLandmarks.isEmpty()) return FloatArray(93)
 
         val input = mutableListOf<Float>()
 
         // faceMesh 사용 인덱스
         val faceIndices = listOf(
-            1, 4, 10, 13, 14, 33, 78, 133, 145, 152, 159, 199, 234, 263, 308, 362, 374, 386, 454)
+            1, 4, 10, 13, 14, 33, 78, 133, 145, 152, 159, 199, 234, 263, 308, 362, 374, 386, 454
+        )
         // faceMesh 랜드마크 x, y, z
         for (i in faceIndices) {
-            val lm = faceLandmarks.firstOrNull{ it.landmarkIndex == i } ?: continue
+            val lm = faceLandmarks.firstOrNull { it.landmarkIndex == i } ?: continue
             input.add(lm.x)
             input.add(lm.y)
             input.add(lm.z)
@@ -182,78 +232,113 @@ class CameraViewModel @Inject constructor(
         )
     }
 
-    // 상태 변화시 로그 저장
-    fun saveLog(currentState: CameraUiState) {
-        val now = Instant.now()
+    // 조건 확인
+    fun checkStates(): List<Int> {
+        val result = mutableListOf<Int>()
 
-        val hasChanged = prevState?.let {
-            it.isPenInHand != currentState.isPenInHand || getPoseState(it.poseLabel) != getPoseState(
-                currentState.poseLabel
-            )
-        } ?: true // 처음 상태는 무조건 저장
+        if (stableState.stablePenInHand) result.add(1)
+        if (stableState.stablePenInHand && getPoseState(stableState.stablePoseLabel) == 1) result.add(
+            2
+        )
+        if (stableState.stablePenInHand && getPoseState(stableState.stablePoseLabel) == 2) result.add(
+            3
+        )
+        if (getPoseState(stableState.stablePoseLabel) == 3) result.add(4)
+        if (getPoseState(stableState.stablePoseLabel) == 0) result.add(5)
+        if (!stableState.stablePenInHand && (getPoseState(stableState.stablePoseLabel) == 1 || getPoseState(
+                stableState.stablePoseLabel
+            ) == 2)
+        ) result.add(6)
 
-        if (hasChanged) {
-            prevState?.let { prev ->
-                currentPeriodStart?.let { start ->
-                    val studyState = getStudyState(prev.isPenInHand)
-                    val poseState = getPoseState(prev.poseLabel)
-                    val duration = Duration.between(start, now).seconds
+        return result
 
-                    val json = JSONObject().apply {
-                        put("state_name", studyState)
-                        put("pose_name", poseState)
-                        put("duration", duration)
+    }
 
-                        val periods = JSONArray().apply {
-                            put(JSONObject().apply {
-                                put("startTime", start.toString())
-                                put("endTime", now.toString())
-                            })
-                        }
-                        put("periods", periods)
-                    }
+    // 상태 변화 감지 로그 저장
+    fun saveLog() {
+        if (!recordingState.isRecording) return
 
-                    logList.add(json.toString())
+        val currentStates = checkStates()
+        val prevStates = recordingState.stateStartTimeMap.keys.toList()
 
+        // 종료된 상태
+        prevStates.forEach { stateId ->
+            if (!currentStates.contains(stateId)) {
+                val startTime = recordingState.stateStartTimeMap[stateId]
+                if (startTime != null) {
+                    recordingState.logMap[stateId]?.add(
+                        mutableMapOf(
+                            "startTime" to startTime.format(timeFormatter),
+                            "endTime" to LocalDateTime.now().format(timeFormatter)
+                        )
+                    )
+                    recordingState.stateStartTimeMap.remove(stateId)
                 }
-
             }
+        }
 
-            // 현재 상태 갱신
-            currentPeriodStart = now
-            prevState = currentState
-
+        // 새로 시작된 상태
+        currentStates.forEach { stateId ->
+            if (!recordingState.stateStartTimeMap.containsKey(stateId)) {
+                recordingState.stateStartTimeMap[stateId] = LocalDateTime.now()
+            }
         }
     }
 
+    // 녹화 시작
     fun startRecordingLog() {
-        logList.clear()
-        prevState = null
-        currentPeriodStart = null
-        isRecording = true
+        recordingState.isRecording = true
+        recordingState.overallStart = LocalDateTime.now()
+        recordingState.prevState = CameraUiState(
+            stableState.stablePenInHand,
+            stableState.stablePoseLabel
+        )
 
-        logJob?.cancel()
-
-        logJob = viewModelScope.launch {
-            while(isRecording) {
-                val currentState = container.stateFlow.value
-                saveLog(currentState)
-                delay(1000L)
-            }
+        for (i in 1..6) {
+            recordingState.logMap[i] = mutableListOf()
         }
 
+        val activateStates = checkStates()
+        activateStates.forEach { stateId ->
+            recordingState.stateStartTimeMap[stateId] = LocalDateTime.now()
+        }
     }
 
+    // 녹화 종료
     fun stopRecordingLog() {
-        val currentState = container.stateFlow.value
-        saveLog(currentState)
+        if (!recordingState.isRecording) return
+        recordingState.overallEnd = LocalDateTime.now()
 
-        isRecording = false
-        logJob?.cancel()
-        logJob = null
+        // 종료되지 않은 상태 처리
+        recordingState.stateStartTimeMap.forEach { (stateId, startTime) ->
+            recordingState.logMap[stateId]?.add(
+                mutableMapOf(
+                    "startTime" to startTime.format(timeFormatter),
+                    "endTime" to recordingState.overallEnd!!.format(timeFormatter)
+                )
+            )
+        }
+        recordingState.stateStartTimeMap.clear()
 
-        prevState = null
-        currentPeriodStart = null
+        //JSON 변환
+        val json = JSONObject().apply {
+            put("date", recordingState.overallStart?.toLocalDate().toString())
+            put("startTime", recordingState.overallStart?.format(timeFormatter))
+            put("endTime", recordingState.overallEnd?.format(timeFormatter))
+
+            val timeLogObj = JSONObject()
+            for (i in 1..6) {
+                val arr = JSONArray()
+                recordingState.logMap[i]?.forEach { log ->
+                    arr.put(JSONObject(log.toMap()))
+                }
+                timeLogObj.put(i.toString(), arr)
+            }
+            put("timeLog", timeLogObj)
+        }
+
+        Log.d("stateLog", json.toString())
+
+        recordingState.isRecording = false
     }
-
 }
