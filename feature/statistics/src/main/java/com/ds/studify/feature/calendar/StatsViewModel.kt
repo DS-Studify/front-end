@@ -1,6 +1,7 @@
 package com.ds.studify.feature.calendar
 
 import androidx.lifecycle.ViewModel
+import com.ds.studify.core.data.model.StudyTimeRange
 import com.ds.studify.core.data.repository.StatsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,7 @@ data class DailyStatsUiState(
     val dateWithDayOfWeek: String,
     val focusTime: String,
     val studyTime: String,
-    val studyTimeLine: List<String> = emptyList()
+    val studyTimeLine: List<StudyTimeRange> = emptyList()
 )
 
 sealed interface StatsUiState {
