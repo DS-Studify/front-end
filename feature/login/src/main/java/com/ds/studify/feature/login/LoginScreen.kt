@@ -29,22 +29,22 @@ import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 internal fun LoginRoute(
-    paddingValues: PaddingValues,
     navigationDelegator: LoginNavigationDelegator,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
     LoginScreen(
-        paddingValues = paddingValues,
+        navigationDelegator = navigationDelegator,
         uiState = uiState,
         onEmailChange = viewModel::updateEmail,
         onPasswordChange = viewModel::updatePassword,
-        onLoginClick = navigationDelegator.onLoginClick
+        onLoginClick = navigationDelegator.onLoginSuccess
     )
 }
 
 @Composable
 internal fun LoginScreen(
+    navigationDelegator: LoginNavigationDelegator,
     paddingValues: PaddingValues = PaddingValues(0.dp),
     uiState: LoginUiState = LoginUiState(),
     onEmailChange: (String) -> Unit = {},
@@ -180,7 +180,7 @@ internal fun LoginScreen(
                     style = Typography.bodyMedium,
                     modifier = Modifier
                         .padding(end = 4.dp)
-                        .clickable {}
+                        .clickable { navigationDelegator.onSignInClicked() }
                 )
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
@@ -195,5 +195,7 @@ internal fun LoginScreen(
 @Preview
 @Composable
 private fun LoginScreenPreview() {
-    LoginScreen()
+    LoginScreen(
+        navigationDelegator = LoginNavigationDelegator()
+    )
 }

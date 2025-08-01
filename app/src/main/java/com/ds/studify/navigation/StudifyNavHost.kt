@@ -15,10 +15,20 @@ import com.ds.studify.feature.analysis.navigation.navigateToAnalysis
 import com.ds.studify.feature.camera.navigation.cameraScreen
 import com.ds.studify.feature.camera.navigation.navigateToCamera
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
+import com.ds.studify.feature.login.navigation.LoginNavigationDelegator
+import com.ds.studify.feature.login.navigation.RouteLogin
+import com.ds.studify.feature.login.navigation.loginScreen
+import com.ds.studify.feature.mypage.navigation.myPageScreen
+import com.ds.studify.feature.mypage.navigation.navigateToMyPage
+import com.ds.studify.feature.signup.navigation.navigateToSignup
+import com.ds.studify.feature.signup.navigation.signupScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
 data object NavRouteMain
+
+@Serializable
+data object NavRouteAuth
 
 fun NavHostController.navigateToMain(
     navOptions: NavOptions? = null
@@ -36,13 +46,35 @@ fun StudifyNavHost(
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
+        navigation<NavRouteAuth>(
+            startDestination = RouteLogin
+        ) {
+            loginScreen(
+                navigationDelegator = LoginNavigationDelegator(
+                    onLoginSuccess = {
+                        navController.navigateToMain(
+                            navOptions {
+                                popUpTo(NavRouteAuth) { inclusive = true }
+                            }
+                        )
+                    },
+                    onSignInClicked = {
+                        navController.navigateToSignup()
+                    }
+                )
+            )
+
+            signupScreen(navController)
+        }
+
         navigation<NavRouteMain>(
             startDestination = RouteMain
         ) {
 
             mainScreen(
                 homeNavigationDelegator = HomeNavigationDelegator(
-                    onStartToStudyClick = { navController.navigateToCamera() }
+                    onStartToStudyClick = { navController.navigateToCamera() },
+                    onMyPageClick = { navController.navigateToMyPage() }
                 )
             )
 
@@ -62,6 +94,10 @@ fun StudifyNavHost(
                         )
                     }
                 )
+            )
+
+            myPageScreen(
+                navController
             )
         }
     }

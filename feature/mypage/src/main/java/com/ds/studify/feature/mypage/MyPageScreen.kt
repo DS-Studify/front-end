@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,33 +24,50 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ds.studify.core.designsystem.component.StudifyScaffoldWithTitle
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 
 @Composable
-internal fun MypageRoute(
-    paddingValues: PaddingValues
+internal fun MyPageRoute(
+    onBack: () -> Unit
 ) {
-
+    StudifyScaffoldWithTitle(
+        titleId = StudifyString.mypage_title,
+        onBackButtonClick = onBack
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            MyPageScreen(
+                paddingValues = paddingValues
+            )
+        }
+    }
 }
 
 @Composable
-internal fun MypageScreen(
-    paddingValues: PaddingValues = PaddingValues(0.dp)
+internal fun MyPageScreen(
+    paddingValues: PaddingValues
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
             .background(color = StudifyColors.WHITE)
+            .padding(
+                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
+                top = paddingValues.calculateTopPadding(),
+                bottom = paddingValues.calculateBottomPadding()
+            )
     ) {
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -111,7 +130,7 @@ internal fun MypageScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable{}
+                        .clickable {}
                 ) {
                     Text(
                         text = stringResource(StudifyString.mypage_menu_change_password),
@@ -135,7 +154,7 @@ internal fun MypageScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable{}
+                        .clickable {}
                 ) {
                     Text(
                         text = stringResource(StudifyString.mypage_menu_change_nickname),
@@ -161,7 +180,7 @@ internal fun MypageScreen(
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
                     modifier = Modifier
                         .padding(top = 8.dp, start = 5.dp)
-                        .clickable{}
+                        .clickable {}
                 ) {
                     Icon(
                         painter = painterResource(id = StudifyDrawable.ic_logout),
@@ -183,6 +202,8 @@ internal fun MypageScreen(
 
 @Preview
 @Composable
-private fun MypageScreenPreview() {
-    MypageScreen()
+private fun MyPageScreenPreview() {
+    MyPageScreen(
+        paddingValues = PaddingValues(0.dp)
+    )
 }

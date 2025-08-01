@@ -52,7 +52,7 @@ internal fun HomeRoute(
         leftActionButton = {
             IconButton(
                 modifier = Modifier.size(width = 28.dp, height = 28.dp),
-                onClick = { }
+                onClick = navigationDelegator.onMyPageClick
             ) {
                 Icon(
                     painter = painterResource(id = StudifyDrawable.ic_drawer),
