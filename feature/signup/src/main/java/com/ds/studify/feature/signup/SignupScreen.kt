@@ -44,12 +44,11 @@ import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 internal fun SignupRoute(
-    paddingValues: PaddingValues = PaddingValues(0.dp),
+    onBack: () -> Unit,
     viewModel: SignupViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
     SignupScreen(
-        paddingValues = paddingValues,
         uiState = uiState,
         updateEmail = viewModel::updateEmail,
         updateVerificationCode = viewModel::updateVerificationCode,
@@ -57,7 +56,7 @@ internal fun SignupRoute(
         updateConfirmPassword = viewModel::updateConfirmPassword,
         updateNickname = viewModel::updateNickname,
         onSendVerificationClick = { },
-        onSignupClick = { }
+        onSignupClick = onBack
     )
 
 }
