@@ -66,6 +66,9 @@
     <string name="stats_total_study_time">총 공부 시간</string>
     <string name="stats_total_focus_time">총 집중 시간</string>
 
+    <!--  피드백 상세  -->
+    <string name="feedback_real_study_time">실제 공부 시간 :</string>
+
     <!-- 마이페이지 -->
     <string name="mypage_title">마이페이지</string>
     <string name="mypage_greetings">오늘은 어떤 하루를 보낼 건가요?</string>
