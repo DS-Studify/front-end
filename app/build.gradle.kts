@@ -35,6 +35,7 @@ dependencies {
     implementation(projects.feature.login)
     implementation(projects.feature.signup)
     implementation(projects.feature.mypage)
+    implementation(projects.feature.feedback)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
