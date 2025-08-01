@@ -1,4 +1,4 @@
-package com.ds.studify.feature.calendar
+package com.ds.studify.feature.feedback
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
