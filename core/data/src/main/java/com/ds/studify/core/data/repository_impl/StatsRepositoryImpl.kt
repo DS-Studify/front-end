@@ -1,5 +1,6 @@
 package com.ds.studify.core.data.repository_impl
 
+import com.ds.studify.core.data.model.StudyTimeRange
 import com.ds.studify.core.data.repository.StatsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,7 +69,11 @@ class StatsRepositoryImpl @Inject constructor() : StatsRepository {
         return studyList?.getOrNull(day - 1) ?: "0H 0M"
     }
 
-    override suspend fun getDailyStudyTimeLine(year: Int, month: Int): List<String> {
-        return listOf("10:00~13:00", "14:30~18:33", "19:40~23:04")
+    override suspend fun getDailyStudyTimeLine(year: Int, month: Int): List<StudyTimeRange> {
+        return listOf(
+            StudyTimeRange(1, "10:00", "13:00"),
+            StudyTimeRange(2, "14:30", "18:33"),
+            StudyTimeRange(3, "19:40", "23:04")
+        )
     }
 }

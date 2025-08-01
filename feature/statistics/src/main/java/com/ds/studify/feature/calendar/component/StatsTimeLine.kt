@@ -21,24 +21,25 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ds.studify.core.data.model.StudyTimeRange
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.resources.StudifyDrawable
 
 @Composable
 fun StatsTimeLine(
     modifier: Modifier = Modifier,
-    studyTimes: List<String>,
-    onClick: () -> Unit,
+    studyTimes: List<StudyTimeRange>,
+    onClick: (Long) -> Unit,
 ) {
     Column(
         modifier = modifier
     ) {
-        studyTimes.forEachIndexed { index, time ->
+        studyTimes.forEachIndexed { index, timeRange ->
             Column {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable { onClick() }
+                        .clickable { onClick(timeRange.id) }
                 ) {
                     Box(
                         modifier = Modifier
@@ -48,7 +49,7 @@ fun StatsTimeLine(
                     )
 
                     Text(
-                        text = time,
+                        text = timeRange.start + "~" + timeRange.end,
                         fontSize = 16.sp,
                         color = Color.Black,
                         modifier = Modifier.padding(horizontal = 12.dp)
@@ -82,7 +83,11 @@ fun StatsTimeLine(
 @Composable
 private fun StatsTimeLinePreview() {
     StatsTimeLine(
-        studyTimes = listOf("10:00~13:00", "14:30~18:33", "19:40~23:04"),
+        studyTimes = listOf(
+            StudyTimeRange(1, "10:00", "13:00"),
+            StudyTimeRange(2, "14:30", "18:33"),
+            StudyTimeRange(3, "19:40", "23:04")
+        ),
         onClick = {}
     )
 }

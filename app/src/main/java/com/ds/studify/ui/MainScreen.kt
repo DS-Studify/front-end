@@ -47,7 +47,10 @@ fun MainScreen(
                     innerPadding
                 )
 
-                statsScreen(innerPadding)
+                statsScreen(
+                    navController,
+                    innerPadding
+                )
             }
         }
     }
