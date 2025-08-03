@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.component.ChartSegment
 import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithTitle
@@ -39,28 +41,43 @@ import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
 import com.ds.studify.core.resources.StudifyString
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 internal fun FeedbackRoute(
     onBack: () -> Unit
 ) {
-    StudifyScaffoldWithTitle(
-        titleId = StudifyString.camera_guide_title,
-        onBackButtonClick = onBack
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            FeedbackScreen(
-                paddingValues = paddingValues
-            )
+    val viewModel = hiltViewModel<FeedbackViewModel>()
+    val uiState by viewModel.collectAsState()
+
+    when (uiState) {
+        FeedbackState.Loading -> {}
+        is FeedbackState.Screen -> {
+            StudifyScaffoldWithTitle(
+                titleId = StudifyString.camera_guide_title,
+                onBackButtonClick = onBack
+            ) { paddingValues ->
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    FeedbackScreen(
+                        paddingValues = paddingValues,
+                        uiState = uiState as FeedbackState.Screen,
+                        onTabEvent = {
+                            viewModel.onEvent(FeedbackUiEvent.ChangeTabIndex(it))
+                        }
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 internal fun FeedbackScreen(
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    uiState: FeedbackState.Screen,
+    onTabEvent: (Int) -> Unit
 ) {
     val tabList = listOf(
         stringResource(StudifyString.study_time),
@@ -75,8 +92,12 @@ internal fun FeedbackScreen(
         tabList.size
     }
 
-    LaunchedEffect(pagerState) {
-        pagerState.scrollToPage(pagerState.currentPage)
+    LaunchedEffect(pagerState.currentPage) {
+        onTabEvent(pagerState.currentPage)
+    }
+
+    LaunchedEffect(uiState.currentTab) {
+        pagerState.scrollToPage(uiState.currentTab)
     }
 
     Column(
@@ -242,6 +263,11 @@ internal fun FeedbackScreen(
 @Composable
 private fun FeedbackScreenPreview() {
     FeedbackScreen(
-        paddingValues = PaddingValues(0.dp)
+        paddingValues = PaddingValues(0.dp),
+        uiState = FeedbackState.Screen(
+            currentTab = 0,
+            studyDate = "2025년 8월 3일"
+        ),
+        onTabEvent = {}
     )
 }
