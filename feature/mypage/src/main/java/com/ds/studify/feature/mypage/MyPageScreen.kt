@@ -40,7 +40,7 @@ internal fun MyPageRoute(
     onBack: () -> Unit
 ) {
     StudifyScaffoldWithTitle(
-        titleId = StudifyString.mypage_title,
+        title = stringResource(StudifyString.mypage_title),
         onBackButtonClick = onBack
     ) { paddingValues ->
         Box(

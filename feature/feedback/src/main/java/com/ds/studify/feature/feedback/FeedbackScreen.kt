@@ -50,11 +50,11 @@ internal fun FeedbackRoute(
     val viewModel = hiltViewModel<FeedbackViewModel>()
     val uiState by viewModel.collectAsState()
 
-    when (uiState) {
+    when (val state = uiState) {
         FeedbackState.Loading -> {}
         is FeedbackState.Screen -> {
             StudifyScaffoldWithTitle(
-                titleId = StudifyString.camera_guide_title,
+                title = state.studyDate,
                 onBackButtonClick = onBack
             ) { paddingValues ->
                 Box(
@@ -62,7 +62,7 @@ internal fun FeedbackRoute(
                 ) {
                     FeedbackScreen(
                         paddingValues = paddingValues,
-                        uiState = uiState as FeedbackState.Screen,
+                        uiState = state,
                         onTabEvent = {
                             viewModel.onEvent(FeedbackUiEvent.ChangeTabIndex(it))
                         }

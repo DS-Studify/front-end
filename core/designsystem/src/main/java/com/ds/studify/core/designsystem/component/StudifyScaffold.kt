@@ -1,7 +1,6 @@
 package com.ds.studify.core.designsystem.component
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -71,7 +70,7 @@ fun StudifyScaffoldWithLogo(
 
 @Composable
 fun StudifyScaffoldWithTitle(
-    @StringRes titleId: Int,
+    title: String,
     paddingValues: PaddingValues? = null,
     onBackButtonClick: (() -> Unit)? = null,
     @DrawableRes navIcon: Int = StudifyDrawable.ic_back,
@@ -89,7 +88,7 @@ fun StudifyScaffoldWithTitle(
                 )
             )
             StudifyTitleBar(
-                titleId = titleId,
+                title = title,
                 onBackButtonClick = onBackButtonClick,
                 navIcon = navIcon,
                 color = color
@@ -99,7 +98,7 @@ fun StudifyScaffoldWithTitle(
         Scaffold(
             topBar = {
                 StudifyTitleBar(
-                    titleId = titleId,
+                    title = title,
                     onBackButtonClick = onBackButtonClick,
                     navIcon = navIcon,
                     color = color

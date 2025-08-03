@@ -1,7 +1,6 @@
 package com.ds.studify.core.designsystem.component
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +26,7 @@ import com.ds.studify.core.resources.StudifyString
 
 @Composable
 fun StudifyTitleBar(
-    @StringRes titleId: Int,
+    title: String,
     onBackButtonClick: (() -> Unit)? = null,
     @DrawableRes navIcon: Int = StudifyDrawable.ic_back,
     color: Color = StudifyColors.BLACK
@@ -59,7 +58,7 @@ fun StudifyTitleBar(
         Text(
             modifier = Modifier
                 .align(Alignment.Center),
-            text = stringResource(id = titleId),
+            text = title,
             color = color,
             style = Typography.headlineSmall
         )
@@ -70,7 +69,7 @@ fun StudifyTitleBar(
 @Composable
 private fun StudifyTitleBarPreview() {
     StudifyTitleBar(
-        titleId = StudifyString.studify,
+        title = stringResource(StudifyString.studify),
         onBackButtonClick = {}
     )
 }

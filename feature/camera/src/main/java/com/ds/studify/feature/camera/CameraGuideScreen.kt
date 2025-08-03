@@ -43,7 +43,7 @@ internal fun CameraGuideRoute(
     onNavigateToStudy: () -> Unit
 ) {
     StudifyScaffoldWithTitle(
-        titleId = StudifyString.camera_guide_title,
+        title = stringResource(StudifyString.camera_guide_title),
         onBackButtonClick = onBack
     ) { paddingValues ->
         Box(
