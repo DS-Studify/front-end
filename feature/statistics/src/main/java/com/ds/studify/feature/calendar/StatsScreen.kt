@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ds.studify.core.data.model.StudyTimeRange
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithLogo
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
@@ -42,6 +43,7 @@ import java.time.YearMonth
 @Composable
 internal fun StatsRoute(
     paddingValues: PaddingValues,
+    onNavigateToFeedback: (Long) -> Unit,
     viewModel: StatsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
@@ -67,7 +69,10 @@ internal fun StatsRoute(
                 StatsScreen(
                     paddingValues = innerPadding,
                     uiState = state,
-                    onEvent = viewModel::onEvent
+                    onEvent = viewModel::onEvent,
+                    onNavigateToFeedback = { id ->
+                        onNavigateToFeedback(id)
+                    }
                 )
             }
 
@@ -86,7 +91,8 @@ internal fun StatsRoute(
 internal fun StatsScreen(
     paddingValues: PaddingValues,
     uiState: StatsUiState.Data,
-    onEvent: (StatsUiEvent) -> Unit
+    onEvent: (StatsUiEvent) -> Unit,
+    onNavigateToFeedback: (Long) -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -177,7 +183,9 @@ internal fun StatsScreen(
                 .padding(top = 60.dp, bottom = 30.dp)
                 .padding(horizontal = 40.dp),
             studyTimes = uiState.daily.studyTimeLine,
-            onClick = {}
+            onClick = { clickedId ->
+                onNavigateToFeedback(clickedId)
+            }
         )
     }
 }
@@ -197,9 +205,14 @@ private fun StatsScreenPreview() {
                 dateWithDayOfWeek = "7월 12일 (토)",
                 focusTime = "5시간 30분",
                 studyTime = "6시간",
-                studyTimeLine = listOf("10:00~13:00", "14:30~18:33", "19:40~23:04")
+                studyTimeLine = listOf(
+                    StudyTimeRange(1, "10:00", "13:00"),
+                    StudyTimeRange(2, "14:30", "18:33"),
+                    StudyTimeRange(3, "19:40", "23:04")
+                )
             )
         ),
-        onEvent = {}
+        onEvent = {},
+        onNavigateToFeedback = {}
     )
 }

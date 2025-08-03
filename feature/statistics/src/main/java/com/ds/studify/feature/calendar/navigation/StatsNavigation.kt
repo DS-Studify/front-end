@@ -18,11 +18,19 @@ fun NavController.navigateToStats(
 }
 
 fun NavGraphBuilder.statsScreen(
+    statsNavigationDelegator: StatsNavigationDelegator,
     paddingValues: PaddingValues
 ) {
     composable<RouteStats> {
         StatsRoute(
-            paddingValues = paddingValues
+            paddingValues = paddingValues,
+            onNavigateToFeedback = { studyId ->
+                statsNavigationDelegator.onTimeLineClick(studyId)
+            }
         )
     }
 }
+
+class StatsNavigationDelegator(
+    val onTimeLineClick: (Long) -> Unit = {}
+)

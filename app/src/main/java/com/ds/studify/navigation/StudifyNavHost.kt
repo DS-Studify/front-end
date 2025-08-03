@@ -12,8 +12,11 @@ import com.ds.studify.feature.analysis.navigation.AnalysisNavigationDelegator
 import com.ds.studify.feature.analysis.navigation.RouteAnalysis
 import com.ds.studify.feature.analysis.navigation.analysisScreen
 import com.ds.studify.feature.analysis.navigation.navigateToAnalysis
+import com.ds.studify.feature.calendar.navigation.StatsNavigationDelegator
 import com.ds.studify.feature.camera.navigation.cameraScreen
 import com.ds.studify.feature.camera.navigation.navigateToCamera
+import com.ds.studify.feature.feedback.navigation.feedbackScreen
+import com.ds.studify.feature.feedback.navigation.navigateToFeedback
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
 import com.ds.studify.feature.login.navigation.LoginNavigationDelegator
 import com.ds.studify.feature.login.navigation.RouteLogin
@@ -75,6 +78,11 @@ fun StudifyNavHost(
                 homeNavigationDelegator = HomeNavigationDelegator(
                     onStartToStudyClick = { navController.navigateToCamera() },
                     onMyPageClick = { navController.navigateToMyPage() }
+                ),
+                statsNavigationDelegator = StatsNavigationDelegator(
+                    onTimeLineClick = { id ->
+                        navController.navigateToFeedback(id)
+                    }
                 )
             )
 
@@ -96,9 +104,9 @@ fun StudifyNavHost(
                 )
             )
 
-            myPageScreen(
-                navController
-            )
+            feedbackScreen(navController)
+
+            myPageScreen(navController)
         }
     }
 }

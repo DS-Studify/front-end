@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.ds.studify.feature.calendar.navigation.StatsNavigationDelegator
 import com.ds.studify.feature.calendar.navigation.statsScreen
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
 import com.ds.studify.feature.home.navigation.RouteHome
@@ -15,12 +16,14 @@ import com.ds.studify.feature.home.navigation.homeScreen
 
 @Composable
 fun MainRoute(
-    homeNavigationDelegator: HomeNavigationDelegator
+    homeNavigationDelegator: HomeNavigationDelegator,
+    statsNavigationDelegator: StatsNavigationDelegator
 ) {
     val navController = rememberNavController()
 
     MainScreen(
         homeNavigationDelegator = homeNavigationDelegator,
+        statsNavigationDelegator = statsNavigationDelegator,
         navController = navController
     )
 }
@@ -28,6 +31,7 @@ fun MainRoute(
 @Composable
 fun MainScreen(
     homeNavigationDelegator: HomeNavigationDelegator,
+    statsNavigationDelegator: StatsNavigationDelegator,
     navController: NavHostController,
 ) {
     Scaffold(
@@ -47,7 +51,10 @@ fun MainScreen(
                     innerPadding
                 )
 
-                statsScreen(innerPadding)
+                statsScreen(
+                    statsNavigationDelegator,
+                    innerPadding
+                )
             }
         }
     }
