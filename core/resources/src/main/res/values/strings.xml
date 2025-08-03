@@ -22,7 +22,7 @@
     <string name="thursday">목</string>
     <string name="friday">금</string>
     <string name="saturday">토</string>
-    
+
     <!--  Bottom Navigation  -->
     <string name="navigation_study">공부 측정</string>
     <string name="navigation_calendar">통계</string>
@@ -61,6 +61,14 @@
     <string name="analysis_pose_description">*공부 시간 중 자세의 비율</string>
     <string name="analysis_restudy">다시 공부하기</string>
     <string name="analysis_finish">종료하기</string>
+
+    <!-- 상태 타임라인 -->
+    <string name="state_1">공부 중</string>
+    <string name="state_2">바른\n자세</string>
+    <string name="state_3">집중도\n저하 자세</string>
+    <string name="state_4">수면</string>
+    <string name="state_5">자리\n비움</string>
+    <string name="state_6">기타</string>
 
     <!--  통계  -->
     <string name="stats_total_study_time">총 공부 시간</string>
