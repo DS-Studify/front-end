@@ -1,16 +1,30 @@
 package com.ds.studify.feature.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.Image
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,39 +40,46 @@ import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.feature.login.navigation.LoginNavigationDelegator
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 internal fun LoginRoute(
-    navigationDelegator: LoginNavigationDelegator,
-    viewModel: LoginViewModel = hiltViewModel()
+    navigationDelegator: LoginNavigationDelegator
 ) {
+    val viewModel: LoginViewModel = hiltViewModel()
     val uiState by viewModel.collectAsState()
-    LoginScreen(
-        navigationDelegator = navigationDelegator,
-        uiState = uiState,
-        onEmailChange = viewModel::updateEmail,
-        onPasswordChange = viewModel::updatePassword,
-        onLoginClick = navigationDelegator.onLoginSuccess
-    )
+
+    viewModel.collectSideEffect {
+        when (it) {
+            is LoginSideEffect.LoginFail -> {}
+
+            is LoginSideEffect.LoginSuccess -> {
+                navigationDelegator.onLoginSuccess()
+            }
+        }
+    }
+
+    when (val state = uiState) {
+        is LoginUiState.Login -> {
+            LoginScreen(
+                navigationDelegator = navigationDelegator,
+                uiState = state,
+                onEvent = viewModel::onEvent
+            )
+        }
+
+        is LoginUiState.WaitingLoginResult -> {}
+    }
 }
 
 @Composable
 internal fun LoginScreen(
     navigationDelegator: LoginNavigationDelegator,
-    paddingValues: PaddingValues = PaddingValues(0.dp),
-    uiState: LoginUiState = LoginUiState(),
-    onEmailChange: (String) -> Unit = {},
-    onPasswordChange: (String) -> Unit = {},
-    onLoginClick: () -> Unit = {}
+    uiState: LoginUiState.Login,
+    onEvent: (LoginUiEvent) -> Unit
 ) {
     Box(
         modifier = Modifier
-            .padding(
-                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                top = 0.dp,
-                bottom = paddingValues.calculateBottomPadding()
-            )
             .fillMaxSize()
             .background(StudifyColors.WHITE)
     ) {
@@ -87,7 +108,7 @@ internal fun LoginScreen(
 
             OutlinedTextField(
                 value = uiState.email,
-                onValueChange = onEmailChange,
+                onValueChange = { onEvent(LoginUiEvent.UpdateEmail(it)) },
                 label = {
                     Text(
                         text = stringResource(id = StudifyString.auth_email_label),
@@ -122,7 +143,7 @@ internal fun LoginScreen(
 
             OutlinedTextField(
                 value = uiState.password,
-                onValueChange = onPasswordChange,
+                onValueChange = { onEvent(LoginUiEvent.UpdatePassword(it)) },
                 label = {
                     Text(
                         text = stringResource(id = StudifyString.auth_password_label),
@@ -144,7 +165,7 @@ internal fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             Button(
-                onClick = { if (uiState.isEmailValid) onLoginClick() },
+                onClick = { if (uiState.isEmailValid) onEvent(LoginUiEvent.LoginRequest) },
                 shape = RoundedCornerShape(4.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = StudifyColors.PK03),
                 modifier = Modifier
@@ -196,6 +217,8 @@ internal fun LoginScreen(
 @Composable
 private fun LoginScreenPreview() {
     LoginScreen(
-        navigationDelegator = LoginNavigationDelegator()
+        navigationDelegator = LoginNavigationDelegator(),
+        uiState = LoginUiState.Login(),
+        onEvent = {}
     )
 }

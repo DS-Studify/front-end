@@ -45,7 +45,7 @@ fun StudifyNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = NavRouteMain,
+        startDestination = NavRouteAuth,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }
     ) {
