@@ -1,7 +1,9 @@
 package com.ds.studify.core.data.di
 
+import com.ds.studify.core.data.repository.AuthRepository
 import com.ds.studify.core.data.repository.StatsRepository
 import com.ds.studify.core.data.repository.TokenRepository
+import com.ds.studify.core.data.repository_impl.AuthRepositoryImpl
 import com.ds.studify.core.data.repository_impl.StatsRepositoryImpl
 import com.ds.studify.core.data.repository_impl.TokenRepositoryImpl
 import dagger.Binds
@@ -12,6 +14,11 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 @Module
 interface RepositoryModule {
+
+    @Binds
+    fun bindAuthRepository(
+        repositoryImpl: AuthRepositoryImpl
+    ): AuthRepository
 
     @Binds
     fun bindTokenRepository(
