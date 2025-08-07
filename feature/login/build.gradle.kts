@@ -14,6 +14,7 @@ dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.resources)
     implementation(projects.core.uiExtension)
+    implementation(projects.core.domain)
 
     implementation(libs.bundles.orbit)
 }

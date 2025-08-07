@@ -88,6 +88,7 @@
     <string name="login_description">AI 분석을 통한 학습 관리 도우미</string>
     <string name="login_button">로그인</string>
     <string name="login_no_account">계정이 없으신가요?</string>
+    <string name="login_failed_message">아이디 또는 비밀번호를 다시 확인해 주세요.</string>
     <string name="auth_signup">회원가입</string>
     <string name="auth_email_label">아이디(이메일)</string>
     <string name="auth_email_warning">아이디는 이메일 주소 형태로 입력해주세요.</string>
