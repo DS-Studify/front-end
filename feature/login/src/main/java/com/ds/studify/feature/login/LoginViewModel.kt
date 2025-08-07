@@ -55,7 +55,7 @@ class LoginViewModel @Inject constructor(
             )
         )
             .onSuccess { response ->
-                tokenRepository.setAccessToken(response.token)
+                tokenRepository.setAccessToken(response.accessToken, response.refreshToken)
                 postSideEffect(LoginSideEffect.LoginSuccess)
             }
             .onFailure {

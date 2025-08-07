@@ -6,10 +6,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ResponseLoginDto(
-    @SerialName("token")
-    val token: String
+    @SerialName("accessToken")
+    val accessToken: String,
+    @SerialName("refreshToken")
+    val refreshToken: String
 ) {
     fun toEntity() = TokenEntity(
-        token = this.token
+        accessToken = this.accessToken,
+        refreshToken = this.refreshToken
     )
 }

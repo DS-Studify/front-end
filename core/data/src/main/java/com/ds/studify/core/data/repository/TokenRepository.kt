@@ -4,7 +4,9 @@ interface TokenRepository {
 
     fun getAccessToken(): String
 
-    fun setAccessToken(accessToken: String)
+    fun getRefreshToken(): String
+
+    fun setAccessToken(accessToken: String, refreshToken: String)
 
     fun clearToken()
 }

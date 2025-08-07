@@ -9,9 +9,11 @@ class TokenRepositoryImpl @Inject constructor(
 ) : TokenRepository {
 
     override fun getAccessToken(): String = tokenDataSource.accessToken
+    override fun getRefreshToken(): String = tokenDataSource.refreshToken
 
-    override fun setAccessToken(accessToken: String) {
+    override fun setAccessToken(accessToken: String, refreshToken: String) {
         tokenDataSource.accessToken = accessToken
+        tokenDataSource.refreshToken = refreshToken
     }
 
     override fun clearToken() {
