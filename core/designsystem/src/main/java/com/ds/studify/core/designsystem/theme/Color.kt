@@ -20,6 +20,7 @@ object StudifyColors {
     val G01 = Color(0xFFEBEBEB)
     val G02 = Color(0xFFDCDCDC)
     val G03 = Color(0xFFA6A6A6)
+    val G04 = Color(0xFF797979)
     val BLACK = Color(0xFF202123)
 
     //Primary

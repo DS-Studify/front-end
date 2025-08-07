@@ -20,9 +20,15 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -34,11 +40,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ds.studify.core.designsystem.component.StudifySnackBar
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.feature.login.navigation.LoginNavigationDelegator
+import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 
@@ -48,14 +56,29 @@ internal fun LoginRoute(
 ) {
     val viewModel: LoginViewModel = hiltViewModel()
     val uiState by viewModel.collectAsState()
+    var showLoginFailDialog by remember { mutableStateOf(false) }
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val setLoginFailMessage = stringResource(StudifyString.login_failed_message)
 
     viewModel.collectSideEffect {
         when (it) {
-            is LoginSideEffect.LoginFail -> {}
+            is LoginSideEffect.LoginFail -> {
+                showLoginFailDialog = true
+            }
 
             is LoginSideEffect.LoginSuccess -> {
                 navigationDelegator.onLoginSuccess()
             }
+        }
+    }
+
+    LaunchedEffect(showLoginFailDialog) {
+        if (showLoginFailDialog) {
+            scope.launch {
+                snackBarHostState.showSnackbar(setLoginFailMessage)
+            }
+            showLoginFailDialog = false
         }
     }
 
@@ -64,7 +87,8 @@ internal fun LoginRoute(
             LoginScreen(
                 navigationDelegator = navigationDelegator,
                 uiState = state,
-                onEvent = viewModel::onEvent
+                onEvent = viewModel::onEvent,
+                snackBarHostState = snackBarHostState
             )
         }
 
@@ -76,7 +100,8 @@ internal fun LoginRoute(
 internal fun LoginScreen(
     navigationDelegator: LoginNavigationDelegator,
     uiState: LoginUiState.Login,
-    onEvent: (LoginUiEvent) -> Unit
+    onEvent: (LoginUiEvent) -> Unit,
+    snackBarHostState: SnackbarHostState
 ) {
     Box(
         modifier = Modifier
@@ -210,6 +235,13 @@ internal fun LoginScreen(
                 )
             }
         }
+
+        StudifySnackBar(
+            modifier = Modifier
+                .padding(bottom = 60.dp)
+                .align(Alignment.BottomCenter),
+            hostState = snackBarHostState
+        )
     }
 }
 
@@ -219,6 +251,7 @@ private fun LoginScreenPreview() {
     LoginScreen(
         navigationDelegator = LoginNavigationDelegator(),
         uiState = LoginUiState.Login(),
-        onEvent = {}
+        onEvent = {},
+        snackBarHostState = SnackbarHostState()
     )
 }
