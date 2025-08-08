@@ -33,6 +33,7 @@ import com.ds.studify.core.designsystem.component.StudifyStartButton
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
+import com.ds.studify.core.domain.entity.HomeEntity
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatRecordDuration
@@ -62,30 +63,40 @@ internal fun HomeRoute(
             }
         }
     ) { innerPadding ->
-        HomeScreen(
-            todayStudyTime = uiState.todayStudyTime,
-            paddingValues = innerPadding,
-            navigationDelegator = navigationDelegator
-        )
+        Box(
+            modifier = Modifier
+                .padding(
+                    start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
+                    top = 0.dp,
+                    bottom = innerPadding.calculateBottomPadding()
+                )
+                .fillMaxSize()
+                .background(color = StudifyColors.WHITE)
+        ) {
+            when (val state = uiState) {
+                is HomeUiState.Success -> {
+                    HomeScreen(
+                        uiState = state,
+                        navigationDelegator = navigationDelegator
+                    )
+                }
+
+                is HomeUiState.Loading -> {}
+
+                is HomeUiState.Error -> {}
+            }
+        }
     }
 }
 
 @Composable
 internal fun HomeScreen(
-    todayStudyTime: Long,
-    paddingValues: PaddingValues,
+    uiState: HomeUiState.Success,
     navigationDelegator: HomeNavigationDelegator
 ) {
     Box(
-        modifier = Modifier
-            .padding(
-                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                top = 0.dp,
-                bottom = paddingValues.calculateBottomPadding()
-            )
-            .fillMaxSize()
-            .background(color = StudifyColors.WHITE)
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier
@@ -95,7 +106,7 @@ internal fun HomeScreen(
         ) {
             Row {
                 Text(
-                    text = "00",
+                    text = uiState.home.nickName,
                     style = Typography.headlineMedium,
                     color = StudifyColors.BLACK
                 )
@@ -107,8 +118,7 @@ internal fun HomeScreen(
             }
 
             Text(
-                text = formatRecordDuration(todayStudyTime),
-                //text = "00:00:00", // TODO
+                text = formatRecordDuration(uiState.home.todayStudyTime),
                 fontFamily = pretendard,
                 fontWeight = FontWeight.Bold,
                 fontSize = 58.sp,
@@ -132,12 +142,16 @@ internal fun HomeScreen(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
     HomeScreen(
-        todayStudyTime = 0L,
-        paddingValues = PaddingValues(top = 56.dp),
+        uiState = HomeUiState.Success(
+            home = HomeEntity(
+                nickName = "닉네임",
+                todayStudyTime = 0
+            )
+        ),
         navigationDelegator = HomeNavigationDelegator()
     )
 }

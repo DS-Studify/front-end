@@ -1,31 +1,40 @@
 package com.ds.studify.feature.home
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.ds.studify.core.data.repository.StatsRepository
+import com.ds.studify.core.data.repository.StudyRecordRepository
+import com.ds.studify.core.domain.entity.HomeEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
-data class HomeUiState(
-    val todayStudyTime: Long
-)
+sealed interface HomeUiState {
+    data object Loading : HomeUiState
+    data class Success(val home: HomeEntity) : HomeUiState
+    data class Error(val message: String) : HomeUiState
+}
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val statsRepository: StatsRepository
+    private val studyRecordRepository: StudyRecordRepository
 ) : ViewModel(), ContainerHost<HomeUiState, Nothing> {
 
-    override val container: Container<HomeUiState, Nothing> = container(
-        HomeUiState(todayStudyTime = 0L)
+    override val container = container<HomeUiState, Nothing>(
+        initialState = HomeUiState.Loading
     ) {
-        viewModelScope.launch {
-            statsRepository.todayStudyTimeStream.collectLatest { studyTime ->
-                reduce { state.copy(todayStudyTime = studyTime) }
+        loadHome()
+    }
+
+    private fun loadHome() = intent {
+        val result = studyRecordRepository.getHome()
+
+        if (result.isSuccess) {
+            reduce {
+                HomeUiState.Success(result.getOrThrow())
+            }
+        } else {
+            reduce {
+                HomeUiState.Error(result.exceptionOrNull()?.message ?: "알 수 없는 오류 발생")
             }
         }
     }
