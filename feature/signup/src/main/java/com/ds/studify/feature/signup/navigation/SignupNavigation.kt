@@ -11,11 +11,12 @@ import kotlinx.serialization.Serializable
 data object RouteSignup
 
 fun NavGraphBuilder.signupScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    onNavigateLogin: () -> Unit
 ) {
     composable<RouteSignup> {
         SignupRoute(
-            onBack = { navHostController.popBackStack() }
+            onNavigateLogin = onNavigateLogin
         )
     }
 }

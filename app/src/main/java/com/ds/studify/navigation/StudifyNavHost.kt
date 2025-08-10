@@ -23,6 +23,7 @@ import com.ds.studify.feature.login.navigation.RouteLogin
 import com.ds.studify.feature.login.navigation.loginScreen
 import com.ds.studify.feature.mypage.navigation.myPageScreen
 import com.ds.studify.feature.mypage.navigation.navigateToMyPage
+import com.ds.studify.feature.signup.navigation.RouteSignup
 import com.ds.studify.feature.signup.navigation.navigateToSignup
 import com.ds.studify.feature.signup.navigation.signupScreen
 import kotlinx.serialization.Serializable
@@ -67,7 +68,15 @@ fun StudifyNavHost(
                 )
             )
 
-            signupScreen(navController)
+            signupScreen(
+                navHostController = navController,
+                onNavigateLogin = {
+                    navController.navigate(RouteLogin) {
+                        popUpTo(RouteSignup) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
 
         navigation<NavRouteMain>(
