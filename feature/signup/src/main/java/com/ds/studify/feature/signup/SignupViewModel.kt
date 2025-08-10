@@ -38,7 +38,13 @@ data class SignupUiState(
     val registerSuccess: Boolean = false
 ){
     val isSignupEnabled: Boolean =
-        isEmailValid && isPasswordMatch && email.isNotBlank() && verificationCode.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() && nickname.isNotBlank()
+        isEmailValid &&
+        isPasswordMatch &&
+        email.isNotBlank() &&
+        verificationCode.isNotBlank() &&
+        password.isNotBlank() &&
+        confirmPassword.isNotBlank() &&
+        nickname.isNotBlank()
 
     // 타이머
     val showTimer: Boolean = resendSecondsLeft > 0
@@ -62,7 +68,8 @@ class SignupViewModel @Inject constructor(
 
     fun updateEmail(email: String) = intent {
         val isValid = email.matches(Regex(EMAIL_REGEX))
-        reduce { state.copy(email = email, isEmailValid = isValid, emailErrorRes = null) }
+        timerJob?.cancel()
+        reduce { state.copy(email = email, isEmailValid = isValid, emailErrorRes = null, resendSecondsLeft = 0) }
     }
 
     fun updateVerificationCode(code: String) = intent {
