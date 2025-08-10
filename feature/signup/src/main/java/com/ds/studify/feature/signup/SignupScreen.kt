@@ -9,17 +9,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -29,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +49,7 @@ import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
+import kotlin.math.max
 
 @Composable
 internal fun SignupRoute(
@@ -91,6 +98,14 @@ internal fun SignupScreen(
     onSendVerificationClick: () -> Unit = {},
     onSignupClick: () -> Unit = {}
 ) {
+    val density = LocalDensity.current
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+    val isImeVisible = imeBottomPx > 0
+    val extraScrollPadding = if (isImeVisible) {
+        max(24, (imeBottomPx * 0.25f).toInt())
+    } else 0
+    val extraScrollPaddingDp = with(density) { extraScrollPadding.toDp() }
+
     Box(
         modifier = Modifier
             .padding(
@@ -101,14 +116,18 @@ internal fun SignupScreen(
             )
             .fillMaxSize()
             .background(StudifyColors.WHITE)
+            .imePadding()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 42.dp),
+                .padding(horizontal = 42.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
+            Spacer(modifier = Modifier.height(24.dp + extraScrollPaddingDp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(id = StudifyDrawable.app_logo_title),
@@ -342,6 +361,8 @@ internal fun SignupScreen(
                     style = Typography.titleSmall
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp + extraScrollPaddingDp))
         }
     }
 }
