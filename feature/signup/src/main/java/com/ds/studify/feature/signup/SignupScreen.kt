@@ -1,5 +1,6 @@
 package com.ds.studify.feature.signup
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,17 +9,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -28,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,13 +48,27 @@ import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
+import kotlin.math.max
 
 @Composable
 internal fun SignupRoute(
-    onBack: () -> Unit,
+    onNavigateLogin: () -> Unit,
     viewModel: SignupViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    viewModel.collectSideEffect { effect ->
+        when (effect) {
+            is SignupSideEffect.Toast ->
+                Toast.makeText(context, context.getString(effect.resId), Toast.LENGTH_SHORT).show()
+
+            SignupSideEffect.NavigateLogin ->
+                onNavigateLogin()
+        }
+    }
+
     SignupScreen(
         uiState = uiState,
         updateEmail = viewModel::updateEmail,
@@ -55,8 +76,13 @@ internal fun SignupRoute(
         updatePassword = viewModel::updatePassword,
         updateConfirmPassword = viewModel::updateConfirmPassword,
         updateNickname = viewModel::updateNickname,
-        onSendVerificationClick = { },
-        onSignupClick = onBack
+        onSendVerificationClick = {
+//            if (uiState.showTimer) {
+//                viewModel.reverify()
+//            } else
+                viewModel.sendVerification()
+        },
+        onSignupClick = { viewModel.onSignupClick() }
     )
 
 }
@@ -73,6 +99,14 @@ internal fun SignupScreen(
     onSendVerificationClick: () -> Unit = {},
     onSignupClick: () -> Unit = {}
 ) {
+    val density = LocalDensity.current
+    val imeBottomPx = WindowInsets.ime.getBottom(density)
+    val isImeVisible = imeBottomPx > 0
+    val extraScrollPadding = if (isImeVisible) {
+        max(24, (imeBottomPx * 0.25f).toInt())
+    } else 0
+    val extraScrollPaddingDp = with(density) { extraScrollPadding.toDp() }
+
     Box(
         modifier = Modifier
             .padding(
@@ -83,14 +117,18 @@ internal fun SignupScreen(
             )
             .fillMaxSize()
             .background(StudifyColors.WHITE)
+            .imePadding()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 42.dp),
+                .padding(horizontal = 42.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
+            Spacer(modifier = Modifier.height(24.dp + extraScrollPaddingDp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
                     painter = painterResource(id = StudifyDrawable.app_logo_title),
@@ -123,13 +161,13 @@ internal fun SignupScreen(
                         style = Typography.bodyMedium
                     )
                 },
-                isError = !uiState.isEmailValid,
+                isError = (!uiState.isEmailValid) || (uiState.emailErrorRes != null),
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = if (!uiState.isEmailValid) StudifyColors.RED else StudifyColors.PK03,
-                    unfocusedBorderColor = if (!uiState.isEmailValid) StudifyColors.RED else StudifyColors.G03,
+                    focusedBorderColor = if ((!uiState.isEmailValid) || (uiState.emailErrorRes != null)) StudifyColors.RED else StudifyColors.PK03,
+                    unfocusedBorderColor = if ((!uiState.isEmailValid) || (uiState.emailErrorRes != null)) StudifyColors.RED else StudifyColors.G03,
                     cursorColor = StudifyColors.PK03
                 )
             )
@@ -143,24 +181,43 @@ internal fun SignupScreen(
                         .align(Alignment.Start)
                         .padding(top = 4.dp)
                 )
+            } else if (uiState.emailErrorRes != null) {
+                Text(
+                    text = stringResource(id = uiState.emailErrorRes),
+                    color = StudifyColors.RED,
+                    style = Typography.bodySmall,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(top = 4.dp)
+                )
             } else {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                if (uiState.showTimer) {
+                    Text(
+                        text = uiState.timerText,
+                        style = Typography.bodyMedium,
+                        color = StudifyColors.G03,
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
                 Button(
                     onClick = onSendVerificationClick,
                     shape = RoundedCornerShape(4.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = StudifyColors.PK03),
-                    enabled = uiState.isEmailValid,
+                    enabled = uiState.isEmailValid && !uiState.isLoading,
                     contentPadding = PaddingValues(horizontal = 12.dp),
                     modifier = Modifier.wrapContentWidth()
                 ) {
                     Text(
-                        text = stringResource(id = StudifyString.signup_verification_code_button),
+                        text = if (uiState.showTimer) stringResource(id = StudifyString.signup_verification_code_resend_button)
+                        else stringResource(id = StudifyString.signup_verification_code_button),
                         style = Typography.bodyMedium
                     )
                 }
@@ -176,18 +233,29 @@ internal fun SignupScreen(
                         style = Typography.bodyMedium
                     )
                 },
-                isError = !uiState.isEmailValid,
+                isError = uiState.verificationErrorRes != null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions.Default,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = StudifyColors.PK03,
-                    unfocusedBorderColor = StudifyColors.G03,
+                    focusedBorderColor = if (uiState.verificationErrorRes != null) StudifyColors.RED else StudifyColors.PK03,
+                    unfocusedBorderColor = if (uiState.verificationErrorRes != null) StudifyColors.RED else StudifyColors.G03,
                     cursorColor = StudifyColors.PK03
                 )
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            if (uiState.verificationErrorRes != null) {
+                Text(
+                    text = stringResource(id = uiState.verificationErrorRes),
+                    color = StudifyColors.RED,
+                    style = Typography.bodySmall,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(top = 4.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             OutlinedTextField(
                 value = uiState.password,
@@ -255,14 +323,28 @@ internal fun SignupScreen(
                         style = Typography.bodyMedium
                     )
                 },
+                isError = uiState.nicknameErrorRes != null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = StudifyColors.PK03,
-                    unfocusedBorderColor = StudifyColors.G03,
+                    focusedBorderColor = if (uiState.nicknameErrorRes != null) StudifyColors.RED else StudifyColors.PK03,
+                    unfocusedBorderColor = if (uiState.nicknameErrorRes != null) StudifyColors.RED else StudifyColors.G03,
                     cursorColor = StudifyColors.PK03
                 )
             )
+
+            if (uiState.nicknameErrorRes != null) {
+                Text(
+                    text = stringResource(id = uiState.nicknameErrorRes),
+                    color = StudifyColors.RED,
+                    style = Typography.bodySmall,
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(top = 4.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -273,13 +355,15 @@ internal fun SignupScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                enabled = uiState.isEmailValid && uiState.isPasswordMatch
+                enabled = uiState.isSignupEnabled && !uiState.isLoading
             ) {
                 Text(
                     text = stringResource(id = StudifyString.auth_signup),
                     style = Typography.titleSmall
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp + extraScrollPaddingDp))
         }
     }
 }
