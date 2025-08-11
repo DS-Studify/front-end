@@ -103,6 +103,7 @@
     <string name="signup_verification_code_resend_button">인증 번호 재발송</string>
     <string name="signup_verification_code_label">인증 번호 확인</string>
     <string name="signup_verification_code_warning">인증 번호가 일치하지 않습니다.</string>
+    <string name="signup_verification_code_expired">인증 번호가 만료되었습니다.</string>
     <string name="signup_verification_code_sent_message">인증 번호를 전송하였습니다.</string>
     <string name="signup_verification_code_resent_message">인증 번호를 재전송하였습니다.</string>
     <string name="signup_verification_code_failed_message">인증 번호 전송에 실패하였습니다.</string>

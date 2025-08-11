@@ -69,7 +69,16 @@ class SignupViewModel @Inject constructor(
     fun updateEmail(email: String) = intent {
         val isValid = email.matches(Regex(EMAIL_REGEX))
         timerJob?.cancel()
-        reduce { state.copy(email = email, isEmailValid = isValid, emailErrorRes = null, resendSecondsLeft = 0) }
+        reduce {
+            state.copy(
+                email = email,
+                isEmailValid = isValid,
+                emailErrorRes = null,
+                verificationErrorRes = null,
+                verificationCode = "",
+                resendSecondsLeft = 0
+            )
+        }
     }
 
     fun updateVerificationCode(code: String) = intent {
@@ -103,6 +112,7 @@ class SignupViewModel @Inject constructor(
 
         authRepository.postSendVerification(state.email)
             .onSuccess {
+                reduce { state.copy(verificationErrorRes = null, verificationCode = "") }
                 startTimer(300)
                 postSideEffect(SignupSideEffect.Toast(StudifyString.signup_verification_code_sent_message))
             }
@@ -118,6 +128,7 @@ class SignupViewModel @Inject constructor(
         reduce { state.copy(isLoading = true) }
         authRepository.postReverify(state.email)
             .onSuccess {
+                reduce { state.copy(verificationErrorRes = null, verificationCode = "") }
                 startTimer(300)
                 postSideEffect(SignupSideEffect.Toast(StudifyString.signup_verification_code_resent_message))
             }
@@ -159,6 +170,7 @@ class SignupViewModel @Inject constructor(
             return@intent
         }
 
+        timerJob?.cancel()
         reduce { state.copy(isLoading = false, registerSuccess = true) }
         postSideEffect(SignupSideEffect.NavigateLogin)
     }
@@ -170,7 +182,14 @@ class SignupViewModel @Inject constructor(
                 intent { reduce { state.copy(resendSecondsLeft = s) } }
                 delay(1_000)
             }
-            intent { reduce { state.copy(resendSecondsLeft = 0) } }
+            intent {
+                reduce {
+                    state.copy(
+                        resendSecondsLeft = 0,
+                        verificationErrorRes = StudifyString.signup_verification_code_expired
+                    )
+                }
+            }
         }
     }
 
