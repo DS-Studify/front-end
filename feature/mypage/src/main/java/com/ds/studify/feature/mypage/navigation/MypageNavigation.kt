@@ -14,14 +14,16 @@ data object NavRouteMyPage
 data object RouteMyPage
 
 fun NavGraphBuilder.myPageScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    navigationDelegator: MyPageNavigationDelegator
 ) {
     navigation<NavRouteMyPage>(
         startDestination = RouteMyPage
     ) {
         composable<RouteMyPage> {
             MyPageRoute(
-                onBack = { navHostController.popBackStack() }
+                onBack = { navHostController.popBackStack() },
+                navigationDelegator = navigationDelegator
             )
         }
     }
@@ -30,3 +32,7 @@ fun NavGraphBuilder.myPageScreen(
 fun NavHostController.navigateToMyPage() {
     navigate(NavRouteMyPage)
 }
+
+class MyPageNavigationDelegator(
+    val onLogoutClick: () -> Unit = {}
+)

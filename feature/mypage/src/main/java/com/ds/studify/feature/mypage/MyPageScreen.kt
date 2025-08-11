@@ -21,6 +21,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -29,38 +30,65 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithTitle
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.feature.mypage.navigation.MyPageNavigationDelegator
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 internal fun MyPageRoute(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    navigationDelegator: MyPageNavigationDelegator
 ) {
+    val viewModel: MyPageViewModel = hiltViewModel()
+    val uiState by viewModel.collectAsState()
+
+    viewModel.collectSideEffect {
+        when (it) {
+            is MyPageSideEffect.LogoutSuccess -> {
+                navigationDelegator.onLogoutClick()
+            }
+        }
+    }
+
     StudifyScaffoldWithTitle(
         title = stringResource(StudifyString.mypage_title),
         onBackButtonClick = onBack
     ) { paddingValues ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = StudifyColors.WHITE)
         ) {
-            MyPageScreen(
-                paddingValues = paddingValues
-            )
+            when (val state = uiState) {
+                is MyPageUiState.Loading -> {}
+
+                is MyPageUiState.MyPage -> {
+                    MyPageScreen(
+                        paddingValues = paddingValues,
+                        uiState = state,
+                        onEvent = viewModel::onEvent
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 internal fun MyPageScreen(
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    uiState: MyPageUiState.MyPage,
+    onEvent: (MyPageUiEvent) -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = StudifyColors.WHITE)
             .padding(
                 start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                 end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
@@ -96,7 +124,7 @@ internal fun MyPageScreen(
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
                         Text(
-                            text = "닉네임님",
+                            text = stringResource(StudifyString.mypage_nickname, uiState.userName),
                             color = StudifyColors.WHITE,
                             style = Typography.headlineMedium
                         )
@@ -180,7 +208,7 @@ internal fun MyPageScreen(
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
                     modifier = Modifier
                         .padding(top = 8.dp, start = 5.dp)
-                        .clickable {}
+                        .clickable { onEvent(MyPageUiEvent.LogoutRequest) }
                 ) {
                     Icon(
                         painter = painterResource(id = StudifyDrawable.ic_logout),
@@ -204,6 +232,8 @@ internal fun MyPageScreen(
 @Composable
 private fun MyPageScreenPreview() {
     MyPageScreen(
-        paddingValues = PaddingValues(0.dp)
+        paddingValues = PaddingValues(0.dp),
+        uiState = MyPageUiState.MyPage(userName = "닉네임"),
+        onEvent = {}
     )
 }

@@ -10,6 +10,7 @@ import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
 sealed interface LoginUiState {
+    data object Loading : LoginUiState
     data class Login(
         val email: String = "",
         val password: String = "",
@@ -36,7 +37,22 @@ class LoginViewModel @Inject constructor(
     private val tokenRepository: TokenRepository
 ) : ViewModel(), ContainerHost<LoginUiState, LoginSideEffect> {
 
-    override val container = container<LoginUiState, LoginSideEffect>(LoginUiState.Login())
+    override val container = container<LoginUiState, LoginSideEffect>(
+        initialState = LoginUiState.Loading
+    ) {
+        checkExistingToken()
+    }
+
+    private fun checkExistingToken() = intent {
+        val accessToken = tokenRepository.getAccessToken()
+        if (accessToken.isNotBlank()) {
+            postSideEffect(LoginSideEffect.LoginSuccess)
+        } else {
+            reduce {
+                LoginUiState.Login()
+            }
+        }
+    }
 
     private val emailRegex =
         Regex("^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")
