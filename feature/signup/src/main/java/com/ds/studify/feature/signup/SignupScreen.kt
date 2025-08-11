@@ -77,9 +77,10 @@ internal fun SignupRoute(
         updateConfirmPassword = viewModel::updateConfirmPassword,
         updateNickname = viewModel::updateNickname,
         onSendVerificationClick = {
-            if (uiState.showTimer) {
-                viewModel.reverify()
-            } else viewModel.sendVerification()
+//            if (uiState.showTimer) {
+//                viewModel.reverify()
+//            } else
+                viewModel.sendVerification()
         },
         onSignupClick = { viewModel.onSignupClick() }
     )
