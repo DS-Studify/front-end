@@ -92,6 +92,8 @@ internal fun LoginRoute(
             )
         }
 
+        is LoginUiState.Loading -> {}
+
         is LoginUiState.WaitingLoginResult -> {}
     }
 }
