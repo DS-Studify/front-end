@@ -28,6 +28,6 @@ class AuthDataSource @Inject constructor(
     suspend fun postReverify(email: String): BaseResponse<String> =
         authService.postReverify(email = email)
 
-    suspend fun postCheckVerification(email: String, code: String): BaseResponse<Boolean> =
+    suspend fun postCheckVerification(email: String, code: String): BaseResponse<String> =
         authService.postCheckVerification(email = email, code = code)
 }

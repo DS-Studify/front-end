@@ -42,5 +42,5 @@ interface AuthService {
     suspend fun postCheckVerification(
         @Query("email") email: String,
         @Query("code") code: String
-    ): BaseResponse<Boolean>
+    ): BaseResponse<String>
 }

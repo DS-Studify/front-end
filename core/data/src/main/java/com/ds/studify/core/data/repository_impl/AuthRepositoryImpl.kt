@@ -34,7 +34,8 @@ class AuthRepositoryImpl @Inject constructor(
 
     override suspend fun postCheckVerification(email: String, code: String): Result<Boolean> =
         runCatching {
-            authDataSource.postCheckVerification(email = email, code = code).data
+            val res = authDataSource.postCheckVerification(email, code)
+            res.status.toInt() == 200 || res.code == "SUCCESS_EMAIL_VERIFY"
         }
 
     override suspend fun postRegister(entity: SignupEntity): Result<Unit> =
