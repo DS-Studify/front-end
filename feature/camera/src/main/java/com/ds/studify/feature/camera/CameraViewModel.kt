@@ -1,7 +1,6 @@
 package com.ds.studify.feature.camera
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.ds.studify.core.data.repository.StudyRepository
 import com.ds.studify.core.domain.entity.CameraEntity
@@ -33,12 +32,12 @@ data class StableState(
 enum class PoseLabel(
     val label: String
 ) {
-    GOOD_POSE("바른 자세"),
-    NFOCUS_LEAN_FOWARD("한쪽으로 엎드린 자세 (집중도 저하)"),
-    NFOCUS_LEAN_BACK("상반신이 뒤로 기운 자세 (집중도 저하)"),
-    NFOCUS_LEAN_SIDE("옆으로 휜 자세 (집중도 저하)"),
-    SLEEP_HEAD_DOWN("머리를 숙여 엎드린 자세 (수면)"),
-    SLEEP_HEAD_BACK("머리가 뒤로 넘어간 자세 (수면)")
+    GOOD_POSE("집중 상태"),
+    NFOCUS_LEAN_FOWARD("집중도 저하 상태"),
+    NFOCUS_LEAN_BACK("집중도 저하 상태"),
+    NFOCUS_LEAN_SIDE("집중도 저하 상태"),
+    SLEEP_HEAD_DOWN("수면 상태"),
+    SLEEP_HEAD_BACK("수면 상태")
 }
 
 data class LogRecordingState(
@@ -68,17 +67,12 @@ class CameraViewModel @Inject constructor(
 
         val entity = recordingState.toCameraEntity()
 
-        Log.d("saveLog", entity.toString())
-
         studyRepository.postRecord(entity)
             .onSuccess {
                 recordingState.logMap.clear()
                 recordingState.stateStartTimeMap.clear()
-                Log.d("saveLog", "저장 성공")
             }
-            .onFailure { exception ->
-                Log.d("saveLog", "저장 실패", exception)
-                Log.e("saveLog", "저장 실패 원인: ${exception.message}", exception)
+            .onFailure {
             }
 
     }
