@@ -4,6 +4,7 @@ import com.ds.studify.core.data.di.qualifier.JWT
 import com.ds.studify.core.data.di.qualifier.NoToken
 import com.ds.studify.core.data.service.AuthService
 import com.ds.studify.core.data.service.StudyRecordService
+import com.ds.studify.core.data.service.StudyService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,5 +25,10 @@ internal object ServiceModule {
     @Singleton
     fun provideStudyRecordService(@JWT retrofit: Retrofit): StudyRecordService =
         retrofit.create(StudyRecordService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideStudyService(@JWT retrofit: Retrofit): StudyService =
+        retrofit.create(StudyService::class.java)
 
 }
