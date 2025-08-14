@@ -84,7 +84,8 @@ internal fun CheckCameraPermission(
 @Composable
 internal fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
-    onRecordCloseClick: () -> Unit
+    onRecordCloseClick: () -> Unit,
+    onEvent: (LogEvent) -> Unit = {event -> viewModel.onEvent(event)}
 ) {
     val uiState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -223,7 +224,7 @@ internal fun CameraScreen(
                         recordingState = recordingState.value,
                         onClick = {
                             cameraX.startRecordVideo()
-                            viewModel.startRecordingLog()
+                            onEvent(LogEvent.StartRecording)
                         }
                     )
                 }
@@ -234,7 +235,7 @@ internal fun CameraScreen(
                         onClick = {
                             cameraX.stopRecordVideo()
                             onRecordCloseClick()
-                            viewModel.stopRecordingLog()
+                            onEvent(LogEvent.SaveLogRequest)
                         }
                     )
                 }
@@ -341,6 +342,7 @@ private fun RequestPermission(
 @Composable
 private fun CameraScreenPreview() {
     CameraScreen(
-        onRecordCloseClick = {}
+        onRecordCloseClick = {},
+        onEvent = {}
     )
 }

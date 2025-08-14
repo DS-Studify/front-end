@@ -3,10 +3,15 @@ package com.ds.studify.feature.camera
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.ds.studify.core.data.repository.StudyRepository
+import com.ds.studify.core.domain.entity.CameraEntity
+import com.ds.studify.core.domain.entity.TimeLog
 import com.ds.studify.core.ui.extension.calculateAngle3D
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -18,6 +23,11 @@ data class CameraUiState(
     val isPenInHand: Boolean,
     val poseLabel: PoseLabel?
 )
+
+sealed interface LogEvent {
+    data object StartRecording : LogEvent
+    data object SaveLogRequest : LogEvent
+}
 
 data class StableState(
     var stablePenInHand: Boolean = false,
@@ -40,13 +50,14 @@ data class LogRecordingState(
     var isRecording: Boolean = false,
     var overallStart: LocalDateTime? = null,
     var overallEnd: LocalDateTime? = null,
-    val logMap: MutableMap<Int, MutableList<MutableMap<String, String>>> = mutableMapOf(),
+    val logMap: MutableMap<Int, MutableList<TimeLog>> = mutableMapOf(),
     val stateStartTimeMap: MutableMap<Int, LocalDateTime> = mutableMapOf()
 )
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    application: Application
+    application: Application,
+    private val studyRepository: StudyRepository
 ) : ViewModel(), ContainerHost<CameraUiState, Nothing> {
 
     override val container: Container<CameraUiState, Nothing> = container(
@@ -55,6 +66,56 @@ class CameraViewModel @Inject constructor(
             poseLabel = null
         )
     )
+
+    fun saveLogToServer() = intent {
+        if (recordingState.overallStart == null) return@intent
+
+        val entity = recordingState.toCameraEntity()
+
+        Log.d("saveLog", entity.toString())
+
+        studyRepository.postRecord(entity)
+            .onSuccess {
+                recordingState.logMap.clear()
+                recordingState.stateStartTimeMap.clear()
+                Log.d("saveLog", "저장 성공")
+            }
+            .onFailure { exception ->
+                Log.d("saveLog", "저장 실패", exception)
+                Log.e("saveLog", "저장 실패 원인: ${exception.message}", exception)
+            }
+
+    }
+
+    fun onEvent(event: LogEvent) {
+        when (event) {
+            is LogEvent.StartRecording -> intent {
+                if (recordingState.isRecording) return@intent
+                startRecordingLog()
+            }
+
+            is LogEvent.SaveLogRequest -> intent {
+                stopRecordingLog()
+                saveLogToServer()
+            }
+        }
+    }
+
+    fun LogRecordingState.toCameraEntity(): CameraEntity {
+        val date = overallStart?.toLocalDate().toString()
+        val startTime = overallStart?.format(timeFormatter).toString()
+        val endTime = overallEnd?.format(timeFormatter).toString()
+
+        val timeLogMap: Map<String, List<TimeLog>> =
+            logMap.mapKeys { (k, _) -> k.toString() }
+
+        return CameraEntity(
+            date = date,
+            startTime = startTime,
+            endTime = endTime,
+            timeLog = timeLogMap
+        )
+    }
 
     private val handClassifier = HandClassifier(application)
     private val poseClassifier = PoseClassifier(application)
@@ -264,19 +325,17 @@ class CameraViewModel @Inject constructor(
         // 종료된 상태
         prevStates.forEach { stateId ->
             if (!currentStates.contains(stateId)) {
-                val startTime = recordingState.stateStartTimeMap[stateId]
-                if (startTime != null) {
-                    recordingState.logMap[stateId]?.add(
-                        mutableMapOf(
-                            "startTime" to startTime.format(timeFormatter),
-                            "endTime" to LocalDateTime.now().format(timeFormatter)
-                        )
+                val startTime = recordingState.stateStartTimeMap[stateId] ?: return@forEach
+                val list = recordingState.logMap.getOrPut(stateId) { mutableListOf() }
+                list.add(
+                    TimeLog(
+                        startTime = startTime.format(timeFormatter),
+                        endTime = LocalDateTime.now().format(timeFormatter)
                     )
-                    recordingState.stateStartTimeMap.remove(stateId)
-                }
+                )
+                recordingState.stateStartTimeMap.remove(stateId)
             }
         }
-
         // 새로 시작된 상태
         currentStates.forEach { stateId ->
             if (!recordingState.stateStartTimeMap.containsKey(stateId)) {
@@ -298,8 +357,7 @@ class CameraViewModel @Inject constructor(
             recordingState.logMap[i] = mutableListOf()
         }
 
-        val activateStates = checkStates()
-        activateStates.forEach { stateId ->
+        checkStates().forEach { stateId ->
             recordingState.stateStartTimeMap[stateId] = LocalDateTime.now()
         }
     }
@@ -311,33 +369,14 @@ class CameraViewModel @Inject constructor(
 
         // 종료되지 않은 상태 처리
         recordingState.stateStartTimeMap.forEach { (stateId, startTime) ->
-            recordingState.logMap[stateId]?.add(
-                mutableMapOf(
-                    "startTime" to startTime.format(timeFormatter),
-                    "endTime" to recordingState.overallEnd!!.format(timeFormatter)
+            val list = recordingState.logMap.getOrPut(stateId) { mutableListOf() }
+            list.add(
+                TimeLog(
+                    startTime = startTime.format(timeFormatter),
+                    endTime = recordingState.overallEnd!!.format(timeFormatter)
                 )
             )
         }
-        recordingState.stateStartTimeMap.clear()
-
-        //JSON 변환
-        val json = JSONObject().apply {
-            put("date", recordingState.overallStart?.toLocalDate().toString())
-            put("startTime", recordingState.overallStart?.format(timeFormatter))
-            put("endTime", recordingState.overallEnd?.format(timeFormatter))
-
-            val timeLogObj = JSONObject()
-            for (i in 1..6) {
-                val arr = JSONArray()
-                recordingState.logMap[i]?.forEach { log ->
-                    arr.put(JSONObject(log.toMap()))
-                }
-                timeLogObj.put(i.toString(), arr)
-            }
-            put("timeLog", timeLogObj)
-        }
-
-        Log.d("stateLog", json.toString())
 
         recordingState.isRecording = false
     }
