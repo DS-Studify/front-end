@@ -8,10 +8,6 @@ import com.ds.studify.core.domain.entity.CameraEntity
 import com.ds.studify.core.domain.entity.TimeLog
 import com.ds.studify.core.ui.extension.calculateAngle3D
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container

@@ -9,11 +9,11 @@ import javax.inject.Inject
 
 class StudyRepositoryImpl @Inject constructor(
     private val studyDataSource: StudyDataSource
-): StudyRepository{
+) : StudyRepository {
     override suspend fun postRecord(entity: CameraEntity): Result<JsonElement?> =
         runCatching {
             studyDataSource.postRecord(
                 request = entity.toDto()
             ).data
-    }
+        }
 }

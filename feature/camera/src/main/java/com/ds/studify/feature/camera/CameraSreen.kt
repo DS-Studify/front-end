@@ -85,7 +85,7 @@ internal fun CheckCameraPermission(
 internal fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
     onRecordCloseClick: () -> Unit,
-    onEvent: (LogEvent) -> Unit = {event -> viewModel.onEvent(event)}
+    onEvent: (LogEvent) -> Unit = { event -> viewModel.onEvent(event) }
 ) {
     val uiState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current

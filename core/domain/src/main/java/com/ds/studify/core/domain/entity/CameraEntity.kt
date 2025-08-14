@@ -1,6 +1,6 @@
 package com.ds.studify.core.domain.entity
 
-data class CameraEntity (
+data class CameraEntity(
     val date: String,
     val startTime: String,
     val endTime: String,
