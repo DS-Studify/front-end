@@ -123,7 +123,7 @@ private fun CameraGuideContent() {
             contentDescription = null,
             modifier = Modifier
                 .padding(vertical = 15.dp)
-                .size(width = 297.dp, height = 181.dp)
+                .size(width = 400.dp, height = 220.dp)
                 .align(Alignment.CenterHorizontally)
         )
 
@@ -134,14 +134,16 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "1.",
+                    text = buildAnnotatedString {
+                        append("1. ")
+                        append(stringResource(id = StudifyString.camera_guide_setting_angle_title))
+                        append(" ")
+                    },
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK
                 )
                 Text(
                     text = buildAnnotatedString {
-                        append(stringResource(id = StudifyString.camera_guide_setting_angle_title))
-                        append(" ")
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
                             append(stringResource(id = StudifyString.camera_guide_setting_angle_body_and_hand))
                         }
@@ -161,7 +163,11 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "2.",
+                    text = buildAnnotatedString {
+                        append("2. ")
+                        append(stringResource(id = StudifyString.camera_guide_setting_distance_title))
+                        append(" ")
+                    },
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK
                 )
@@ -176,7 +182,11 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "3.",
+                    text = buildAnnotatedString {
+                        append("3. ")
+                        append(stringResource(id = StudifyString.camera_guide_setting_light_title))
+                        append(" ")
+                    },
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK
                 )
@@ -191,7 +201,11 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "4.",
+                    text = buildAnnotatedString {
+                        append("4. ")
+                        append(stringResource(id = StudifyString.camera_guide_setting_background_title))
+                        append(" ")
+                    },
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK
                 )
@@ -206,7 +220,11 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "5.",
+                    text = buildAnnotatedString {
+                        append("5. ")
+                        append(stringResource(id = StudifyString.camera_guide_setting_fix_title))
+                        append(" ")
+                    },
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK
                 )
@@ -257,6 +275,22 @@ private fun CameraGuideContent() {
                 )
                 Text(
                     text = stringResource(id = StudifyString.camera_guide_precautions_content_2),
+                    style = Typography.bodyMedium,
+                    color = StudifyColors.BLACK
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = "＊",
+                    style = Typography.headlineSmall,
+                    color = StudifyColors.BLACK,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+                Text(
+                    text = stringResource(id = StudifyString.camera_guide_precautions_content_3),
                     style = Typography.bodyMedium,
                     color = StudifyColors.BLACK
                 )
