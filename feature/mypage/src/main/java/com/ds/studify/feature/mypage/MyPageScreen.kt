@@ -72,7 +72,9 @@ internal fun MyPageRoute(
                     MyPageScreen(
                         paddingValues = paddingValues,
                         uiState = state,
-                        onEvent = viewModel::onEvent
+                        onEvent = viewModel::onEvent,
+                        onPasswordChangeClick = navigationDelegator.onChangePasswordClick,
+                        onNicknameChangeClick = navigationDelegator.onChangeNicknameClick
                     )
                 }
             }
@@ -84,11 +86,14 @@ internal fun MyPageRoute(
 internal fun MyPageScreen(
     paddingValues: PaddingValues,
     uiState: MyPageUiState.MyPage,
-    onEvent: (MyPageUiEvent) -> Unit
+    onEvent: (MyPageUiEvent) -> Unit,
+    onPasswordChangeClick: () -> Unit,
+    onNicknameChangeClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(StudifyColors.WHITE)
             .padding(
                 start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                 end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
@@ -158,7 +163,7 @@ internal fun MyPageScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {}
+                        .clickable { onPasswordChangeClick() }
                 ) {
                     Text(
                         text = stringResource(StudifyString.mypage_menu_change_password),
@@ -182,7 +187,7 @@ internal fun MyPageScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {}
+                        .clickable { onNicknameChangeClick() }
                 ) {
                     Text(
                         text = stringResource(StudifyString.mypage_menu_change_nickname),
@@ -234,6 +239,8 @@ private fun MyPageScreenPreview() {
     MyPageScreen(
         paddingValues = PaddingValues(0.dp),
         uiState = MyPageUiState.MyPage(userName = "닉네임"),
-        onEvent = {}
+        onEvent = {},
+        onPasswordChangeClick = {},
+        onNicknameChangeClick = {}
     )
 }
