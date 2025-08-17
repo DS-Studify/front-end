@@ -25,6 +25,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.component.ChartSegment
 import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
 import com.ds.studify.core.designsystem.component.StudifyTabBar
@@ -45,21 +48,31 @@ import com.ds.studify.core.ui.extension.formatTimeInKorean
 import com.ds.studify.feature.analysis.component.AnalysisOutlinedButton
 import com.ds.studify.feature.analysis.component.AnalysisPrimaryButton
 import com.ds.studify.feature.analysis.component.AnalysisProgressBar
+import com.ds.studify.feature.analysis.component.StateTimeline
 import com.ds.studify.feature.analysis.navigation.AnalysisNavigationDelegator
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 @Composable
 internal fun AnalysisRoute(
-    navigationDelegator: AnalysisNavigationDelegator
+    navigationDelegator: AnalysisNavigationDelegator,
+    viewModel: AnalysisViewModel = hiltViewModel()
 ) {
+    val processedData by viewModel.barDataList.collectAsState()
+    val studyTimeRange by viewModel.studyTimeRange.collectAsState()
+
     AnalysisScreen(
-        navigationDelegator = navigationDelegator
+        navigationDelegator = navigationDelegator,
+        processedData = processedData,
+        studyTimeRange = studyTimeRange
     )
 }
 
 @Composable
 internal fun AnalysisScreen(
-    navigationDelegator: AnalysisNavigationDelegator
+    navigationDelegator: AnalysisNavigationDelegator,
+    processedData: List<BarData>,
+    studyTimeRange: Pair<LocalDateTime, LocalDateTime>?
 ) {
     val tabList = listOf(
         stringResource(StudifyString.study_time),
@@ -284,10 +297,25 @@ internal fun AnalysisScreen(
             }
         }
 
+        Text(
+            text = stringResource(StudifyString.analysis_state_timeline),
+            style = Typography.headlineSmall,
+            color = StudifyColors.BLACK,
+            modifier = Modifier
+                .padding(top = 50.dp, start = 24.dp, bottom = 10.dp)
+        )
+
+        StateTimeline(
+            processedData,
+            studyTimeRange,
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 70.dp)
+                .padding(top = 50.dp)
                 .padding(horizontal = 30.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -306,7 +334,12 @@ internal fun AnalysisScreen(
 @Preview
 @Composable
 private fun AnalysisScreenPreview() {
+    val viewModel = AnalysisViewModel()
+    val processedData by viewModel.barDataList.collectAsState()
+    val studyTimeRange by viewModel.studyTimeRange.collectAsState()
     AnalysisScreen(
-        navigationDelegator = AnalysisNavigationDelegator()
+        navigationDelegator = AnalysisNavigationDelegator(),
+        processedData = processedData,
+        studyTimeRange = studyTimeRange
     )
 }

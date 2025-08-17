@@ -66,6 +66,7 @@
     <string name="analysis_pose_description">*공부 시간 중 자세의 비율</string>
     <string name="analysis_restudy">다시 공부하기</string>
     <string name="analysis_finish">종료하기</string>
+    <string name="analysis_state_timeline">상태 타임라인</string>
 
     <!-- 상태 타임라인 -->
     <string name="state_1">공부 중</string>

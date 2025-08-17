@@ -27,14 +27,17 @@ import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.feature.analysis.AnalysisViewModel
+import com.ds.studify.feature.analysis.BarData
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun StateTimeline(viewModel: AnalysisViewModel) {
-
-    val processedData by viewModel.barDataList.collectAsState()
-    val studyTimeRange by viewModel.studyTimeRange.collectAsState()
+fun StateTimeline(
+    processedData: List<BarData>,
+    studyTimeRange: Pair<LocalDateTime, LocalDateTime>?,
+    modifier: Modifier = Modifier
+) {
 
     val segmentMap = processedData.associate { barData ->
         barData.stateId to barData.segments
@@ -61,7 +64,7 @@ fun StateTimeline(viewModel: AnalysisViewModel) {
     )
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(500.dp)
             .clip(RoundedCornerShape(10.dp))
@@ -137,5 +140,7 @@ fun StateTimeline(viewModel: AnalysisViewModel) {
 @Composable
 private fun StateTimelinePreview() {
     val viewModel = AnalysisViewModel()
-    StateTimeline(viewModel)
+    val processedData by viewModel.barDataList.collectAsState()
+    val studyTimeRange by viewModel.studyTimeRange.collectAsState()
+    StateTimeline(processedData, studyTimeRange)
 }
