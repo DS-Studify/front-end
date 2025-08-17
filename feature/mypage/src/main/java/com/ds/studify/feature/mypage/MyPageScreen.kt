@@ -47,11 +47,30 @@ internal fun MyPageRoute(
 ) {
     val viewModel: MyPageViewModel = hiltViewModel()
     val uiState by viewModel.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshProfile()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     viewModel.collectSideEffect {
         when (it) {
-            is MyPageSideEffect.LogoutSuccess -> {
-                navigationDelegator.onLogoutClick()
+            is MyPageSideEffect.LogoutSuccess -> navigationDelegator.onLogoutClick()
+            is MyPageSideEffect.Toast -> {
+                android.widget.Toast
+                    .makeText(
+                        context,
+                        context.getString(it.resId),
+                        android.widget.Toast.LENGTH_SHORT
+                    )
+                    .show()
             }
         }
     }
@@ -140,7 +159,7 @@ internal fun MyPageScreen(
                         )
                     }
                     Text(
-                        text = "abcd123@gmail.com",
+                        text = uiState.email,
                         color = StudifyColors.WHITE,
                         style = Typography.bodySmall,
                         modifier = Modifier.padding(top = 8.dp)
@@ -238,7 +257,7 @@ internal fun MyPageScreen(
 private fun MyPageScreenPreview() {
     MyPageScreen(
         paddingValues = PaddingValues(0.dp),
-        uiState = MyPageUiState.MyPage(userName = "닉네임"),
+        uiState = MyPageUiState.MyPage(userName = "닉네임", email = "abcd123@gmail.com"),
         onEvent = {},
         onPasswordChangeClick = {},
         onNicknameChangeClick = {}
