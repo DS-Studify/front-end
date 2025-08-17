@@ -1,3 +1,5 @@
+import com.ds.studify.convention.implementation
+
 plugins {
     alias(libs.plugins.studify.module)
     alias(libs.plugins.studify.compose.module)
@@ -13,6 +15,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.data)
     implementation(projects.core.resources)
     implementation(projects.core.uiExtension)
 }

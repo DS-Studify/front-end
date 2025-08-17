@@ -1,4 +1,4 @@
-package com.ds.studify.feature.analysis.component
+package com.ds.studify.core.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,14 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.ds.studify.core.data.model.BarData
+import com.ds.studify.core.data.model.Segment
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyString
-import com.ds.studify.feature.analysis.AnalysisViewModel
-import com.ds.studify.feature.analysis.BarData
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 
 @Composable
 fun StateTimeline(
@@ -139,8 +136,52 @@ fun StateTimeline(
 @Preview
 @Composable
 private fun StateTimelinePreview() {
-    val viewModel = AnalysisViewModel()
-    val processedData by viewModel.barDataList.collectAsState()
-    val studyTimeRange by viewModel.studyTimeRange.collectAsState()
-    StateTimeline(processedData, studyTimeRange)
+    val studyTimeRange = Pair(
+        LocalDateTime.of(2025, 8, 1, 23, 10, 44),
+        LocalDateTime.of(2025, 8, 1, 23, 11, 13)
+    )
+
+    val processedData = listOf(
+        BarData(
+            stateId = 1,
+            segments = listOf(
+                Segment(startRatio = 0.2f, height = 0.3f) // y:20% 지점부터 30% 높이
+            )
+        ),
+        BarData(
+            stateId = 2,
+            segments = listOf(
+                Segment(startRatio = 0.3f, height = 0.15f),
+                Segment(startRatio = 0.55f, height = 0.2f)
+            )
+        ),
+        BarData(
+            stateId = 3,
+            segments = listOf(
+                Segment(startRatio = 0.5f, height = 0.1f)
+            )
+        ),
+        BarData(
+            stateId = 4,
+            segments = emptyList()
+        ),
+        BarData(
+            stateId = 5,
+            segments = listOf(
+                Segment(startRatio = 0f, height = 0.1f)
+            )
+        ),
+        BarData(
+            stateId = 6,
+            segments = listOf(
+                Segment(startRatio = 0.1f, height = 0.05f),
+                Segment(startRatio = 0.8f, height = 0.1f)
+            )
+        )
+    )
+
+    StateTimeline(
+        processedData = processedData,
+        studyTimeRange = studyTimeRange
+    )
 }

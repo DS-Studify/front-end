@@ -2,6 +2,8 @@ package com.ds.studify.feature.analysis
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ds.studify.core.data.model.BarData
+import com.ds.studify.core.data.model.Segment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,16 +18,6 @@ import javax.inject.Inject
 
 data class AnalysisState(
     val sampleData: String = ""
-)
-
-data class Segment(
-    val startRatio: Float,
-    val height: Float
-)
-
-data class BarData(
-    val stateId: Int,
-    val segments: List<Segment>
 )
 
 data class TimeRange(

@@ -37,7 +37,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ds.studify.core.data.model.BarData
 import com.ds.studify.core.designsystem.component.ChartSegment
+import com.ds.studify.core.designsystem.component.StateTimeline
 import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
 import com.ds.studify.core.designsystem.component.StudifyTabBar
 import com.ds.studify.core.designsystem.theme.StudifyColors
@@ -48,7 +50,6 @@ import com.ds.studify.core.ui.extension.formatTimeInKorean
 import com.ds.studify.feature.analysis.component.AnalysisOutlinedButton
 import com.ds.studify.feature.analysis.component.AnalysisPrimaryButton
 import com.ds.studify.feature.analysis.component.AnalysisProgressBar
-import com.ds.studify.feature.analysis.component.StateTimeline
 import com.ds.studify.feature.analysis.navigation.AnalysisNavigationDelegator
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
