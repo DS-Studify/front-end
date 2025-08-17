@@ -89,6 +89,7 @@ internal fun MyPageScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(StudifyColors.WHITE)
             .padding(
                 start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                 end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
