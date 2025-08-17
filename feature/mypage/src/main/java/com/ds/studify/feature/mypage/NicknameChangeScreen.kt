@@ -39,6 +39,7 @@ import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyString
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import kotlin.math.max
 
 @Composable
@@ -47,6 +48,20 @@ internal fun NicknameChangeRoute(
     viewModel: NicknameChangeViewModel = hiltViewModel()
 ) {
     val uiState = viewModel.collectAsState().value
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    viewModel.collectSideEffect { effect ->
+        when (effect) {
+            is NicknameChangeSideEffect.Toast ->
+                android.widget.Toast.makeText(
+                    context,
+                    context.getString(effect.resId),
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+
+            NicknameChangeSideEffect.NavigateBack -> onBack()
+        }
+    }
 
     StudifyScaffoldWithTitle(
         title = stringResource(id = StudifyString.mypage_edit_profile_title),
