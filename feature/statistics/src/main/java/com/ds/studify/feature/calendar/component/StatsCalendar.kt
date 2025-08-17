@@ -32,8 +32,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
+import com.ds.studify.core.domain.entity.CalendarEntity
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.core.ui.extension.formatTimeToHM
 import com.ds.studify.feature.calendar.StatsUiEvent
 import java.time.LocalDate
 import java.time.YearMonth
@@ -44,7 +46,7 @@ fun StatsCalendar(
     modifier: Modifier = Modifier,
     yearMonthState: YearMonth,
     dateState: LocalDate,
-    studyTimeInMonth: List<String>,
+    studyTimeInMonth: List<CalendarEntity.CalendarInfo>,
     onMonthPickerClick: () -> Unit,
     onEvent: (StatsUiEvent) -> Unit
 ) {
@@ -146,7 +148,7 @@ internal fun CalendarHeader(
 internal fun CalendarDate(
     currentMonth: YearMonth,
     selectedDate: LocalDate,
-    studyTimeInMonth: List<String>,
+    studyTimeInMonth: List<CalendarEntity.CalendarInfo>,
     onDateClick: (Int) -> Unit
 ) {
     val currentDate = LocalDate.now()
@@ -154,6 +156,15 @@ internal fun CalendarDate(
     val firstDayOfMonth = currentMonth.atDay(1)
     val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value
     val weeksInMonth = ceil((firstDayOfWeek - 1 + daysInMonth) / 7.0).toInt()
+
+    val studyTimeMap = remember(studyTimeInMonth, currentMonth) {
+        studyTimeInMonth
+            .mapNotNull { info ->
+                runCatching { LocalDate.parse(info.date) to info.totalStudyTime }.getOrNull()
+            }
+            .filter { (d, _) -> d.year == currentMonth.year && d.monthValue == currentMonth.monthValue }
+            .toMap()
+    }
 
     Column(
         modifier = Modifier
@@ -195,6 +206,9 @@ internal fun CalendarDate(
                     val isSaturday = dayOfWeek == 7
 
                     if (day in 1..daysInMonth) {
+                        val cellDate = currentMonth.atDay(day)
+                        val seconds = studyTimeMap[cellDate] ?: 0
+
                         Column(
                             modifier = Modifier
                                 .weight(1f)
@@ -237,10 +251,10 @@ internal fun CalendarDate(
                                     )
                                 }
                             }
-                            if (currentMonth.atDay(day) <= selectedDate) {
-                                val studyTimeAtDay = studyTimeInMonth.getOrElse(day - 1) { "" }
+
+                            if (seconds > 0) {
                                 Text(
-                                    text = studyTimeAtDay,
+                                    text = formatTimeToHM(seconds),
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .wrapContentHeight(align = Alignment.CenterVertically),
@@ -265,7 +279,14 @@ private fun StatsCalendarPreview() {
     StatsCalendar(
         yearMonthState = YearMonth.now(),
         dateState = LocalDate.now(),
-        studyTimeInMonth = listOf("1H 10M", "2H 20M"),
+        studyTimeInMonth = listOf(
+            CalendarEntity.CalendarInfo(
+                "2025-08-04", 1800
+            ),
+            CalendarEntity.CalendarInfo(
+                "2025-08-18", 3600
+            )
+        ),
         onMonthPickerClick = {},
         onEvent = {}
     )

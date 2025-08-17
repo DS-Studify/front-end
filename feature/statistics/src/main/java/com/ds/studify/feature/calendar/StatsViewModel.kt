@@ -1,13 +1,9 @@
 package com.ds.studify.feature.calendar
 
 import androidx.lifecycle.ViewModel
-import com.ds.studify.core.data.model.StudyTimeRange
-import com.ds.studify.core.data.repository.StatsRepository
+import com.ds.studify.core.data.repository.StudyRecordRepository
+import com.ds.studify.core.domain.entity.CalendarEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.map
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -15,26 +11,15 @@ import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
 
-data class StudyHistoryUiState(
-    val yearMonth: YearMonth = YearMonth.now(),
-    val studyHistoryInMonth: List<String> = emptyList()
-)
-
-data class DailyStatsUiState(
-    val selectedDate: LocalDate,
-    val dateWithDayOfWeek: String,
-    val focusTime: String,
-    val studyTime: String,
-    val studyTimeLine: List<StudyTimeRange> = emptyList()
-)
-
 sealed interface StatsUiState {
     data object Loading : StatsUiState
-
     data class Data(
-        val history: StudyHistoryUiState,
-        val daily: DailyStatsUiState
+        val selectedYearMonth: YearMonth = YearMonth.now(),
+        val selectedDate: LocalDate,
+        val calendar: CalendarEntity
     ) : StatsUiState
+
+    data class Error(val message: String) : StatsUiState
 }
 
 sealed class StatsUiEvent {
@@ -44,107 +29,52 @@ sealed class StatsUiEvent {
 
 @HiltViewModel
 class StatsViewModel @Inject constructor(
-    private val statsRepository: StatsRepository
+    private val studyRecordRepository: StudyRecordRepository
 ) : ViewModel(), ContainerHost<StatsUiState, Nothing> {
 
     override val container: Container<StatsUiState, Nothing> = container(
         initialState = StatsUiState.Loading
     ) {
         val now = LocalDate.now()
-        val initialDaily = DailyStatsUiState(
-            selectedDate = LocalDate.now(),
-            dateWithDayOfWeek = formatDateWithDayOfWeek(now.year, now.monthValue, now.dayOfMonth),
-            focusTime = statsRepository.getDailyFocusTime(now.year, now.monthValue),
-            studyTime = statsRepository.getDailyStudyTime(now.year, now.monthValue, now.dayOfMonth),
-            studyTimeLine = statsRepository.getDailyStudyTimeLine(now.year, now.monthValue)
-        )
 
-        val initialState = StatsUiState.Data(
-            history = StudyHistoryUiState(
-                yearMonth = YearMonth.now(),
-                studyHistoryInMonth = statsRepository.getStudyHistoryInMonth(
-                    now.year,
-                    now.monthValue
-                )
-            ),
-            daily = initialDaily
-        )
-
-        reduce { initialState }
-
-        yearMonthState
-            .drop(1)
-            .map { yearMonth ->
-                val history = StudyHistoryUiState(
-                    yearMonth = yearMonth,
-                    studyHistoryInMonth = statsRepository.getStudyHistoryInMonth(
-                        yearMonth.year,
-                        yearMonth.monthValue
-                    )
-                )
-
-                when (val current = state) {
-                    is StatsUiState.Data -> current.copy(history = history)
-                    else -> current
-                }
-            }
-            .collectLatest {
-                reduce { it }
-            }
+        loadCalendar(now)
     }
 
-    private val yearMonthState = MutableStateFlow(YearMonth.now())
+    private fun loadCalendar(date: LocalDate) = intent {
+        val result = studyRecordRepository.getCalendar(date = date.toString())
 
-    private fun formatDateWithDayOfWeek(year: Int, month: Int, day: Int): String {
-        val date = LocalDate.of(year, month, day)
-        val dayOfWeekKorean = when (date.dayOfWeek) {
-            java.time.DayOfWeek.MONDAY -> "월"
-            java.time.DayOfWeek.TUESDAY -> "화"
-            java.time.DayOfWeek.WEDNESDAY -> "수"
-            java.time.DayOfWeek.THURSDAY -> "목"
-            java.time.DayOfWeek.FRIDAY -> "금"
-            java.time.DayOfWeek.SATURDAY -> "토"
-            else -> "일"
+        if (result.isSuccess) {
+            reduce {
+                StatsUiState.Data(
+                    selectedYearMonth = YearMonth.of(date.year, date.month),
+                    selectedDate = date,
+                    calendar = result.getOrThrow()
+                )
+            }
+        } else {
+            reduce {
+                StatsUiState.Error(result.exceptionOrNull()?.message ?: "알 수 없는 오류 발생")
+            }
         }
-        return "${month}월 ${day}일 ($dayOfWeekKorean)"
     }
 
     fun onEvent(event: StatsUiEvent) {
         when (event) {
             is StatsUiEvent.ChangeYearMonth -> {
-                yearMonthState.value = YearMonth.of(event.year, event.month)
+                val date = LocalDate.of(event.year, event.month, 1)
+
+                loadCalendar(date)
             }
 
             is StatsUiEvent.ChangeDate -> intent {
                 if (state !is StatsUiState.Data) return@intent
 
                 val dataState = state as StatsUiState.Data
-                val yearMonth = yearMonthState.value
-                val selectedDate = LocalDate.of(yearMonth.year, yearMonth.monthValue, event.date)
-
-                val formattedDate =
-                    formatDateWithDayOfWeek(yearMonth.year, yearMonth.monthValue, event.date)
-                val focusTime =
-                    statsRepository.getDailyFocusTime(yearMonth.year, yearMonth.monthValue)
-                val studyTime = statsRepository.getDailyStudyTime(
-                    yearMonth.year,
-                    yearMonth.monthValue,
-                    event.date
+                val selectedDate = LocalDate.of(
+                    dataState.selectedYearMonth.year, dataState.selectedYearMonth.month, event.date
                 )
-                val studyTimeLine =
-                    statsRepository.getDailyStudyTimeLine(yearMonth.year, yearMonth.monthValue)
 
-                reduce {
-                    dataState.copy(
-                        daily = DailyStatsUiState(
-                            selectedDate = selectedDate,
-                            dateWithDayOfWeek = formattedDate,
-                            focusTime = focusTime,
-                            studyTime = studyTime,
-                            studyTimeLine = studyTimeLine
-                        )
-                    )
-                }
+                loadCalendar(selectedDate)
             }
         }
     }

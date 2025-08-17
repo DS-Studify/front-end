@@ -28,12 +28,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ds.studify.core.data.model.StudyTimeRange
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithLogo
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
+import com.ds.studify.core.domain.entity.CalendarEntity
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.core.ui.extension.formatTimeInKorean
 import com.ds.studify.feature.calendar.component.StatsCalendar
 import com.ds.studify.feature.calendar.component.StatsTimeLine
 import org.orbitmvi.orbit.compose.collectAsState
@@ -76,7 +77,7 @@ internal fun StatsRoute(
                 )
             }
 
-            is StatsUiState.Loading -> {
+            else -> {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -110,9 +111,9 @@ internal fun StatsScreen(
     ) {
         StatsCalendar(
             modifier = Modifier.fillMaxWidth(),
-            yearMonthState = uiState.history.yearMonth,
-            dateState = uiState.daily.selectedDate,
-            studyTimeInMonth = uiState.history.studyHistoryInMonth,
+            yearMonthState = uiState.selectedYearMonth,
+            dateState = uiState.selectedDate,
+            studyTimeInMonth = uiState.calendar.calendar,
             onMonthPickerClick = {},
             onEvent = onEvent
         )
@@ -133,7 +134,7 @@ internal fun StatsScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = uiState.daily.dateWithDayOfWeek,
+                text = uiState.calendar.detail.date,
                 color = StudifyColors.BLACK,
                 style = Typography.headlineSmall,
             )
@@ -154,7 +155,7 @@ internal fun StatsScreen(
                         style = Typography.headlineSmall,
                     )
                     Text(
-                        text = uiState.daily.studyTime,
+                        text = formatTimeInKorean(uiState.calendar.detail.totalStudyTime),
                         color = StudifyColors.BLACK,
                         style = Typography.bodySmall,
                     )
@@ -170,7 +171,7 @@ internal fun StatsScreen(
                         style = Typography.headlineSmall,
                     )
                     Text(
-                        text = uiState.daily.focusTime,
+                        text = formatTimeInKorean(uiState.calendar.detail.focusTime),
                         color = StudifyColors.BLACK,
                         style = Typography.bodySmall,
                     )
@@ -182,7 +183,7 @@ internal fun StatsScreen(
             modifier = Modifier
                 .padding(top = 60.dp, bottom = 30.dp)
                 .padding(horizontal = 40.dp),
-            studyTimes = uiState.daily.studyTimeLine,
+            studyTimes = uiState.calendar.detail.timeRanges,
             onClick = { clickedId ->
                 onNavigateToFeedback(clickedId)
             }
@@ -196,19 +197,28 @@ private fun StatsScreenPreview() {
     StatsScreen(
         paddingValues = PaddingValues(0.dp),
         uiState = StatsUiState.Data(
-            history = StudyHistoryUiState(
-                yearMonth = YearMonth.now(),
-                studyHistoryInMonth = listOf("1H 20M", "2H 30M")
-            ),
-            daily = DailyStatsUiState(
-                selectedDate = LocalDate.now(),
-                dateWithDayOfWeek = "7월 12일 (토)",
-                focusTime = "5시간 30분",
-                studyTime = "6시간",
-                studyTimeLine = listOf(
-                    StudyTimeRange(1, "10:00", "13:00"),
-                    StudyTimeRange(2, "14:30", "18:33"),
-                    StudyTimeRange(3, "19:40", "23:04")
+            selectedYearMonth = YearMonth.now(),
+            selectedDate = LocalDate.now(),
+            calendar = CalendarEntity(
+                year = 2025,
+                month = 8,
+                calendar = listOf(
+                    CalendarEntity.CalendarInfo(
+                        date = "2025-08-18",
+                        totalStudyTime = 3600
+                    )
+                ),
+                detail = CalendarEntity.DetailInfo(
+                    date = "8월 18일 (월)",
+                    totalStudyTime = 3600,
+                    focusTime = 2400,
+                    timeRanges = listOf(
+                        CalendarEntity.DetailInfo.Study(
+                            studyRecordId = 1,
+                            start = "01:00",
+                            end = "01:50"
+                        )
+                    )
                 )
             )
         ),
