@@ -46,6 +46,7 @@ class StatsViewModel @Inject constructor(
         if (result.isSuccess) {
             reduce {
                 StatsUiState.Data(
+                    selectedYearMonth = YearMonth.of(date.year, date.month),
                     selectedDate = date,
                     calendar = result.getOrThrow()
                 )
