@@ -1,6 +1,5 @@
 package com.ds.studify.feature.analysis
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.ds.studify.core.data.repository.StudyRecordRepository
 import com.ds.studify.core.domain.entity.AnalysisEntity
@@ -31,11 +30,8 @@ class AnalysisViewModel @Inject constructor(
 
     private fun loadAnalysis(studyRecordId: Int) = intent {
         val result = studyRecordRepository.getAnalysis(studyRecordId)
-        Log.d("analLog", "시작")
-        Log.d("analLog", result.toString())
 
         if (result.isSuccess) {
-            val entity = result.getOrThrow()
 
             reduce {
                 AnalysisUiState.Data(
@@ -45,8 +41,6 @@ class AnalysisViewModel @Inject constructor(
 
         } else {
             AnalysisUiState.Error(result.exceptionOrNull()?.message ?: "오류 발생")
-            val msg = result.exceptionOrNull()?.message.toString()
-            Log.d("analLog", msg)
         }
     }
 
