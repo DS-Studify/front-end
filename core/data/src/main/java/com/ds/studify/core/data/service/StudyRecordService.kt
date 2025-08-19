@@ -5,7 +5,6 @@ import com.ds.studify.core.data.dto.response.ResponseAnalysisDto
 import com.ds.studify.core.data.dto.response.ResponseHomeDto
 import retrofit2.http.Path
 import com.ds.studify.core.data.dto.response.ResponseCalendarDto
-import com.ds.studify.core.data.dto.response.ResponseHomeDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
