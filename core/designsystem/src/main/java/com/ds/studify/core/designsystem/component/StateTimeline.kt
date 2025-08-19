@@ -22,24 +22,34 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ds.studify.core.data.model.BarData
-import com.ds.studify.core.data.model.Segment
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
+import com.ds.studify.core.domain.entity.TimeEntry
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.core.ui.extension.getBarRatioInSeconds
+import com.ds.studify.core.ui.extension.getTimeLog
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun StateTimeline(
-    processedData: List<BarData>,
-    studyTimeRange: Pair<LocalDateTime, LocalDateTime>?,
+    timeLogs: Map<String, List<TimeEntry>>,
+    startTime: String,
+    endTime: String,
     modifier: Modifier = Modifier
 ) {
+    val isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
-    val segmentMap = processedData.associate { barData ->
+    val barDataList: List<BarData> = getBarRatioInSeconds(
+        timeLogs = getTimeLog(timeLogs),
+        start = LocalDateTime.parse(startTime, isoFormatter),
+        end = LocalDateTime.parse(endTime, isoFormatter),
+    )
+
+    val segmentMap = barDataList.associate { barData ->
         barData.stateId to barData.segments
     }
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     fun getStateColor(stateId: Int) = when (stateId) {
         1 -> StudifyColors.RED02
@@ -80,11 +90,11 @@ fun StateTimeline(
                 horizontalAlignment = Alignment.End
             ) {
                 Text(
-                    text = studyTimeRange?.first?.format(timeFormatter) ?: "",
+                    text = LocalDateTime.parse(startTime, isoFormatter).format(timeFormatter),
                     style = Typography.bodySmall
                 )
                 Text(
-                    text = studyTimeRange?.second?.format(timeFormatter) ?: "",
+                    text = LocalDateTime.parse(endTime, isoFormatter).format(timeFormatter),
                     style = Typography.bodySmall
                 )
             }
@@ -136,52 +146,36 @@ fun StateTimeline(
 @Preview
 @Composable
 private fun StateTimelinePreview() {
-    val studyTimeRange = Pair(
-        LocalDateTime.of(2025, 8, 1, 23, 10, 44),
-        LocalDateTime.of(2025, 8, 1, 23, 11, 13)
-    )
-
-    val processedData = listOf(
-        BarData(
-            stateId = 1,
-            segments = listOf(
-                Segment(startRatio = 0.2f, height = 0.3f) // y:20% 지점부터 30% 높이
-            )
+    val timeLog: Map<String, List<TimeEntry>> = mapOf(
+        "1" to listOf(
+            TimeEntry("2025-07-27T23:00:00", "2025-07-27T23:02:00"),
+            TimeEntry("2025-07-27T23:10:00", "2025-07-27T23:12:00"),
         ),
-        BarData(
-            stateId = 2,
-            segments = listOf(
-                Segment(startRatio = 0.3f, height = 0.15f),
-                Segment(startRatio = 0.55f, height = 0.2f)
-            )
+        "2" to listOf(
+            TimeEntry("2025-07-27T23:02:00", "2025-07-27T23:04:00"),
+            TimeEntry("2025-07-27T23:12:00", "2025-07-27T23:14:00"),
         ),
-        BarData(
-            stateId = 3,
-            segments = listOf(
-                Segment(startRatio = 0.5f, height = 0.1f)
-            )
+        "3" to listOf(
+            TimeEntry("2025-07-27T23:04:00", "2025-07-27T23:06:00"),
+            TimeEntry("2025-07-27T23:14:00", "2025-07-27T23:16:00"),
         ),
-        BarData(
-            stateId = 4,
-            segments = emptyList()
+        "4" to listOf(
+            TimeEntry("2025-07-27T23:06:00", "2025-07-27T23:08:00"),
+            TimeEntry("2025-07-27T23:16:00", "2025-07-27T23:18:00"),
         ),
-        BarData(
-            stateId = 5,
-            segments = listOf(
-                Segment(startRatio = 0f, height = 0.1f)
-            )
+        "5" to listOf(
+            TimeEntry("2025-07-27T23:08:00", "2025-07-27T23:09:00"),
+            TimeEntry("2025-07-27T23:18:00", "2025-07-27T23:19:00"),
         ),
-        BarData(
-            stateId = 6,
-            segments = listOf(
-                Segment(startRatio = 0.1f, height = 0.05f),
-                Segment(startRatio = 0.8f, height = 0.1f)
-            )
-        )
+        "6" to listOf(
+            TimeEntry("2025-07-27T23:09:00", "2025-07-27T23:10:00"),
+            TimeEntry("2025-07-27T23:19:00", "2025-07-27T23:20:00"),
+        ),
     )
 
     StateTimeline(
-        processedData = processedData,
-        studyTimeRange = studyTimeRange
+        timeLogs = timeLog,
+        startTime = "2025-07-27T23:00",
+        endTime = "2025-07-27T23:30"
     )
 }

@@ -10,6 +10,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import com.ds.studify.core.data.model.BarData
+import com.ds.studify.core.data.model.Segment
+import com.ds.studify.core.data.model.TimeRange
+import com.ds.studify.core.domain.entity.TimeEntry
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.acos
 import kotlin.math.sqrt
 
@@ -87,4 +94,45 @@ fun calculateAngle3D(a: FloatArray, b: FloatArray, c: FloatArray): Float {
 
     val cosine = (dot / (abNorm * cbNorm + 1e-6)).coerceIn(-1.0, 1.0)
     return Math.toDegrees(acos(cosine)).toFloat()
+}
+
+fun getBarRatioInSeconds(
+    timeLogs: Map<Int, List<TimeRange>>,
+    start: LocalDateTime,
+    end: LocalDateTime
+): List<BarData> {
+    val totalSeconds = Duration.between(start, end).seconds.toFloat()
+
+    val barList = timeLogs.map { (stateId, logs) ->
+        val segments = logs.map { log ->
+            val startRatio = Duration.between(start, log.startTime).seconds / totalSeconds
+            val endRatio = Duration.between(start, log.endTime).seconds / totalSeconds
+            val height = endRatio - startRatio
+            Segment(startRatio, height)
+        }
+        BarData(stateId, segments)
+    }
+
+    return barList
+}
+
+fun getTimeLog(
+    timeLogs: Map<String, List<TimeEntry>>
+): Map<Int, List<TimeRange>> {
+    val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+    val timeLog = timeLogs.mapNotNull { (k, list) ->
+        val key = k.toIntOrNull() ?: return@mapNotNull null
+        val ranges = list.mapNotNull { timeEntry ->
+            runCatching {
+                TimeRange(
+                    startTime = LocalDateTime.parse(timeEntry.startTime, formatter),
+                    endTime = LocalDateTime.parse(timeEntry.endTime, formatter)
+                )
+            }.getOrNull()
+        }
+        key to ranges
+    }.toMap()
+
+    return timeLog
 }

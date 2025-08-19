@@ -18,4 +18,5 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.resources)
     implementation(projects.core.uiExtension)
+    implementation(projects.core.domain)
 }

@@ -1,3 +1,5 @@
+import com.ds.studify.convention.implementation
+
 plugins {
     alias(libs.plugins.studify.module)
     alias(libs.plugins.studify.hilt)
@@ -14,6 +16,7 @@ dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.resources)
     implementation(projects.core.uiExtension)
+    implementation(projects.core.domain)
 
     implementation(libs.bundles.orbit)
 }
