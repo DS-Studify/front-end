@@ -1,5 +1,6 @@
 package com.ds.studify.core.data.datasource
 
+import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import javax.inject.Inject
@@ -20,7 +21,8 @@ class TokenDataSource @Inject constructor(
         get() = tokenDataSource.getString(REFRESH_TOKEN, "") ?: ""
         set(value) = tokenDataSource.edit { putString(REFRESH_TOKEN, value) }
 
+    @SuppressLint("ApplySharedPref")
     fun clearToken() {
-        tokenDataSource.edit().clear().apply()
+        tokenDataSource.edit().clear().commit()
     }
 }
