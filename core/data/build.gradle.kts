@@ -34,4 +34,6 @@ android {
 dependencies {
     implementation(projects.core.resources)
     implementation(projects.core.domain)
+
+    implementation(libs.jakewharton.process.phoenix)
 }

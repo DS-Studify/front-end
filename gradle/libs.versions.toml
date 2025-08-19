@@ -27,6 +27,7 @@ orbit = "9.0.0"
 camera = "1.4.2"
 mediapipeTasks = "0.10.14"
 tensorflow = "2.13.0"
+phoenix = "3.0.0"
 
 [libraries]
 gradlePlugin-android = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -77,6 +78,8 @@ camera-video = { group = "androidx.camera", name = "camera-video", version.ref =
 
 mediapipe-vision = { group = "com.google.mediapipe", name = "tasks-vision", version.ref = "mediapipeTasks" }
 tensorflow-lite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tensorflow" }
+
+jakewharton-process-phoenix = { group = "com.jakewharton", name = "process-phoenix", version.ref = "phoenix" }
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
