@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
-import com.ds.studify.core.domain.entity.CalendarEntity
+import com.ds.studify.core.domain.entity.CalendarMonthlyEntity
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatTimeToHM
@@ -46,7 +46,7 @@ fun StatsCalendar(
     modifier: Modifier = Modifier,
     yearMonthState: YearMonth,
     dateState: LocalDate,
-    studyTimeInMonth: List<CalendarEntity.CalendarInfo>,
+    studyTimeInMonth: List<CalendarMonthlyEntity.CalendarInfo>,
     onMonthPickerClick: () -> Unit,
     onEvent: (StatsUiEvent) -> Unit
 ) {
@@ -148,7 +148,7 @@ internal fun CalendarHeader(
 internal fun CalendarDate(
     currentMonth: YearMonth,
     selectedDate: LocalDate,
-    studyTimeInMonth: List<CalendarEntity.CalendarInfo>,
+    studyTimeInMonth: List<CalendarMonthlyEntity.CalendarInfo>,
     onDateClick: (Int) -> Unit
 ) {
     val currentDate = LocalDate.now()
@@ -280,10 +280,10 @@ private fun StatsCalendarPreview() {
         yearMonthState = YearMonth.now(),
         dateState = LocalDate.now(),
         studyTimeInMonth = listOf(
-            CalendarEntity.CalendarInfo(
+            CalendarMonthlyEntity.CalendarInfo(
                 "2025-08-04", 1800
             ),
-            CalendarEntity.CalendarInfo(
+            CalendarMonthlyEntity.CalendarInfo(
                 "2025-08-18", 3600
             )
         ),

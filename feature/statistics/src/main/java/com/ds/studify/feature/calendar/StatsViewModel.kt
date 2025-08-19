@@ -2,8 +2,11 @@ package com.ds.studify.feature.calendar
 
 import androidx.lifecycle.ViewModel
 import com.ds.studify.core.data.repository.StudyRecordRepository
-import com.ds.studify.core.domain.entity.CalendarEntity
+import com.ds.studify.core.domain.entity.CalendarDailyEntity
+import com.ds.studify.core.domain.entity.CalendarMonthlyEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
@@ -16,7 +19,8 @@ sealed interface StatsUiState {
     data class Data(
         val selectedYearMonth: YearMonth = YearMonth.now(),
         val selectedDate: LocalDate,
-        val calendar: CalendarEntity
+        val calendar: CalendarMonthlyEntity,
+        val daily: CalendarDailyEntity
     ) : StatsUiState
 
     data class Error(val message: String) : StatsUiState
@@ -35,35 +39,65 @@ class StatsViewModel @Inject constructor(
     override val container: Container<StatsUiState, Nothing> = container(
         initialState = StatsUiState.Loading
     ) {
-        val now = LocalDate.now()
+        val currentYearMonth = YearMonth.now()
+        val todayDate = LocalDate.now()
 
-        loadCalendar(now)
+        loadMonthAndDay(currentYearMonth, todayDate)
     }
 
-    private fun loadCalendar(date: LocalDate) = intent {
-        val result = studyRecordRepository.getCalendar(date = date.toString())
+    private fun loadMonthAndDay(month: YearMonth, date: LocalDate) = intent {
+        coroutineScope {
+            val monthStr = month.toString()
+            val dateStr = date.toString()
 
-        if (result.isSuccess) {
+            val monthlyDeferred =
+                async { studyRecordRepository.getCalendarMonthly(month = monthStr) }
+            val dailyDeferred = async { studyRecordRepository.getCalendarDaily(date = dateStr) }
+
+            val monthlyResult = monthlyDeferred.await()
+            val dailyResult = dailyDeferred.await()
+
+            val monthly = monthlyResult.getOrElse { err ->
+                reduce { StatsUiState.Error(err.message ?: "월간 데이터 로드 실패") }
+                return@coroutineScope
+            }
+            val daily = dailyResult.getOrElse { err ->
+                reduce { StatsUiState.Error(err.message ?: "일간 데이터 로드 실패") }
+                return@coroutineScope
+            }
+
             reduce {
                 StatsUiState.Data(
-                    selectedYearMonth = YearMonth.of(date.year, date.month),
+                    selectedYearMonth = month,
                     selectedDate = date,
-                    calendar = result.getOrThrow()
+                    calendar = monthly,
+                    daily = daily
                 )
-            }
-        } else {
-            reduce {
-                StatsUiState.Error(result.exceptionOrNull()?.message ?: "알 수 없는 오류 발생")
             }
         }
     }
 
     fun onEvent(event: StatsUiEvent) {
         when (event) {
-            is StatsUiEvent.ChangeYearMonth -> {
-                val date = LocalDate.of(event.year, event.month, 1)
+            is StatsUiEvent.ChangeYearMonth -> intent {
+                if (state !is StatsUiState.Data) return@intent
 
-                loadCalendar(date)
+                val dataState = state as StatsUiState.Data
+                val selectedYearMonth = YearMonth.of(event.year, event.month)
+
+                studyRecordRepository.getCalendarMonthly(month = selectedYearMonth.toString())
+                    .onSuccess { response ->
+                        reduce {
+                            dataState.copy(
+                                selectedYearMonth = selectedYearMonth,
+                                calendar = response
+                            )
+                        }
+                    }.onFailure { error ->
+                        reduce {
+                            StatsUiState.Error(error.message ?: "월간 데이터 로드 실패")
+                        }
+                    }
             }
 
             is StatsUiEvent.ChangeDate -> intent {
@@ -74,7 +108,19 @@ class StatsViewModel @Inject constructor(
                     dataState.selectedYearMonth.year, dataState.selectedYearMonth.month, event.date
                 )
 
-                loadCalendar(selectedDate)
+                studyRecordRepository.getCalendarDaily(date = selectedDate.toString())
+                    .onSuccess { response ->
+                        reduce {
+                            dataState.copy(
+                                selectedDate = selectedDate,
+                                daily = response
+                            )
+                        }
+                    }.onFailure { error ->
+                        reduce {
+                            StatsUiState.Error(error.message ?: "일간 데이터 로드 실패")
+                        }
+                    }
             }
         }
     }
