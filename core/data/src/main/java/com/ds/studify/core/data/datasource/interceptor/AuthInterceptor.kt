@@ -1,6 +1,5 @@
 package com.ds.studify.core.data.datasource.interceptor
 
-import android.content.Intent
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -8,6 +7,7 @@ import android.util.Log
 import com.ds.studify.core.data.datasource.AuthDataSource
 import com.ds.studify.core.data.datasource.TokenDataSource
 import com.ds.studify.core.data.dto.request.RequestReissueToken
+import com.jakewharton.processphoenix.ProcessPhoenix
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -107,26 +107,12 @@ class AuthInterceptor @Inject constructor(
 
     private fun handleTokenRefreshFailed(): Response {
         Handler(Looper.getMainLooper()).post {
-            restartApp()
+            ProcessPhoenix.triggerRebirth(context)
         }
 
         tokenDataSource.clearToken()
 
         throw IllegalStateException("Token reissue failed. Restarting app.")
-    }
-
-    private fun restartApp() {
-        val packageManager = context.packageManager
-        val intent = packageManager.getLaunchIntentForPackage(context.packageName)
-
-        if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-            Runtime.getRuntime().exit(0)
-        } else {
-            throw IllegalStateException("Cannot restart app: Launch intent not found")
-        }
     }
 
     companion object {

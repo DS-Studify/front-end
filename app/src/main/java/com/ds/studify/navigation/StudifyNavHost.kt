@@ -63,6 +63,7 @@ fun StudifyNavHost(
                         navController.navigateToMain(
                             navOptions {
                                 popUpTo(NavRouteAuth) { inclusive = true }
+                                launchSingleTop = true
                             }
                         )
                     },
