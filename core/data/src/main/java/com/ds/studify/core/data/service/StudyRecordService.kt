@@ -7,10 +7,8 @@ import com.ds.studify.core.data.dto.response.ResponseFeedbackDto
 import com.ds.studify.core.data.dto.response.ResponseHomeDto
 import com.ds.studify.core.data.dto.response.ResponsePieChartDto
 import com.ds.studify.core.data.dto.response.ResponseAnalysisDto
-import com.ds.studify.core.data.dto.response.ResponseHomeDto
 import retrofit2.http.Path
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface StudyRecordService {

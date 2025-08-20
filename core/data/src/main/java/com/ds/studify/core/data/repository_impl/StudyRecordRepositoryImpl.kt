@@ -3,11 +3,10 @@ package com.ds.studify.core.data.repository_impl
 import com.ds.studify.core.data.datasource.StudyRecordDataSource
 import com.ds.studify.core.data.dto.response.toEntity
 import com.ds.studify.core.data.repository.StudyRecordRepository
+import com.ds.studify.core.domain.entity.AnalysisEntity
 import com.ds.studify.core.domain.entity.CalendarDailyEntity
 import com.ds.studify.core.domain.entity.CalendarMonthlyEntity
 import com.ds.studify.core.domain.entity.FeedbackEntity
-import com.ds.studify.core.domain.entity.AnalysisEntity
-import com.ds.studify.core.domain.entity.CalendarEntity
 import com.ds.studify.core.domain.entity.HomeEntity
 import com.ds.studify.core.domain.entity.PieChartEntity
 import javax.inject.Inject
