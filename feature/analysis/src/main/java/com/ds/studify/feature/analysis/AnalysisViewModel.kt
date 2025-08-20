@@ -28,7 +28,7 @@ class AnalysisViewModel @Inject constructor(
         loadAnalysis(studyRecordId = 28)
     }
 
-    private fun loadAnalysis(studyRecordId: Int) = intent {
+    private fun loadAnalysis(studyRecordId: Long) = intent {
         val result = studyRepository.getAnalysis(studyRecordId)
 
         if (result.isSuccess) {

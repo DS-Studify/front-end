@@ -1,7 +1,7 @@
 package com.ds.studify.core.domain.entity
 
 data class AnalysisEntity(
-    val studyRecordId: Int,
+    val studyRecordId: Long,
     val studyDate: String,
     val startTime: String,
     val endTime: String,

@@ -7,5 +7,5 @@ import kotlinx.serialization.json.JsonElement
 interface StudyRepository {
     suspend fun postRecord(entity: CameraEntity): Result<JsonElement?>
 
-    suspend fun getAnalysis(studyRecordId: Int): Result<AnalysisEntity>
+    suspend fun getAnalysis(studyRecordId: Long): Result<AnalysisEntity>
 }

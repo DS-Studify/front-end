@@ -18,6 +18,6 @@ interface StudyService {
 
     @GET("/record/{studyRecordId}/result")
     suspend fun getAnalysis(
-        @Path("studyRecordId") studyRecordId: Int
+        @Path("studyRecordId") studyRecordId: Long
     ): BaseResponse<ResponseAnalysisDto>
 }
