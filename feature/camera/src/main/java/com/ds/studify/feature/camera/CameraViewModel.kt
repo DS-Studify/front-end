@@ -32,12 +32,13 @@ data class StableState(
 enum class PoseLabel(
     val label: String
 ) {
-    GOOD_POSE("집중 상태"),
-    NFOCUS_LEAN_FOWARD("집중도 저하 상태"),
-    NFOCUS_LEAN_BACK("집중도 저하 상태"),
-    NFOCUS_LEAN_SIDE("집중도 저하 상태"),
-    SLEEP_HEAD_DOWN("수면 상태"),
-    SLEEP_HEAD_BACK("수면 상태")
+    GOOD_POSE("집중 자세"),
+    NFOCUS_LEAN_FOWARD("집중도 저하 자세"),
+    NFOCUS_LEAN_BACK("집중도 저하 자세"),
+    NFOCUS_LEAN_SIDE("집중도 저하 자세"),
+    SLEEP_HEAD_DOWN("수면 자세"),
+    SLEEP_HEAD_BACK("수면 자세"),
+    AWAY("자리 비움")
 }
 
 data class LogRecordingState(
@@ -121,13 +122,14 @@ class CameraViewModel @Inject constructor(
     fun getPoseState(poseLabel: PoseLabel?): Int {
         return when (poseLabel) {
             PoseLabel.GOOD_POSE -> 1
-
             PoseLabel.NFOCUS_LEAN_BACK,
             PoseLabel.NFOCUS_LEAN_FOWARD,
             PoseLabel.NFOCUS_LEAN_SIDE -> 2
 
             PoseLabel.SLEEP_HEAD_BACK,
             PoseLabel.SLEEP_HEAD_DOWN -> 3
+
+            PoseLabel.AWAY -> 4
 
             else -> 0
         }
@@ -152,6 +154,11 @@ class CameraViewModel @Inject constructor(
 
     // 자세 상태 연속 3번 지연 업데이트
     fun updatePoseState(currentValue: PoseLabel?) {
+        if (currentValue == PoseLabel.AWAY) {
+            stableState.stablePoseLabel = PoseLabel.AWAY
+            poseCount = 0
+            return
+        }
         if (currentValue == stableState.stablePoseLabel) {
             poseCount = 0
             return
@@ -183,19 +190,27 @@ class CameraViewModel @Inject constructor(
     }
 
     fun classifyPose(poseLandmarks: List<PoseLandmark>, faceLandmarks: List<FaceLandmark>) {
-        val input = preparePoseModelInput(poseLandmarks, faceLandmarks)
-        val result = poseClassifier.predict(input)
+        if (poseLandmarks.isEmpty() && faceLandmarks.isEmpty()) {
+            intent {
+                reduce { state.copy(poseLabel = PoseLabel.AWAY) }
+                updatePoseState(PoseLabel.AWAY)
+                saveLog()
+            }
+        } else {
+            val input = preparePoseModelInput(poseLandmarks, faceLandmarks)
+            val result = poseClassifier.predict(input)
 
-        val predictedLabel = result.indices.maxByOrNull { result[it] } ?: -1
-        val labels = listOf(
-            PoseLabel.GOOD_POSE, PoseLabel.NFOCUS_LEAN_BACK,
-            PoseLabel.NFOCUS_LEAN_FOWARD, PoseLabel.NFOCUS_LEAN_SIDE,
-            PoseLabel.SLEEP_HEAD_BACK, PoseLabel.SLEEP_HEAD_DOWN,
-        )
-        intent {
-            reduce { state.copy(poseLabel = labels[predictedLabel]) }
-            updatePoseState(labels[predictedLabel])
-            saveLog()
+            val predictedLabel = result.indices.maxByOrNull { result[it] } ?: -1
+            val labels = listOf(
+                PoseLabel.GOOD_POSE, PoseLabel.NFOCUS_LEAN_BACK,
+                PoseLabel.NFOCUS_LEAN_FOWARD, PoseLabel.NFOCUS_LEAN_SIDE,
+                PoseLabel.SLEEP_HEAD_BACK, PoseLabel.SLEEP_HEAD_DOWN,
+            )
+            intent {
+                reduce { state.copy(poseLabel = labels[predictedLabel]) }
+                updatePoseState(labels[predictedLabel])
+                saveLog()
+            }
         }
     }
 
@@ -286,21 +301,36 @@ class CameraViewModel @Inject constructor(
     // 조건 확인
     fun checkStates(): List<Int> {
         val result = mutableListOf<Int>()
+        val poseState = getPoseState(stableState.stablePoseLabel)
+        val hasPen = stableState.stablePenInHand
 
-        if (stableState.stablePenInHand && !(getPoseState(stableState.stablePoseLabel) == 3)) result.add(1)
-        if (stableState.stablePenInHand && getPoseState(stableState.stablePoseLabel) == 1) result.add(
-            2
-        )
-        if (stableState.stablePenInHand && getPoseState(stableState.stablePoseLabel) == 2) result.add(
-            3
-        )
-        if (getPoseState(stableState.stablePoseLabel) == 3) result.add(4)
-        if (getPoseState(stableState.stablePoseLabel) == 0) result.add(5)
-        if (!stableState.stablePenInHand && (getPoseState(stableState.stablePoseLabel) == 1 || getPoseState(
-                stableState.stablePoseLabel
-            ) == 2)
-        ) result.add(6)
+        when (poseState) {
+            1 -> {
+                if (hasPen) {
+                    result.add(1)
+                    result.add(2)
+                } else {
+                    result.add(6)
+                }
+            }
 
+            2 -> {
+                if (hasPen) {
+                    result.add(1)
+                    result.add(3)
+                } else {
+                    result.add(6)
+                }
+            }
+
+            3 -> {
+                result.add(4)
+            }
+
+            4, 0 -> {
+                result.add(5)
+            }
+        }
         return result
 
     }
