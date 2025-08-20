@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -52,15 +53,16 @@ internal fun StatsRoute(
 
     StudifyScaffoldWithLogo(
         paddingValues = paddingValues,
-        leftActionButton = {
+        rightActionButton = {
             IconButton(
-                modifier = Modifier.size(width = 28.dp, height = 28.dp),
+                modifier = Modifier.size(width = 32.dp, height = 32.dp),
                 onClick = { }
             ) {
                 Icon(
-                    painter = painterResource(id = StudifyDrawable.ic_drawer),
+                    painter = painterResource(id = StudifyDrawable.ic_mypage),
                     contentDescription = null,
-                    modifier = Modifier.size(width = 20.dp, height = 14.dp)
+                    modifier = Modifier.size(width = 26.dp, height = 26.dp),
+                    tint = Color(0xFF454545)
                 )
             }
         }
