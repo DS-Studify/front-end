@@ -25,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,12 +35,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.component.ChartSegment
+import com.ds.studify.core.designsystem.component.StateTimeline
 import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
 import com.ds.studify.core.designsystem.component.StudifyTabBar
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
+import com.ds.studify.core.domain.entity.AnalysisEntity
+import com.ds.studify.core.domain.entity.TimeEntry
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatTimeInKorean
 import com.ds.studify.feature.analysis.component.AnalysisOutlinedButton
@@ -47,19 +52,40 @@ import com.ds.studify.feature.analysis.component.AnalysisPrimaryButton
 import com.ds.studify.feature.analysis.component.AnalysisProgressBar
 import com.ds.studify.feature.analysis.navigation.AnalysisNavigationDelegator
 import kotlinx.coroutines.launch
+import org.orbitmvi.orbit.compose.collectAsState
 
 @Composable
 internal fun AnalysisRoute(
-    navigationDelegator: AnalysisNavigationDelegator
+    navigationDelegator: AnalysisNavigationDelegator,
+    viewModel: AnalysisViewModel = hiltViewModel()
 ) {
-    AnalysisScreen(
-        navigationDelegator = navigationDelegator
-    )
+
+    val uiState by viewModel.collectAsState()
+
+    when (uiState) {
+        is AnalysisUiState.Data -> {
+            val state = uiState as AnalysisUiState.Data
+            AnalysisScreen(
+                navigationDelegator = navigationDelegator,
+                uiState = state
+            )
+        }
+
+        else -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = StudifyColors.WHITE)
+            )
+        }
+    }
+
 }
 
 @Composable
 internal fun AnalysisScreen(
-    navigationDelegator: AnalysisNavigationDelegator
+    navigationDelegator: AnalysisNavigationDelegator,
+    uiState: AnalysisUiState.Data,
 ) {
     val tabList = listOf(
         stringResource(StudifyString.study_time),
@@ -124,7 +150,7 @@ internal fun AnalysisScreen(
                         color = StudifyColors.BLACK
                     )
                     Text(
-                        text = formatTimeInKorean(24300),
+                        text = formatTimeInKorean(uiState.analysis.actualStudyTime.toInt()),
                         style = Typography.titleLarge,
                         color = StudifyColors.BLACK
                     )
@@ -132,8 +158,8 @@ internal fun AnalysisScreen(
 
                 AnalysisProgressBar(
                     modifier = Modifier.padding(horizontal = 20.dp),
-                    totalRecordTime = 32300,
-                    totalStudyTime = 24300
+                    totalRecordTime = uiState.analysis.recordTime.toInt(),
+                    totalStudyTime = uiState.analysis.actualStudyTime.toInt()
                 )
 
                 Row(
@@ -148,7 +174,7 @@ internal fun AnalysisScreen(
                         color = Color(0xFF6B6D71)
                     )
                     Text(
-                        text = formatTimeInKorean(32300),
+                        text = formatTimeInKorean(uiState.analysis.recordTime.toInt()),
                         style = Typography.bodySmall,
                         color = Color(0xFF6B6D71)
                     )
@@ -167,7 +193,10 @@ internal fun AnalysisScreen(
                     )
                     Spacer(modifier = Modifier.size(4.dp))
                     Text(
-                        text = stringResource(StudifyString.analysis_during_record_study, 85),
+                        text = stringResource(
+                            StudifyString.analysis_during_record_study,
+                            ((uiState.analysis.actualStudyTime.toFloat() / uiState.analysis.recordTime.toFloat()) * 100).toInt()
+                        ),
                         style = TextStyle(
                             fontFamily = pretendard,
                             fontWeight = FontWeight.Bold,
@@ -199,7 +228,7 @@ internal fun AnalysisScreen(
                 )
         ) {
             Text(
-                text = "오늘 학습 태도를 분석한 결과, 전체적으로 집중력이 높은 편이었습니다. 다만, 중간중간 자세가 흐트러지거나 시선이 다른 곳으로 향하는 순간이 몇 번 감지되었습니다. 앞으로는 짧은 휴식을 적절히 활용하면서 자세를 바로잡는 습관을 들이면 더욱 효과적인 학습이 가능할 거에요.",
+                text = uiState.analysis.aiFeedback,
                 style = Typography.bodySmall,
                 modifier = Modifier
                     .padding(top = 23.dp, bottom = 40.dp)
@@ -284,10 +313,26 @@ internal fun AnalysisScreen(
             }
         }
 
+        Text(
+            text = stringResource(StudifyString.analysis_state_timeline),
+            style = Typography.headlineSmall,
+            color = StudifyColors.BLACK,
+            modifier = Modifier
+                .padding(top = 50.dp, start = 24.dp, bottom = 10.dp)
+        )
+
+        StateTimeline(
+            timeLogs = uiState.analysis.timeLog,
+            startTime = uiState.analysis.startTime,
+            endTime = uiState.analysis.endTime,
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 70.dp)
+                .padding(top = 50.dp)
                 .padding(horizontal = 30.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -306,7 +351,53 @@ internal fun AnalysisScreen(
 @Preview
 @Composable
 private fun AnalysisScreenPreview() {
-    AnalysisScreen(
-        navigationDelegator = AnalysisNavigationDelegator()
+
+    val timeLog: Map<String, List<TimeEntry>> = mapOf(
+        "1" to listOf(
+            TimeEntry("2025-07-27T23:00:00", "2025-07-27T23:02:00"),
+            TimeEntry("2025-07-27T23:10:00", "2025-07-27T23:12:00"),
+        ),
+        "2" to listOf(
+            TimeEntry("2025-07-27T23:02:00", "2025-07-27T23:04:00"),
+            TimeEntry("2025-07-27T23:12:00", "2025-07-27T23:14:00"),
+        ),
+        "3" to listOf(
+            TimeEntry("2025-07-27T23:04:00", "2025-07-27T23:06:00"),
+            TimeEntry("2025-07-27T23:14:00", "2025-07-27T23:16:00"),
+        ),
+        "4" to listOf(
+            TimeEntry("2025-07-27T23:06:00", "2025-07-27T23:08:00"),
+            TimeEntry("2025-07-27T23:16:00", "2025-07-27T23:18:00"),
+        ),
+        "5" to listOf(
+            TimeEntry("2025-07-27T23:08:00", "2025-07-27T23:09:00"),
+            TimeEntry("2025-07-27T23:18:00", "2025-07-27T23:19:00"),
+        ),
+        "6" to listOf(
+            TimeEntry("2025-07-27T23:09:00", "2025-07-27T23:10:00"),
+            TimeEntry("2025-07-27T23:19:00", "2025-07-27T23:20:00"),
+        ),
     )
+
+
+    AnalysisScreen(
+        navigationDelegator = AnalysisNavigationDelegator(
+            onRestudyClick = {},
+            onStudyCloseClick = {}
+        ),
+        uiState = AnalysisUiState.Data(
+            analysis = AnalysisEntity(
+                studyRecordId = 1,
+                studyDate = "2025년 7월 27일 (일)",
+                startTime = "2025-07-27T23:00",
+                endTime = "2025-07-27T23:30",
+                recordTime = "1800",
+                recordRatio = 13,
+                actualStudyTime = "240",
+                timeLog = timeLog,
+                aiFeedback = "오늘 학습 태도를 분석한 결과, 전체적으로 집중력이 높은 편이었습니다. 다만, 중간중간 자세가 흐트러지거나 시선이 다른 곳으로 향하는 순간이 몇 번 감지되었습니다. 앞으로는 짧은 휴식을 적절히 활용하면서 자세를 바로잡는 습관을 들이면 더욱 효과적인 학습이 가능할 거에요."
+            )
+        )
+    )
+
 }

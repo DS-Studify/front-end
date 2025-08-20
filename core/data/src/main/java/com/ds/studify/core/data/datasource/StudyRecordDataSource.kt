@@ -4,6 +4,7 @@ import com.ds.studify.core.data.dto.response.BaseResponse
 import com.ds.studify.core.data.dto.response.ResponseCalendarDailyDto
 import com.ds.studify.core.data.dto.response.ResponseCalendarMonthlyDto
 import com.ds.studify.core.data.dto.response.ResponseFeedbackDto
+import com.ds.studify.core.data.dto.response.ResponseAnalysisDto
 import com.ds.studify.core.data.dto.response.ResponseHomeDto
 import com.ds.studify.core.data.dto.response.ResponsePieChartDto
 import com.ds.studify.core.data.service.StudyRecordService
@@ -26,4 +27,9 @@ class StudyRecordDataSource @Inject constructor(
 
     suspend fun getPieChart(studyRecordId: Long, tab: String): BaseResponse<List<ResponsePieChartDto>> =
         studyRecordService.getPieChart(studyRecordId = studyRecordId, tab = tab)
+        
+    suspend fun getAnalysis(
+        studyRecordId: Int
+    ): BaseResponse<ResponseAnalysisDto> =
+        studyRecordService.getAnalysis(studyRecordId)
 }

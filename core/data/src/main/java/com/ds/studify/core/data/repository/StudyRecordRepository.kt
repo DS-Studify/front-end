@@ -3,6 +3,8 @@ package com.ds.studify.core.data.repository
 import com.ds.studify.core.domain.entity.CalendarDailyEntity
 import com.ds.studify.core.domain.entity.CalendarMonthlyEntity
 import com.ds.studify.core.domain.entity.FeedbackEntity
+import com.ds.studify.core.domain.entity.AnalysisEntity
+import com.ds.studify.core.domain.entity.CalendarEntity
 import com.ds.studify.core.domain.entity.HomeEntity
 import com.ds.studify.core.domain.entity.PieChartEntity
 
@@ -16,4 +18,6 @@ interface StudyRecordRepository {
     suspend fun getFeedback(studyRecordId: Long): Result<FeedbackEntity>
 
     suspend fun getPieChart(studyRecordId: Long, tab: String): Result<List<PieChartEntity>>
+  
+    suspend fun getAnalysis(studyRecordId: Int): Result<AnalysisEntity>
 }
