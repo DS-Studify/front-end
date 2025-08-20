@@ -3,8 +3,11 @@ package com.ds.studify.core.data.service
 import com.ds.studify.core.data.dto.response.BaseResponse
 import com.ds.studify.core.data.dto.response.ResponseCalendarDailyDto
 import com.ds.studify.core.data.dto.response.ResponseCalendarMonthlyDto
+import com.ds.studify.core.data.dto.response.ResponseFeedbackDto
 import com.ds.studify.core.data.dto.response.ResponseHomeDto
+import com.ds.studify.core.data.dto.response.ResponsePieChartDto
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface StudyRecordService {
@@ -21,4 +24,15 @@ interface StudyRecordService {
     suspend fun getCalendarDaily(
         @Query("date") date: String
     ): BaseResponse<ResponseCalendarDailyDto>
+
+    @GET("/record/{studyRecordId}/feedback")
+    suspend fun getFeedback(
+        @Path("studyRecordId") studyRecordId: Long
+    ): BaseResponse<ResponseFeedbackDto>
+
+    @GET("/record/{studyRecordId}/pie-chart")
+    suspend fun getPieChart(
+        @Path("studyRecordId") studyRecordId: Long,
+        @Query("tab") tab: String
+    ): BaseResponse<List<ResponsePieChartDto>>
 }
