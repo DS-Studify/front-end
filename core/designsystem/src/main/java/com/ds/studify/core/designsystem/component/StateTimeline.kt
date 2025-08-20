@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,15 +72,12 @@ fun StateTimeline(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(500.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(color = StudifyColors.PK01),
-        contentAlignment = Alignment.Center
+            .background(color = StudifyColors.PK01)
+            .padding(start = 6.dp, end = 14.dp)
+            .padding(vertical = 12.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(end = 3.dp)
-        ) {
+        Row {
             Column(
                 modifier = Modifier
                     .height(430.dp)
@@ -91,26 +87,26 @@ fun StateTimeline(
             ) {
                 Text(
                     text = LocalDateTime.parse(startTime, isoFormatter).format(timeFormatter),
-                    style = Typography.bodySmall
+                    style = Typography.labelSmall
                 )
                 Text(
                     text = LocalDateTime.parse(endTime, isoFormatter).format(timeFormatter),
-                    style = Typography.bodySmall
+                    style = Typography.labelSmall
                 )
             }
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 (1..6).forEach { stateId ->
                     Column(
-                        modifier = Modifier
-                            .height(470.dp),
+                        modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Top
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(47.dp)
+                                .fillMaxWidth()
                                 .height(430.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(color = StudifyColors.G01)
