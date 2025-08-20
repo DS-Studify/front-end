@@ -13,6 +13,6 @@ class StudyDataSource @Inject constructor(
     suspend fun postRecord(request: RequestRecordDto): BaseResponse<JsonElement?> =
         studyService.postRecord(request = request)
 
-    suspend fun getAnalysis(studyRecordId: Int): BaseResponse<ResponseAnalysisDto> =
+    suspend fun getAnalysis(studyRecordId: Long): BaseResponse<ResponseAnalysisDto> =
         studyService.getAnalysis(studyRecordId)
 }

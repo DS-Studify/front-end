@@ -18,7 +18,7 @@ class StudyRepositoryImpl @Inject constructor(
             ).data
         }
 
-    override suspend fun getAnalysis(studyRecordId: Int): Result<AnalysisEntity> =
+    override suspend fun getAnalysis(studyRecordId: Long): Result<AnalysisEntity> =
         runCatching {
             studyDataSource.getAnalysis(studyRecordId).data.toEntity()
         }

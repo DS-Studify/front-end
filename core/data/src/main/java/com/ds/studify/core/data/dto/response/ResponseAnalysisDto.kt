@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ResponseAnalysisDto(
     @SerialName("studyRecordId")
-    val studyRecordId: Int,
+    val studyRecordId: Long,
     @SerialName("studyDate")
     val studyDate: String,
     @SerialName("startTime")

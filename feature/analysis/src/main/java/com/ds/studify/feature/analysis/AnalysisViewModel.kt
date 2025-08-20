@@ -1,9 +1,13 @@
 package com.ds.studify.feature.analysis
 
 import androidx.lifecycle.ViewModel
+import com.ds.studify.core.data.repository.StudyRecordRepository
 import com.ds.studify.core.data.repository.StudyRepository
 import com.ds.studify.core.domain.entity.AnalysisEntity
+import com.ds.studify.core.domain.entity.PieChartEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
@@ -11,15 +15,22 @@ import javax.inject.Inject
 sealed interface AnalysisUiState {
     data object Loading : AnalysisUiState
     data class Data(
-        val analysis: AnalysisEntity
+        val currentTab: Int,
+        val analysis: AnalysisEntity,
+        val pieChart: List<PieChartEntity>
     ) : AnalysisUiState
 
     data class Error(val message: String) : AnalysisUiState
 }
 
+sealed interface AnalysisUiEvent {
+    data class ChangeTabIndex(val index: Int) : AnalysisUiEvent
+}
+
 @HiltViewModel
 class AnalysisViewModel @Inject constructor(
-    private val studyRepository: StudyRepository
+    private val studyRepository: StudyRepository,
+    private val studyRecordRepository: StudyRecordRepository
 ) : ViewModel(), ContainerHost<AnalysisUiState, Nothing> {
 
     override val container = container<AnalysisUiState, Nothing>(
@@ -28,20 +39,61 @@ class AnalysisViewModel @Inject constructor(
         loadAnalysis(studyRecordId = 28)
     }
 
-    private fun loadAnalysis(studyRecordId: Int) = intent {
-        val result = studyRepository.getAnalysis(studyRecordId)
+    private fun loadAnalysis(studyRecordId: Long) = intent {
+        coroutineScope {
+            val analysisDeferred = async { studyRepository.getAnalysis(studyRecordId) }
+            val pieChartDeferred =
+                async { studyRecordRepository.getPieChart(studyRecordId, "study_time") }
 
-        if (result.isSuccess) {
+            val analysisResult = analysisDeferred.await()
+            val pieChartResult = pieChartDeferred.await()
+
+            val analysis = analysisResult.getOrElse { error ->
+                reduce { AnalysisUiState.Error(error.message ?: "분석 결과 로드 실패") }
+                return@coroutineScope
+            }
+            val pieChart = pieChartResult.getOrElse { error ->
+                reduce { AnalysisUiState.Error(error.message ?: "Pie Chart 로드 실패") }
+                return@coroutineScope
+            }
 
             reduce {
                 AnalysisUiState.Data(
-                    analysis = result.getOrThrow()
+                    currentTab = 0,
+                    analysis = analysis,
+                    pieChart = pieChart
                 )
             }
-
-        } else {
-            AnalysisUiState.Error(result.exceptionOrNull()?.message ?: "오류 발생")
         }
     }
 
+    fun onEvent(event: AnalysisUiEvent) {
+        when (event) {
+            is AnalysisUiEvent.ChangeTabIndex -> intent {
+                val uiState = state as? AnalysisUiState.Data ?: return@intent
+
+                val currentTab = when (event.index) {
+                    0 -> "study_time"
+                    1 -> "focus"
+                    else -> "pose"
+                }
+
+                studyRecordRepository.getPieChart(
+                    studyRecordId = uiState.analysis.studyRecordId,
+                    tab = currentTab
+                ).onSuccess { response ->
+                    reduce {
+                        uiState.copy(
+                            currentTab = event.index,
+                            pieChart = response
+                        )
+                    }
+                }.onFailure { error ->
+                    reduce {
+                        AnalysisUiState.Error(error.message ?: "Pie Chart 로드 실패")
+                    }
+                }
+            }
+        }
+    }
 }

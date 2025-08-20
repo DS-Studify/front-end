@@ -38,12 +38,28 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
+import com.ds.studify.core.domain.entity.PieChartEntity
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.ui.extension.formatTimeInKorean
 import kotlin.math.cos
 import kotlin.math.sin
 
 data class ChartSegment(val label: String, val color: Color, val time: Int)
+
+fun List<PieChartEntity>.toChartSegments(): List<ChartSegment> {
+    val palette = when (size) {
+        2 -> listOf(StudifyColors.PK02, StudifyColors.G01)
+        else -> listOf(StudifyColors.PK02, StudifyColors.G03, StudifyColors.G02, StudifyColors.G01)
+    }
+
+    return this.mapIndexed { index, entity ->
+        ChartSegment(
+            label = entity.label,
+            color = palette.getOrElse(index) { palette.last() },
+            time = entity.time
+        )
+    }
+}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

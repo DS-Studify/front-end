@@ -32,11 +32,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ds.studify.core.designsystem.component.ChartSegment
 import com.ds.studify.core.designsystem.component.StateTimeline
 import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithTitle
 import com.ds.studify.core.designsystem.component.StudifyTabBar
+import com.ds.studify.core.designsystem.component.toChartSegments
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
@@ -244,21 +244,6 @@ internal fun FeedbackScreen(
             endTime = uiState.feedback.endTime,
             modifier = Modifier
                 .padding(horizontal = 20.dp)
-        )
-    }
-}
-
-fun List<PieChartEntity>.toChartSegments(): List<ChartSegment> {
-    val palette = when (size) {
-        2 -> listOf(StudifyColors.PK02, StudifyColors.G02)
-        else -> listOf(StudifyColors.PK02, StudifyColors.G03, StudifyColors.G02, StudifyColors.G01)
-    }
-
-    return this.mapIndexed { index, entity ->
-        ChartSegment(
-            label = entity.label,
-            color = palette.getOrElse(index) { palette.last() },
-            time = entity.time
         )
     }
 }
