@@ -287,7 +287,7 @@ class CameraViewModel @Inject constructor(
     fun checkStates(): List<Int> {
         val result = mutableListOf<Int>()
 
-        if (stableState.stablePenInHand) result.add(1)
+        if (stableState.stablePenInHand && !(getPoseState(stableState.stablePoseLabel) == 3)) result.add(1)
         if (stableState.stablePenInHand && getPoseState(stableState.stablePoseLabel) == 1) result.add(
             2
         )
