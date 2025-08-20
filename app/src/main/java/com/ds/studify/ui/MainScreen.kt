@@ -52,8 +52,7 @@ fun MainScreen(
                 )
 
                 statsScreen(
-                    statsNavigationDelegator,
-                    innerPadding
+                    statsNavigationDelegator
                 )
             }
         }

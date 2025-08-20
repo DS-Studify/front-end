@@ -4,37 +4,29 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ds.studify.core.designsystem.component.StudifyScaffoldWithLogo
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.domain.entity.CalendarDailyEntity
 import com.ds.studify.core.domain.entity.CalendarMonthlyEntity
-import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatTimeInKorean
 import com.ds.studify.feature.calendar.component.StatsCalendar
@@ -45,70 +37,49 @@ import java.time.YearMonth
 
 @Composable
 internal fun StatsRoute(
-    paddingValues: PaddingValues,
     onNavigateToFeedback: (Long) -> Unit,
     viewModel: StatsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
 
-    StudifyScaffoldWithLogo(
-        paddingValues = paddingValues,
-        rightActionButton = {
-            IconButton(
-                modifier = Modifier.size(width = 32.dp, height = 32.dp),
-                onClick = { }
-            ) {
-                Icon(
-                    painter = painterResource(id = StudifyDrawable.ic_mypage),
-                    contentDescription = null,
-                    modifier = Modifier.size(width = 26.dp, height = 26.dp),
-                    tint = Color(0xFF454545)
-                )
-            }
+    when (uiState) {
+        is StatsUiState.Data -> {
+            val state = uiState as StatsUiState.Data
+            StatsScreen(
+                uiState = state,
+                onEvent = viewModel::onEvent,
+                onNavigateToFeedback = { id ->
+                    onNavigateToFeedback(id)
+                }
+            )
         }
-    ) { innerPadding ->
-        when (uiState) {
-            is StatsUiState.Data -> {
-                val state = uiState as StatsUiState.Data
-                StatsScreen(
-                    paddingValues = innerPadding,
-                    uiState = state,
-                    onEvent = viewModel::onEvent,
-                    onNavigateToFeedback = { id ->
-                        onNavigateToFeedback(id)
-                    }
-                )
-            }
 
-            else -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = StudifyColors.WHITE)
-                )
-            }
+        else -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = StudifyColors.WHITE)
+            )
         }
     }
 }
 
 @Composable
 internal fun StatsScreen(
-    paddingValues: PaddingValues,
     uiState: StatsUiState.Data,
     onEvent: (StatsUiEvent) -> Unit,
     onNavigateToFeedback: (Long) -> Unit
 ) {
     val scrollState = rememberScrollState()
+    val insets = WindowInsets.statusBars.asPaddingValues()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(color = StudifyColors.WHITE)
             .padding(
-                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding()
+                top = 40.dp,
+                bottom = insets.calculateBottomPadding()
             )
             .verticalScroll(scrollState)
     ) {
@@ -198,7 +169,6 @@ internal fun StatsScreen(
 @Composable
 private fun StatsScreenPreview() {
     StatsScreen(
-        paddingValues = PaddingValues(0.dp),
         uiState = StatsUiState.Data(
             selectedYearMonth = YearMonth.now(),
             selectedDate = LocalDate.now(),
