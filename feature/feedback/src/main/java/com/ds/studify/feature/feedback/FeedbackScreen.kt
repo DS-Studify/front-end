@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ds.studify.core.designsystem.component.ChartSegment
+import com.ds.studify.core.designsystem.component.StateTimeline
 import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithTitle
 import com.ds.studify.core.designsystem.component.StudifyTabBar
@@ -41,6 +42,7 @@ import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
 import com.ds.studify.core.domain.entity.FeedbackEntity
 import com.ds.studify.core.domain.entity.PieChartEntity
+import com.ds.studify.core.domain.entity.TimeEntry
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatTimeInKorean
 import kotlinx.coroutines.launch
@@ -226,7 +228,23 @@ internal fun FeedbackScreen(
             )
         }
 
-        //TODO: 타임라인
+        Text(
+            text = stringResource(StudifyString.analysis_state_timeline),
+            fontFamily = pretendard,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 14.sp,
+            color = StudifyColors.BLACK,
+            modifier = Modifier
+                .padding(start = 23.dp, bottom = 10.dp)
+        )
+
+        StateTimeline(
+            timeLogs = uiState.feedback.timeLog,
+            startTime = uiState.feedback.startTime,
+            endTime = uiState.feedback.endTime,
+            modifier = Modifier
+                .padding(horizontal = 20.dp)
+        )
     }
 }
 
@@ -260,21 +278,21 @@ private fun FeedbackScreenPreview() {
                 actualStudyTime = 240,
                 timeLog = mapOf(
                     "1" to listOf(
-                        FeedbackEntity.TimeLog(
+                        TimeEntry(
                             startTime = "2025-07-27T23:00:00",
                             endTime = "2025-07-27T23:02:00"
                         ),
-                        FeedbackEntity.TimeLog(
+                        TimeEntry(
                             startTime = "2025-07-27T23:10:00",
                             endTime = "2025-07-27T23:12:00"
                         )
                     ),
                     "2" to listOf(
-                        FeedbackEntity.TimeLog(
+                        TimeEntry(
                             startTime = "2025-07-27T23:02:00",
                             endTime = "2025-07-27T23:04:00"
                         ),
-                        FeedbackEntity.TimeLog(
+                        TimeEntry(
                             startTime = "2025-07-27T23:20:00",
                             endTime = "2025-07-27T23:22:00"
                         )
