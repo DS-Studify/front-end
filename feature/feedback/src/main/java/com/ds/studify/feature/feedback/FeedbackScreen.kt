@@ -39,7 +39,10 @@ import com.ds.studify.core.designsystem.component.StudifyTabBar
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
+import com.ds.studify.core.domain.entity.FeedbackEntity
+import com.ds.studify.core.domain.entity.PieChartEntity
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.core.ui.extension.formatTimeInKorean
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -51,10 +54,9 @@ internal fun FeedbackRoute(
     val uiState by viewModel.collectAsState()
 
     when (val state = uiState) {
-        FeedbackState.Loading -> {}
-        is FeedbackState.Screen -> {
+        is FeedbackState.Success -> {
             StudifyScaffoldWithTitle(
-                title = state.studyDate,
+                title = state.feedback.studyDate,
                 onBackButtonClick = onBack
             ) { paddingValues ->
                 Box(
@@ -70,13 +72,21 @@ internal fun FeedbackRoute(
                 }
             }
         }
+
+        else -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = StudifyColors.WHITE)
+            )
+        }
     }
 }
 
 @Composable
 internal fun FeedbackScreen(
     paddingValues: PaddingValues,
-    uiState: FeedbackState.Screen,
+    uiState: FeedbackState.Success,
     onTabEvent: (Int) -> Unit
 ) {
     val tabList = listOf(
@@ -143,7 +153,7 @@ internal fun FeedbackScreen(
                         fontSize = 14.sp,
                     )
                     Text(
-                        text = "6시간 45분",
+                        text = formatTimeInKorean(uiState.feedback.actualStudyTime),
                         color = StudifyColors.PK03,
                         style = Typography.headlineSmall
                     )
@@ -171,56 +181,17 @@ internal fun FeedbackScreen(
         ) { page ->
             when (page) {
                 0 -> StudifyDonutChartWithState(
-                    listOf(
-                        ChartSegment(
-                            stringResource(StudifyString.study),
-                            StudifyColors.PK02,
-                            24300
-                        ),
-                        ChartSegment(
-                            stringResource(StudifyString.sleep),
-                            StudifyColors.G03,
-                            4200
-                        ),
-                        ChartSegment(
-                            stringResource(StudifyString.emptiness_of_seat),
-                            StudifyColors.G02,
-                            2800
-                        ),
-                        ChartSegment(stringResource(StudifyString.etc), StudifyColors.G01, 4800)
-                    ),
+                    chartData = uiState.pieChart.toChartSegments(),
                     stringResource(StudifyString.analysis_study_time_description)
                 )
 
                 1 -> StudifyDonutChartWithState(
-                    listOf(
-                        ChartSegment(
-                            stringResource(StudifyString.focus),
-                            StudifyColors.PK02,
-                            24300
-                        ),
-                        ChartSegment(
-                            stringResource(StudifyString.not_focus),
-                            StudifyColors.G01,
-                            12000
-                        ),
-                    ),
+                    chartData = uiState.pieChart.toChartSegments(),
                     stringResource(StudifyString.analysis_focus_description)
                 )
 
                 2 -> StudifyDonutChartWithState(
-                    listOf(
-                        ChartSegment(
-                            stringResource(StudifyString.good_pose),
-                            StudifyColors.PK02,
-                            24300
-                        ),
-                        ChartSegment(
-                            stringResource(StudifyString.bad_pose),
-                            StudifyColors.G01,
-                            12000
-                        ),
-                    ),
+                    chartData = uiState.pieChart.toChartSegments(),
                     stringResource(StudifyString.analysis_pose_description)
                 )
             }
@@ -247,7 +218,7 @@ internal fun FeedbackScreen(
                 )
         ) {
             Text(
-                text = "오늘 학습 태도를 분석한 결과, 전체적으로 집중력이 높은 편이었습니다. 다만, 중간중간 자세가 흐트러지거나 시선이 다른 곳으로 향하는 순간이 몇 번 감지되었습니다. 앞으로는 짧은 휴식을 적절히 활용하면서 자세를 바로잡는 습관을 들이면 더욱 효과적인 학습이 가능할 거에요.",
+                text = uiState.feedback.aiFeedback,
                 style = Typography.bodySmall,
                 modifier = Modifier
                     .padding(top = 23.dp, bottom = 40.dp)
@@ -259,14 +230,76 @@ internal fun FeedbackScreen(
     }
 }
 
+fun List<PieChartEntity>.toChartSegments(): List<ChartSegment> {
+    val palette = when (size) {
+        2 -> listOf(StudifyColors.PK02, StudifyColors.G02)
+        else -> listOf(StudifyColors.PK02, StudifyColors.G03, StudifyColors.G02, StudifyColors.G01)
+    }
+
+    return this.mapIndexed { index, entity ->
+        ChartSegment(
+            label = entity.label,
+            color = palette.getOrElse(index) { palette.last() },
+            time = entity.time
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun FeedbackScreenPreview() {
     FeedbackScreen(
         paddingValues = PaddingValues(0.dp),
-        uiState = FeedbackState.Screen(
+        uiState = FeedbackState.Success(
             currentTab = 0,
-            studyDate = "2025년 8월 3일"
+            feedback = FeedbackEntity(
+                studyRecordId = 1,
+                studyDate = "2025년 8월 17일 (일)",
+                startTime = "2025-08-17T23:00",
+                endTime = "2025-08-17T23:30",
+                actualStudyTime = 240,
+                timeLog = mapOf(
+                    "1" to listOf(
+                        FeedbackEntity.TimeLog(
+                            startTime = "2025-07-27T23:00:00",
+                            endTime = "2025-07-27T23:02:00"
+                        ),
+                        FeedbackEntity.TimeLog(
+                            startTime = "2025-07-27T23:10:00",
+                            endTime = "2025-07-27T23:12:00"
+                        )
+                    ),
+                    "2" to listOf(
+                        FeedbackEntity.TimeLog(
+                            startTime = "2025-07-27T23:02:00",
+                            endTime = "2025-07-27T23:04:00"
+                        ),
+                        FeedbackEntity.TimeLog(
+                            startTime = "2025-07-27T23:20:00",
+                            endTime = "2025-07-27T23:22:00"
+                        )
+                    )
+                ),
+                aiFeedback = "오늘 학습 태도를 분석한 결과, 전체적으로 집중력이 높은 편이었습니다. 다만, 중간중간 자세가 흐트러지거나 시선이 다른 곳으로 향하는 순간이 몇 번 감지되었습니다. 앞으로는 짧은 휴식을 적절히 활용하면서 자세를 바로잡는 습관을 들이면 더욱 효과적인 학습이 가능할 거에요."
+            ),
+            pieChart = listOf(
+                PieChartEntity(
+                    label = "공부",
+                    time = 24300
+                ),
+                PieChartEntity(
+                    label = "졸음",
+                    time = 4200
+                ),
+                PieChartEntity(
+                    label = "자리비움",
+                    time = 2800
+                ),
+                PieChartEntity(
+                    label = "기타",
+                    time = 4800
+                )
+            )
         ),
         onTabEvent = {}
     )
