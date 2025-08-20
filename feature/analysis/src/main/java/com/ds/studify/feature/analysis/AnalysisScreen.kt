@@ -36,14 +36,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.ds.studify.core.designsystem.component.ChartSegment
 import com.ds.studify.core.designsystem.component.StateTimeline
 import com.ds.studify.core.designsystem.component.StudifyDonutChartWithState
 import com.ds.studify.core.designsystem.component.StudifyTabBar
+import com.ds.studify.core.designsystem.component.toChartSegments
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.designsystem.theme.pretendard
 import com.ds.studify.core.domain.entity.AnalysisEntity
+import com.ds.studify.core.domain.entity.PieChartEntity
 import com.ds.studify.core.domain.entity.TimeEntry
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.core.ui.extension.formatTimeInKorean
@@ -67,7 +68,10 @@ internal fun AnalysisRoute(
             val state = uiState as AnalysisUiState.Data
             AnalysisScreen(
                 navigationDelegator = navigationDelegator,
-                uiState = state
+                uiState = state,
+                onTabEvent = {
+                    viewModel.onEvent(AnalysisUiEvent.ChangeTabIndex(it))
+                }
             )
         }
 
@@ -86,6 +90,7 @@ internal fun AnalysisRoute(
 internal fun AnalysisScreen(
     navigationDelegator: AnalysisNavigationDelegator,
     uiState: AnalysisUiState.Data,
+    onTabEvent: (Int) -> Unit
 ) {
     val tabList = listOf(
         stringResource(StudifyString.study_time),
@@ -101,8 +106,12 @@ internal fun AnalysisScreen(
     }
     val insets = WindowInsets.navigationBars.asPaddingValues()
 
-    LaunchedEffect(pagerState) {
-        pagerState.scrollToPage(pagerState.currentPage)
+    LaunchedEffect(pagerState.currentPage) {
+        onTabEvent(pagerState.currentPage)
+    }
+
+    LaunchedEffect(uiState.currentTab) {
+        pagerState.scrollToPage(uiState.currentTab)
     }
 
     Column(
@@ -257,56 +266,17 @@ internal fun AnalysisScreen(
             ) { page ->
                 when (page) {
                     0 -> StudifyDonutChartWithState(
-                        listOf(
-                            ChartSegment(
-                                stringResource(StudifyString.study),
-                                StudifyColors.PK02,
-                                24300
-                            ),
-                            ChartSegment(
-                                stringResource(StudifyString.sleep),
-                                StudifyColors.G03,
-                                4200
-                            ),
-                            ChartSegment(
-                                stringResource(StudifyString.emptiness_of_seat),
-                                StudifyColors.G02,
-                                2800
-                            ),
-                            ChartSegment(stringResource(StudifyString.etc), StudifyColors.G01, 4800)
-                        ),
+                        chartData = uiState.pieChart.toChartSegments(),
                         stringResource(StudifyString.analysis_study_time_description)
                     )
 
                     1 -> StudifyDonutChartWithState(
-                        listOf(
-                            ChartSegment(
-                                stringResource(StudifyString.focus),
-                                StudifyColors.PK02,
-                                24300
-                            ),
-                            ChartSegment(
-                                stringResource(StudifyString.not_focus),
-                                StudifyColors.G01,
-                                12000
-                            ),
-                        ),
+                        chartData = uiState.pieChart.toChartSegments(),
                         stringResource(StudifyString.analysis_focus_description)
                     )
 
                     2 -> StudifyDonutChartWithState(
-                        listOf(
-                            ChartSegment(
-                                stringResource(StudifyString.good_pose),
-                                StudifyColors.PK02,
-                                24300
-                            ),
-                            ChartSegment(
-                                stringResource(StudifyString.bad_pose),
-                                StudifyColors.G01,
-                                12000
-                            ),
-                        ),
+                        chartData = uiState.pieChart.toChartSegments(),
                         stringResource(StudifyString.analysis_pose_description)
                     )
                 }
@@ -379,13 +349,13 @@ private fun AnalysisScreenPreview() {
         ),
     )
 
-
     AnalysisScreen(
         navigationDelegator = AnalysisNavigationDelegator(
             onRestudyClick = {},
             onStudyCloseClick = {}
         ),
         uiState = AnalysisUiState.Data(
+            currentTab = 0,
             analysis = AnalysisEntity(
                 studyRecordId = 1,
                 studyDate = "2025년 7월 27일 (일)",
@@ -396,8 +366,26 @@ private fun AnalysisScreenPreview() {
                 actualStudyTime = "240",
                 timeLog = timeLog,
                 aiFeedback = "오늘 학습 태도를 분석한 결과, 전체적으로 집중력이 높은 편이었습니다. 다만, 중간중간 자세가 흐트러지거나 시선이 다른 곳으로 향하는 순간이 몇 번 감지되었습니다. 앞으로는 짧은 휴식을 적절히 활용하면서 자세를 바로잡는 습관을 들이면 더욱 효과적인 학습이 가능할 거에요."
+            ),
+            pieChart = listOf(
+                PieChartEntity(
+                    label = "공부",
+                    time = 24300
+                ),
+                PieChartEntity(
+                    label = "졸음",
+                    time = 4200
+                ),
+                PieChartEntity(
+                    label = "자리비움",
+                    time = 2800
+                ),
+                PieChartEntity(
+                    label = "기타",
+                    time = 4800
+                )
             )
-        )
+        ),
+        onTabEvent = {}
     )
-
 }
