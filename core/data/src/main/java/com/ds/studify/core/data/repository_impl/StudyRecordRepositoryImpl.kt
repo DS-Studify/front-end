@@ -3,7 +3,6 @@ package com.ds.studify.core.data.repository_impl
 import com.ds.studify.core.data.datasource.StudyRecordDataSource
 import com.ds.studify.core.data.dto.response.toEntity
 import com.ds.studify.core.data.repository.StudyRecordRepository
-import com.ds.studify.core.domain.entity.AnalysisEntity
 import com.ds.studify.core.domain.entity.CalendarDailyEntity
 import com.ds.studify.core.domain.entity.CalendarMonthlyEntity
 import com.ds.studify.core.domain.entity.FeedbackEntity
@@ -44,10 +43,5 @@ class StudyRecordRepositoryImpl @Inject constructor(
                 studyRecordId = studyRecordId,
                 tab = tab
             ).data.toEntity()
-        }
-        
-    override suspend fun getAnalysis(studyRecordId: Int): Result<AnalysisEntity> =
-        runCatching {
-            studyRecordDataSource.getAnalysis(studyRecordId).data.toEntity()
         }
 }

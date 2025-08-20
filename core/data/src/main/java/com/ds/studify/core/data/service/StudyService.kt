@@ -2,9 +2,12 @@ package com.ds.studify.core.data.service
 
 import com.ds.studify.core.data.dto.request.RequestRecordDto
 import com.ds.studify.core.data.dto.response.BaseResponse
+import com.ds.studify.core.data.dto.response.ResponseAnalysisDto
 import kotlinx.serialization.json.JsonElement
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface StudyService {
 
@@ -12,4 +15,9 @@ interface StudyService {
     suspend fun postRecord(
         @Body request: RequestRecordDto
     ): BaseResponse<JsonElement?>
+
+    @GET("/record/{studyRecordId}/result")
+    suspend fun getAnalysis(
+        @Path("studyRecordId") studyRecordId: Int
+    ): BaseResponse<ResponseAnalysisDto>
 }
