@@ -29,7 +29,7 @@ internal val APP_LOGO_TITLE_HEIGHT_DP = 56.dp
 @Composable
 fun StudifyScaffoldWithLogo(
     paddingValues: PaddingValues,
-    leftActionButton: @Composable (RowScope.() -> Unit)? = null,
+    rightActionButton: @Composable (RowScope.() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Box {
@@ -48,13 +48,13 @@ fun StudifyScaffoldWithLogo(
                 .height(APP_LOGO_TITLE_HEIGHT_DP)
                 .background(color = StudifyColors.WHITE)
         ) {
-            leftActionButton?.let {
+            rightActionButton?.let {
                 Row(
                     modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(start = 21.dp)
+                        .align(Alignment.CenterEnd)
+                        .padding(top = 4.dp, end = 22.dp)
                 ) {
-                    leftActionButton()
+                    rightActionButton()
                 }
             }
 
