@@ -6,11 +6,6 @@ data class FeedbackEntity(
     val startTime: String,
     val endTime: String,
     val actualStudyTime: Int,
-    val timeLog: Map<String, List<TimeLog>>,
+    val timeLog: Map<String, List<TimeEntry>>,
     val aiFeedback: String
-) {
-    data class TimeLog(
-        val startTime: String,
-        val endTime: String
-    )
-}
+)

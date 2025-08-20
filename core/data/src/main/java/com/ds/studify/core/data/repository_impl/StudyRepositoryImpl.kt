@@ -3,6 +3,7 @@ package com.ds.studify.core.data.repository_impl
 import com.ds.studify.core.data.datasource.StudyDataSource
 import com.ds.studify.core.data.dto.request.toDto
 import com.ds.studify.core.data.repository.StudyRepository
+import com.ds.studify.core.domain.entity.AnalysisEntity
 import com.ds.studify.core.domain.entity.CameraEntity
 import kotlinx.serialization.json.JsonElement
 import javax.inject.Inject
@@ -15,5 +16,10 @@ class StudyRepositoryImpl @Inject constructor(
             studyDataSource.postRecord(
                 request = entity.toDto()
             ).data
+        }
+
+    override suspend fun getAnalysis(studyRecordId: Int): Result<AnalysisEntity> =
+        runCatching {
+            studyDataSource.getAnalysis(studyRecordId).data.toEntity()
         }
 }

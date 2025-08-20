@@ -6,9 +6,6 @@ import com.ds.studify.core.data.dto.response.ResponseCalendarMonthlyDto
 import com.ds.studify.core.data.dto.response.ResponseFeedbackDto
 import com.ds.studify.core.data.dto.response.ResponseHomeDto
 import com.ds.studify.core.data.dto.response.ResponsePieChartDto
-import com.ds.studify.core.data.dto.response.ResponseAnalysisDto
-import com.ds.studify.core.data.dto.response.ResponseHomeDto
-import retrofit2.http.Path
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -38,9 +35,4 @@ interface StudyRecordService {
         @Path("studyRecordId") studyRecordId: Long,
         @Query("tab") tab: String
     ): BaseResponse<List<ResponsePieChartDto>>
-
-    @GET("/record/{studyRecordId}/result")
-    suspend fun getAnalysis(
-        @Path("studyRecordId") studyRecordId: Int
-    ): BaseResponse<ResponseAnalysisDto>
 }

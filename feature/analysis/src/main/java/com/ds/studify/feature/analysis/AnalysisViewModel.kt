@@ -1,7 +1,7 @@
 package com.ds.studify.feature.analysis
 
 import androidx.lifecycle.ViewModel
-import com.ds.studify.core.data.repository.StudyRecordRepository
+import com.ds.studify.core.data.repository.StudyRepository
 import com.ds.studify.core.domain.entity.AnalysisEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import org.orbitmvi.orbit.ContainerHost
@@ -19,7 +19,7 @@ sealed interface AnalysisUiState {
 
 @HiltViewModel
 class AnalysisViewModel @Inject constructor(
-    private val studyRecordRepository: StudyRecordRepository
+    private val studyRepository: StudyRepository
 ) : ViewModel(), ContainerHost<AnalysisUiState, Nothing> {
 
     override val container = container<AnalysisUiState, Nothing>(
@@ -29,7 +29,7 @@ class AnalysisViewModel @Inject constructor(
     }
 
     private fun loadAnalysis(studyRecordId: Int) = intent {
-        val result = studyRecordRepository.getAnalysis(studyRecordId)
+        val result = studyRepository.getAnalysis(studyRecordId)
 
         if (result.isSuccess) {
 
