@@ -37,7 +37,7 @@ import com.ds.studify.core.designsystem.theme.pretendard
 import com.ds.studify.core.domain.entity.HomeEntity
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
-import com.ds.studify.core.ui.extension.formatRecordDuration
+import com.ds.studify.core.ui.extension.formatTimeToColon
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -120,7 +120,7 @@ internal fun HomeScreen(
             }
 
             Text(
-                text = formatRecordDuration(uiState.home.todayStudyTime),
+                text = formatTimeToColon(uiState.home.todayStudyTime),
                 fontFamily = pretendard,
                 fontWeight = FontWeight.Bold,
                 fontSize = 58.sp,

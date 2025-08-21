@@ -9,7 +9,7 @@ data class ResponseHomeDto(
     @SerialName("nickName")
     val nickName: String,
     @SerialName("todayStudyTime")
-    val todayStudyTime: Long
+    val todayStudyTime: Int
 ) {
     fun toEntity() = HomeEntity(
         nickName = this.nickName,
