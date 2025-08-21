@@ -114,9 +114,7 @@ internal fun CameraScreen(
     }
 
     LaunchedEffect(poseLandmarks.value) {
-        if (poseLandmarks.value.isNotEmpty() && faceLandmarks.value.isNotEmpty()) {
-            viewModel.classifyPose(poseLandmarks.value, faceLandmarks.value)
-        }
+        viewModel.classifyPose(poseLandmarks.value, faceLandmarks.value)
     }
 
     DisposableEffect(facing.value) {
@@ -187,16 +185,17 @@ internal fun CameraScreen(
                     .align(Alignment.TopStart)
                     .padding(top = 20.dp, start = 30.dp)
             ) {
-                Text(
-                    text = if (uiState.isPenInHand) "Studying" else "Not studying",
-                    style = Typography.titleMedium,
-                    color = if (uiState.isPenInHand) StudifyColors.PK03 else Color.DarkGray
-                )
                 if (uiState.poseLabel != null) {
                     Text(
-                        text = uiState.poseLabel!!.label,
+                        modifier = Modifier
+                            .padding(top = 10.dp),
+                        text = getStudyState(uiState.isPenInHand, uiState.poseLabel!!),
                         style = Typography.titleMedium,
-                        color = Color.White
+                        color = if (getStudyState(
+                                uiState.isPenInHand,
+                                uiState.poseLabel!!
+                            ) == "공부 중지"
+                        ) StudifyColors.PK03 else StudifyColors.WHITE
                     )
                 }
             }
@@ -315,6 +314,16 @@ private fun DrawScope.drawPoseConnections(landmarks: List<PoseLandmark>, size: S
                 strokeWidth = 4f
             )
         }
+    }
+}
+
+private fun getStudyState(isPenInHand: Boolean, poseLabel: PoseLabel): String {
+    return when (poseLabel.label) {
+        "집중 자세" -> if (isPenInHand) "집중 상태" else "공부 중지"
+        "집중도 저하 자세" -> if (isPenInHand) "집중도 저하 상태" else "공부 중지"
+        "수면 자세" -> "수면 상태"
+        "자리 비움" -> ""
+        else -> ""
     }
 }
 
