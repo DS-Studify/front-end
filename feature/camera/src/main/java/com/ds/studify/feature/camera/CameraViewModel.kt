@@ -212,7 +212,7 @@ class CameraViewModel @Inject constructor(
 
             "자리 비움" -> {
                 sleepCount = 0; prevPose = null
-                stablestudyState = "자리 비움"
+                stablestudyState = ""
                 stablestudyState
             }
 
@@ -224,14 +224,13 @@ class CameraViewModel @Inject constructor(
         isPenInHand: Boolean? = null,
         poseLabel: PoseLabel? = null,
     ) = intent {
-        val current = container.stateFlow.value
-        val newIsPen = isPenInHand ?: current.isPenInHand
-        val newPose = poseLabel ?: current.poseLabel
+        val newIsPen = isPenInHand ?: state.isPenInHand
+        val newPose = poseLabel ?: state.poseLabel
 
         val newStudyState = getStudyState(newIsPen, newPose)
 
         reduce {
-            current.copy(
+            state.copy(
                 isPenInHand = newIsPen,
                 poseLabel = newPose,
                 studyState = newStudyState
