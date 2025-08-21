@@ -161,17 +161,19 @@ private fun DonutChart(data: List<ChartSegment>) {
             val textX = center.x + textRadius * cos(angleRad).toFloat()
             val textY = center.y + textRadius * sin(angleRad).toFloat()
 
-            drawContext.canvas.nativeCanvas.drawText(
-                "${(percentage * 100).toInt()}%",
-                textX,
-                textY,
-                Paint().apply {
-                    color = android.graphics.Color.WHITE
-                    textSize = 40f
-                    textAlign = Paint.Align.CENTER
-                    isAntiAlias = true
-                }
-            )
+            if (percentage != 0f) {
+                drawContext.canvas.nativeCanvas.drawText(
+                    "${(percentage * 100).toInt()}%",
+                    textX,
+                    textY,
+                    Paint().apply {
+                        color = android.graphics.Color.WHITE
+                        textSize = 40f
+                        textAlign = Paint.Align.CENTER
+                        isAntiAlias = true
+                    }
+                )
+            }
 
             startAngle += sweepAngle
         }
@@ -232,7 +234,7 @@ private fun DonutChartWithTwoStatePreview2() {
     StudifyDonutChartWithState(
         listOf(
             ChartSegment("바른 자세", StudifyColors.PK02, 24300),
-            ChartSegment("나쁜 자세", StudifyColors.G01, 12000),
+            ChartSegment("나쁜 자세", StudifyColors.G01, 0),
         ),
         "*공부 시간 중 자세의 비율"
     )
