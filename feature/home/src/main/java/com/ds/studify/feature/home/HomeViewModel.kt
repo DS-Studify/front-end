@@ -21,11 +21,9 @@ class HomeViewModel @Inject constructor(
 
     override val container = container<HomeUiState, Nothing>(
         initialState = HomeUiState.Loading
-    ) {
-        loadHome()
-    }
+    )
 
-    private fun loadHome() = intent {
+    fun loadHome() = intent {
         val result = studyRecordRepository.getHome()
 
         if (result.isSuccess) {
@@ -34,7 +32,7 @@ class HomeViewModel @Inject constructor(
             }
         } else {
             reduce {
-                HomeUiState.Error(result.exceptionOrNull()?.message ?: "알 수 없는 오류 발생")
+                HomeUiState.Error(result.exceptionOrNull()?.message ?: "홈 로드 실패")
             }
         }
     }
