@@ -189,13 +189,9 @@ internal fun CameraScreen(
                     Text(
                         modifier = Modifier
                             .padding(top = 10.dp),
-                        text = getStudyState(uiState.isPenInHand, uiState.poseLabel!!),
+                        text = uiState.studyState,
                         style = Typography.titleMedium,
-                        color = if (getStudyState(
-                                uiState.isPenInHand,
-                                uiState.poseLabel!!
-                            ) == "공부 중지"
-                        ) StudifyColors.PK03 else StudifyColors.WHITE
+                        color = if (uiState.studyState == "공부 중지") StudifyColors.PK03 else StudifyColors.WHITE
                     )
                 }
             }
@@ -314,16 +310,6 @@ private fun DrawScope.drawPoseConnections(landmarks: List<PoseLandmark>, size: S
                 strokeWidth = 4f
             )
         }
-    }
-}
-
-private fun getStudyState(isPenInHand: Boolean, poseLabel: PoseLabel): String {
-    return when (poseLabel.label) {
-        "집중 자세" -> if (isPenInHand) "집중 상태" else "공부 중지"
-        "집중도 저하 자세" -> if (isPenInHand) "집중도 저하 상태" else "공부 중지"
-        "수면 자세" -> "수면 상태"
-        "자리 비움" -> ""
-        else -> ""
     }
 }
 

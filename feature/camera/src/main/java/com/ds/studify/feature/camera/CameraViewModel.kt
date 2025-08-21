@@ -1,6 +1,7 @@
 package com.ds.studify.feature.camera
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.ds.studify.core.data.repository.StudyRepository
 import com.ds.studify.core.domain.entity.CameraEntity
@@ -16,7 +17,8 @@ import javax.inject.Inject
 
 data class CameraUiState(
     val isPenInHand: Boolean,
-    val poseLabel: PoseLabel?
+    val poseLabel: PoseLabel?,
+    val studyState: String = ""
 )
 
 sealed interface LogEvent {
@@ -59,7 +61,8 @@ class CameraViewModel @Inject constructor(
     override val container: Container<CameraUiState, Nothing> = container(
         CameraUiState(
             isPenInHand = false,
-            poseLabel = null
+            poseLabel = null,
+            studyState = ""
         )
     )
 
@@ -118,6 +121,10 @@ class CameraViewModel @Inject constructor(
     private var requiredCount = 3
     private val timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
+    var sleepCount = 0
+    var prevPose: String? = null
+    var stablestudyState: String = ""
+
     // 자세 분류 결과에 따른 공부 상태
     fun getPoseState(poseLabel: PoseLabel?): Int {
         return when (poseLabel) {
@@ -131,7 +138,7 @@ class CameraViewModel @Inject constructor(
 
             PoseLabel.AWAY -> 4
 
-            else -> 0
+            else -> -1
         }
     }
 
@@ -154,6 +161,10 @@ class CameraViewModel @Inject constructor(
 
     // 자세 상태 연속 3번 지연 업데이트
     fun updatePoseState(currentValue: PoseLabel?) {
+        if (stableState.stablePoseLabel == null) {
+            stableState.stablePoseLabel = currentValue
+            return
+        }
         if (currentValue == PoseLabel.AWAY) {
             stableState.stablePoseLabel = PoseLabel.AWAY
             poseCount = 0
@@ -174,6 +185,60 @@ class CameraViewModel @Inject constructor(
         }
     }
 
+    // studyState 업데이트
+    fun getStudyState(isPenInHand: Boolean, poseLabel: PoseLabel?): String {
+        return when (poseLabel?.label) {
+            "집중 자세" -> {
+                sleepCount = 0; prevPose = null
+                stablestudyState = if (isPenInHand) "집중 상태" else "공부 중지"
+                stablestudyState
+            }
+
+            "집중도 저하 자세" -> {
+                sleepCount = 0; prevPose = null
+                stablestudyState = if (isPenInHand) "집중도 저하 상태" else "공부 중지"
+                stablestudyState
+            }
+
+            "수면 자세" -> {
+                prevPose = "수면 자세"
+                sleepCount++
+                Log.d("sleepCount", sleepCount.toString())
+                if (sleepCount >= 6) {
+                    stablestudyState = "수면 상태"
+                }
+                stablestudyState
+            }
+
+            "자리 비움" -> {
+                sleepCount = 0; prevPose = null
+                stablestudyState = "자리 비움"
+                stablestudyState
+            }
+
+            else -> ""
+        }
+    }
+
+    private fun updateUiState(
+        isPenInHand: Boolean? = null,
+        poseLabel: PoseLabel? = null,
+    ) = intent {
+        val current = container.stateFlow.value
+        val newIsPen = isPenInHand ?: current.isPenInHand
+        val newPose = poseLabel ?: current.poseLabel
+
+        val newStudyState = getStudyState(newIsPen, newPose)
+
+        reduce {
+            current.copy(
+                isPenInHand = newIsPen,
+                poseLabel = newPose,
+                studyState = newStudyState
+            )
+        }
+    }
+
     fun classifyHand(handLandmarks: List<HandLandmark>) {
         if (handLandmarks.size != 21) return
 
@@ -182,36 +247,36 @@ class CameraViewModel @Inject constructor(
 
         val isPen = result >= 0.5f  // 0.5 이상 -> 펜 쥔 손
 
-        intent {
-            reduce { state.copy(isPenInHand = isPen) }
-            updatePenState(isPen)
-            saveLog()
-        }
+        updateUiState(isPenInHand = isPen)
+        updatePenState(isPen)
+        saveLog()
     }
 
     fun classifyPose(poseLandmarks: List<PoseLandmark>, faceLandmarks: List<FaceLandmark>) {
-        if (poseLandmarks.isEmpty() && faceLandmarks.isEmpty()) {
-            intent {
-                reduce { state.copy(poseLabel = PoseLabel.AWAY) }
-                updatePoseState(PoseLabel.AWAY)
-                saveLog()
-            }
-        } else {
-            val input = preparePoseModelInput(poseLandmarks, faceLandmarks)
-            val result = poseClassifier.predict(input)
-
-            val predictedLabel = result.indices.maxByOrNull { result[it] } ?: -1
-            val labels = listOf(
-                PoseLabel.GOOD_POSE, PoseLabel.NFOCUS_LEAN_BACK,
-                PoseLabel.NFOCUS_LEAN_FOWARD, PoseLabel.NFOCUS_LEAN_SIDE,
-                PoseLabel.SLEEP_HEAD_BACK, PoseLabel.SLEEP_HEAD_DOWN,
-            )
-            intent {
-                reduce { state.copy(poseLabel = labels[predictedLabel]) }
-                updatePoseState(labels[predictedLabel])
-                saveLog()
-            }
+        // 시작 후 랜드 마크 입력 대기
+        if (stableState.stablePoseLabel == null) {
+            if (poseLandmarks.isEmpty() || faceLandmarks.isEmpty()) return
         }
+
+        val input = preparePoseModelInput(poseLandmarks, faceLandmarks)
+        val result = poseClassifier.predict(input)
+
+        val predictedLabel = result.indices.maxByOrNull { result[it] } ?: -1
+        val labels = listOf(
+            PoseLabel.GOOD_POSE, PoseLabel.NFOCUS_LEAN_BACK,
+            PoseLabel.NFOCUS_LEAN_FOWARD, PoseLabel.NFOCUS_LEAN_SIDE,
+            PoseLabel.SLEEP_HEAD_BACK, PoseLabel.SLEEP_HEAD_DOWN,
+        )
+        updateUiState(poseLabel = labels[predictedLabel])
+        updatePoseState(labels[predictedLabel])
+        saveLog()
+
+        if (poseLandmarks.isEmpty() && faceLandmarks.isEmpty()) {
+            updateUiState(poseLabel = PoseLabel.AWAY)
+            updatePoseState(PoseLabel.AWAY)
+            saveLog()
+        }
+        Log.d("poseState", stableState.stablePoseLabel.toString())
     }
 
     private fun prepareHandModelInput(handLandmarks: List<HandLandmark>): FloatArray {
@@ -327,7 +392,7 @@ class CameraViewModel @Inject constructor(
                 result.add(4)
             }
 
-            4, 0 -> {
+            4 -> {
                 result.add(5)
             }
         }
@@ -340,6 +405,7 @@ class CameraViewModel @Inject constructor(
         if (!recordingState.isRecording) return
 
         val currentStates = checkStates()
+        Log.d("poseState2", currentStates.toString())
         val prevStates = recordingState.stateStartTimeMap.keys.toList()
 
         // 종료된 상태
@@ -359,12 +425,17 @@ class CameraViewModel @Inject constructor(
         // 새로 시작된 상태
         currentStates.forEach { stateId ->
             if (!recordingState.stateStartTimeMap.containsKey(stateId)) {
-                recordingState.stateStartTimeMap[stateId] = LocalDateTime.now()
+                val start = if (recordingState.logMap.values.all { it.isEmpty() }) {
+                    recordingState.overallStart ?: LocalDateTime.now()
+                } else {
+                    LocalDateTime.now()
+                }
+                recordingState.stateStartTimeMap[stateId] = start
             }
         }
     }
 
-    // 녹화 시작
+    // 로그 기록 시작
     fun startRecordingLog() {
         recordingState.isRecording = true
         recordingState.overallStart = LocalDateTime.now()
@@ -382,7 +453,7 @@ class CameraViewModel @Inject constructor(
         }
     }
 
-    // 녹화 종료
+    // 로그 기록 종료
     fun stopRecordingLog() {
         if (!recordingState.isRecording) return
         recordingState.overallEnd = LocalDateTime.now()
