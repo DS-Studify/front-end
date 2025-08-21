@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +38,7 @@ import com.ds.studify.core.designsystem.theme.pretendard
 import com.ds.studify.core.domain.entity.HomeEntity
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
-import com.ds.studify.core.ui.extension.formatRecordDuration
+import com.ds.studify.core.ui.extension.formatTimeToColon
 import com.ds.studify.feature.home.navigation.HomeNavigationDelegator
 import org.orbitmvi.orbit.compose.collectAsState
 
@@ -48,6 +49,10 @@ internal fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadHome()
+    }
 
     StudifyScaffoldWithLogo(
         paddingValues = paddingValues,
@@ -120,7 +125,7 @@ internal fun HomeScreen(
             }
 
             Text(
-                text = formatRecordDuration(uiState.home.todayStudyTime),
+                text = formatTimeToColon(uiState.home.todayStudyTime),
                 fontFamily = pretendard,
                 fontWeight = FontWeight.Bold,
                 fontSize = 58.sp,
