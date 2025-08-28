@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.ui.extension.formatRecordDuration
@@ -98,11 +103,7 @@ internal fun CheckCameraPermission(
                 }
 
                 is CameraUiState.Loading -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = StudifyColors.WHITE)
-                    )
+                    LoadingScreen()
                 }
             }
         }
@@ -356,6 +357,26 @@ private fun RequestPermission(
         }
     } else {
         setState(CameraPermissionState.Success)
+    }
+}
+
+@Composable
+private fun LoadingScreen() {
+    val composition by rememberLottieComposition(
+        spec = LottieCompositionSpec.Asset("lottie_loading.json")
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = StudifyColors.WHITE)
+    ) {
+        LottieAnimation(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(200.dp),
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+        )
     }
 }
 
