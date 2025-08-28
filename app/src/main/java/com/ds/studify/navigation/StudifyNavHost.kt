@@ -113,7 +113,7 @@ fun StudifyNavHost(
                     onStudyCloseClick = {
                         navController.navigateToMain(
                             navOptions {
-                                popUpTo(RouteAnalysis) { inclusive = true }
+                                popUpTo<RouteAnalysis> { inclusive = true }
                             }
                         )
                     }

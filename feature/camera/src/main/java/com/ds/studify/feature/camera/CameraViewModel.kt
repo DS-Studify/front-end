@@ -15,11 +15,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-data class CameraUiState(
-    val isPenInHand: Boolean,
-    val poseLabel: PoseLabel?,
-    val studyState: String = ""
-)
+sealed interface CameraUiState {
+    data object Loading : CameraUiState
+    data class Data(
+        val isPenInHand: Boolean,
+        val poseLabel: PoseLabel?,
+        val studyState: String = ""
+    ) : CameraUiState
+}
 
 sealed interface LogEvent {
     data object StartRecording : LogEvent
@@ -63,7 +66,7 @@ class CameraViewModel @Inject constructor(
 ) : ViewModel(), ContainerHost<CameraUiState, CameraSideEffect> {
 
     override val container: Container<CameraUiState, CameraSideEffect> = container(
-        CameraUiState(
+        CameraUiState.Data(
             isPenInHand = false,
             poseLabel = null,
             studyState = ""
@@ -73,6 +76,10 @@ class CameraViewModel @Inject constructor(
     fun saveLogToServer() = intent {
         if (recordingState.overallStart == null) return@intent
 
+        reduce {
+            CameraUiState.Loading
+        }
+
         val entity = recordingState.toCameraEntity()
 
         studyRepository.postRecord(entity)
@@ -81,9 +88,7 @@ class CameraViewModel @Inject constructor(
                 recordingState.stateStartTimeMap.clear()
                 postSideEffect(CameraSideEffect.LoadStudyRecordId(id))
             }
-            .onFailure {
-            }
-
+            .onFailure {}
     }
 
     fun onEvent(event: LogEvent) {
@@ -149,15 +154,17 @@ class CameraViewModel @Inject constructor(
 
     // 펜 상태 연속 3번 지연 업데이트
     fun updatePenState(currentValue: Boolean) {
+        val state = container.stateFlow.value
+
+        if (state !is CameraUiState.Data) return
+
         if (currentValue == stableState.stablePenInHand) {
             penCount = 0
             return
         }
-        if (penCount == 0 || currentValue != container.stateFlow.value.isPenInHand) {
-            penCount = 1
-        } else {
-            penCount++
-        }
+
+        penCount = if (currentValue != state.isPenInHand) 1 else penCount + 1
+
         if (penCount >= requiredCount) {
             stableState.stablePenInHand = currentValue
             penCount = 0
@@ -166,24 +173,23 @@ class CameraViewModel @Inject constructor(
 
     // 자세 상태 연속 3번 지연 업데이트
     fun updatePoseState(currentValue: PoseLabel?) {
+        val state = container.stateFlow.value
+
+        if (state !is CameraUiState.Data) return
+
         if (stableState.stablePoseLabel == null) {
             stableState.stablePoseLabel = currentValue
             return
         }
-        if (currentValue == PoseLabel.AWAY) {
-            stableState.stablePoseLabel = PoseLabel.AWAY
+
+        if (currentValue == PoseLabel.AWAY || currentValue == stableState.stablePoseLabel) {
+            stableState.stablePoseLabel = currentValue
             poseCount = 0
             return
         }
-        if (currentValue == stableState.stablePoseLabel) {
-            poseCount = 0
-            return
-        }
-        if (poseCount == 0 || currentValue != container.stateFlow.value.poseLabel) {
-            poseCount = 1
-        } else {
-            poseCount++
-        }
+
+        poseCount = if (currentValue != state.poseLabel) 1 else poseCount + 1
+
         if (poseCount >= requiredCount) {
             stableState.stablePoseLabel = currentValue
             poseCount = 0
@@ -229,13 +235,15 @@ class CameraViewModel @Inject constructor(
         isPenInHand: Boolean? = null,
         poseLabel: PoseLabel? = null,
     ) = intent {
-        val newIsPen = isPenInHand ?: state.isPenInHand
-        val newPose = poseLabel ?: state.poseLabel
+        val uiState = state as? CameraUiState.Data ?: return@intent
+
+        val newIsPen = isPenInHand ?: uiState.isPenInHand
+        val newPose = poseLabel ?: uiState.poseLabel
 
         val newStudyState = getStudyState(newIsPen, newPose)
 
         reduce {
-            state.copy(
+            uiState.copy(
                 isPenInHand = newIsPen,
                 poseLabel = newPose,
                 studyState = newStudyState
@@ -443,7 +451,7 @@ class CameraViewModel @Inject constructor(
     fun startRecordingLog() {
         recordingState.isRecording = true
         recordingState.overallStart = LocalDateTime.now()
-        recordingState.prevState = CameraUiState(
+        recordingState.prevState = CameraUiState.Data(
             stableState.stablePenInHand,
             stableState.stablePoseLabel
         )

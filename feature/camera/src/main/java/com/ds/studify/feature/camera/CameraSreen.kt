@@ -72,6 +72,7 @@ internal fun CheckCameraPermission(
     onRecordCloseClick: (Long) -> Unit
 ) {
     val viewModel: CameraViewModel = hiltViewModel()
+    val uiState by viewModel.collectAsState()
 
     viewModel.collectSideEffect {
         when (it) {
@@ -87,10 +88,23 @@ internal fun CheckCameraPermission(
         }
 
         is CameraPermissionState.Success -> {
-            CameraScreen(
-                viewModel = viewModel,
-                onEvent = viewModel::onEvent
-            )
+            when (val state = uiState) {
+                is CameraUiState.Data -> {
+                    CameraScreen(
+                        viewModel = viewModel,
+                        uiState = state,
+                        onEvent = viewModel::onEvent
+                    )
+                }
+
+                is CameraUiState.Loading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = StudifyColors.WHITE)
+                    )
+                }
+            }
         }
     }
 }
@@ -98,9 +112,9 @@ internal fun CheckCameraPermission(
 @Composable
 internal fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
+    uiState: CameraUiState.Data,
     onEvent: (LogEvent) -> Unit
 ) {
-    val uiState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraScope = rememberCoroutineScope()
     val context = LocalContext.current as Activity
@@ -349,6 +363,11 @@ private fun RequestPermission(
 @Composable
 private fun CameraScreenPreview() {
     CameraScreen(
+        uiState = CameraUiState.Data(
+            isPenInHand = false,
+            poseLabel = null,
+            studyState = ""
+        ),
         onEvent = {}
     )
 }
