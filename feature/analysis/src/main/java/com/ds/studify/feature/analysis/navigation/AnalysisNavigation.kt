@@ -7,7 +7,7 @@ import com.ds.studify.feature.analysis.AnalysisRoute
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object RouteAnalysis
+data class RouteAnalysis(val id: Long)
 
 fun NavGraphBuilder.analysisScreen(
     analysisNavigationDelegator: AnalysisNavigationDelegator
@@ -19,8 +19,8 @@ fun NavGraphBuilder.analysisScreen(
     }
 }
 
-fun NavController.navigateToAnalysis() {
-    navigate(RouteAnalysis)
+fun NavController.navigateToAnalysis(id: Long) {
+    navigate(RouteAnalysis(id))
 }
 
 class AnalysisNavigationDelegator(

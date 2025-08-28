@@ -23,4 +23,5 @@ dependencies {
 
     implementation(libs.mediapipe.vision)
     implementation(libs.tensorflow.lite)
+    implementation(libs.lottie.compose)
 }

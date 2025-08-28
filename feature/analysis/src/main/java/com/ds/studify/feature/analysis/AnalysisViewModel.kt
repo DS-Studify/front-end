@@ -1,10 +1,12 @@
 package com.ds.studify.feature.analysis
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.ds.studify.core.data.repository.StudyRecordRepository
 import com.ds.studify.core.data.repository.StudyRepository
 import com.ds.studify.core.domain.entity.AnalysisEntity
 import com.ds.studify.core.domain.entity.PieChartEntity
+import com.ds.studify.feature.analysis.navigation.RouteAnalysis
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -27,16 +29,27 @@ sealed interface AnalysisUiEvent {
     data class ChangeTabIndex(val index: Int) : AnalysisUiEvent
 }
 
+sealed interface AnalysisSideEffect {
+    data object InvalidAnalysisId : AnalysisSideEffect
+}
+
 @HiltViewModel
 class AnalysisViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val studyRepository: StudyRepository,
     private val studyRecordRepository: StudyRecordRepository
-) : ViewModel(), ContainerHost<AnalysisUiState, Nothing> {
+) : ViewModel(), ContainerHost<AnalysisUiState, AnalysisSideEffect> {
 
-    override val container = container<AnalysisUiState, Nothing>(
+    override val container = container<AnalysisUiState, AnalysisSideEffect>(
         initialState = AnalysisUiState.Loading
     ) {
-        loadAnalysis(studyRecordId = 28)
+        val id = savedStateHandle.get<Long>(RouteAnalysis::id.name)
+            ?: run {
+                postSideEffect(AnalysisSideEffect.InvalidAnalysisId)
+                return@container
+            }
+
+        loadAnalysis(id)
     }
 
     private fun loadAnalysis(studyRecordId: Long) = intent {

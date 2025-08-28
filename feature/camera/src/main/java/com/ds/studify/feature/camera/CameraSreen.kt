@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.ui.extension.formatRecordDuration
@@ -48,11 +53,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 internal fun CameraRoute(
-    onRecordCloseClick: () -> Unit
+    onRecordCloseClick: (Long) -> Unit
 ) {
     val uiState =
         MutableStateFlow<CameraPermissionState>(CameraPermissionState.PermissionNotGranted)
@@ -68,15 +74,38 @@ internal fun CameraRoute(
 internal fun CheckCameraPermission(
     cameraState: State<CameraPermissionState>,
     setState: (CameraPermissionState) -> Unit,
-    onRecordCloseClick: () -> Unit
+    onRecordCloseClick: (Long) -> Unit
 ) {
+    val viewModel: CameraViewModel = hiltViewModel()
+    val uiState by viewModel.collectAsState()
+
+    viewModel.collectSideEffect {
+        when (it) {
+            is CameraSideEffect.LoadStudyRecordId -> {
+                onRecordCloseClick(it.id)
+            }
+        }
+    }
+
     when (cameraState.value) {
         is CameraPermissionState.PermissionNotGranted -> {
             RequestPermission(setState)
         }
 
         is CameraPermissionState.Success -> {
-            CameraScreen(onRecordCloseClick = onRecordCloseClick)
+            when (val state = uiState) {
+                is CameraUiState.Data -> {
+                    CameraScreen(
+                        viewModel = viewModel,
+                        uiState = state,
+                        onEvent = viewModel::onEvent
+                    )
+                }
+
+                is CameraUiState.Loading -> {
+                    LoadingScreen()
+                }
+            }
         }
     }
 }
@@ -84,10 +113,9 @@ internal fun CheckCameraPermission(
 @Composable
 internal fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
-    onRecordCloseClick: () -> Unit,
-    onEvent: (LogEvent) -> Unit = { event -> viewModel.onEvent(event) }
+    uiState: CameraUiState.Data,
+    onEvent: (LogEvent) -> Unit
 ) {
-    val uiState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraScope = rememberCoroutineScope()
     val context = LocalContext.current as Activity
@@ -229,7 +257,6 @@ internal fun CameraScreen(
                         recordingState = recordingState.value,
                         onClick = {
                             cameraX.stopRecordVideo()
-                            onRecordCloseClick()
                             onEvent(LogEvent.SaveLogRequest)
                         }
                     )
@@ -333,11 +360,35 @@ private fun RequestPermission(
     }
 }
 
+@Composable
+private fun LoadingScreen() {
+    val composition by rememberLottieComposition(
+        spec = LottieCompositionSpec.Asset("lottie_loading.json")
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = StudifyColors.WHITE)
+    ) {
+        LottieAnimation(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(200.dp),
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun CameraScreenPreview() {
     CameraScreen(
-        onRecordCloseClick = {},
+        uiState = CameraUiState.Data(
+            isPenInHand = false,
+            poseLabel = null,
+            studyState = ""
+        ),
         onEvent = {}
     )
 }

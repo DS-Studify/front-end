@@ -15,11 +15,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-data class CameraUiState(
-    val isPenInHand: Boolean,
-    val poseLabel: PoseLabel?,
-    val studyState: String = ""
-)
+sealed interface CameraUiState {
+    data object Loading : CameraUiState
+    data class Data(
+        val isPenInHand: Boolean,
+        val poseLabel: PoseLabel?,
+        val studyState: String = ""
+    ) : CameraUiState
+}
 
 sealed interface LogEvent {
     data object StartRecording : LogEvent
@@ -52,33 +55,40 @@ data class LogRecordingState(
     val stateStartTimeMap: MutableMap<Int, LocalDateTime> = mutableMapOf()
 )
 
+sealed interface CameraSideEffect {
+    data class LoadStudyRecordId(val id: Long) : CameraSideEffect
+}
+
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     application: Application,
     private val studyRepository: StudyRepository
-) : ViewModel(), ContainerHost<CameraUiState, Nothing> {
+) : ViewModel(), ContainerHost<CameraUiState, CameraSideEffect> {
 
-    override val container: Container<CameraUiState, Nothing> = container(
-        CameraUiState(
+    override val container: Container<CameraUiState, CameraSideEffect> = container(
+        CameraUiState.Data(
             isPenInHand = false,
             poseLabel = null,
             studyState = ""
         )
     )
 
-    fun saveLogToServer() = intent {
+    private fun saveLogToServer() = intent {
         if (recordingState.overallStart == null) return@intent
+
+        reduce {
+            CameraUiState.Loading
+        }
 
         val entity = recordingState.toCameraEntity()
 
         studyRepository.postRecord(entity)
-            .onSuccess {
+            .onSuccess { id ->
                 recordingState.logMap.clear()
                 recordingState.stateStartTimeMap.clear()
+                postSideEffect(CameraSideEffect.LoadStudyRecordId(id))
             }
-            .onFailure {
-            }
-
+            .onFailure {}
     }
 
     fun onEvent(event: LogEvent) {
@@ -95,7 +105,7 @@ class CameraViewModel @Inject constructor(
         }
     }
 
-    fun LogRecordingState.toCameraEntity(): CameraEntity {
+    private fun LogRecordingState.toCameraEntity(): CameraEntity {
         val date = overallStart?.toLocalDate().toString()
         val startTime = overallStart?.format(timeFormatter).toString()
         val endTime = overallEnd?.format(timeFormatter).toString()
@@ -121,12 +131,12 @@ class CameraViewModel @Inject constructor(
     private var requiredCount = 3
     private val timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
-    var sleepCount = 0
-    var prevPose: String? = null
-    var stablestudyState: String = ""
+    private var sleepCount = 0
+    private var prevPose: String? = null
+    private var stableStudyState: String = ""
 
     // 자세 분류 결과에 따른 공부 상태
-    fun getPoseState(poseLabel: PoseLabel?): Int {
+    private fun getPoseState(poseLabel: PoseLabel?): Int {
         return when (poseLabel) {
             PoseLabel.GOOD_POSE -> 1
             PoseLabel.NFOCUS_LEAN_BACK,
@@ -143,16 +153,18 @@ class CameraViewModel @Inject constructor(
     }
 
     // 펜 상태 연속 3번 지연 업데이트
-    fun updatePenState(currentValue: Boolean) {
+    private fun updatePenState(currentValue: Boolean) {
+        val state = container.stateFlow.value
+
+        if (state !is CameraUiState.Data) return
+
         if (currentValue == stableState.stablePenInHand) {
             penCount = 0
             return
         }
-        if (penCount == 0 || currentValue != container.stateFlow.value.isPenInHand) {
-            penCount = 1
-        } else {
-            penCount++
-        }
+
+        penCount = if (currentValue != state.isPenInHand) 1 else penCount + 1
+
         if (penCount >= requiredCount) {
             stableState.stablePenInHand = currentValue
             penCount = 0
@@ -160,25 +172,24 @@ class CameraViewModel @Inject constructor(
     }
 
     // 자세 상태 연속 3번 지연 업데이트
-    fun updatePoseState(currentValue: PoseLabel?) {
+    private fun updatePoseState(currentValue: PoseLabel?) {
+        val state = container.stateFlow.value
+
+        if (state !is CameraUiState.Data) return
+
         if (stableState.stablePoseLabel == null) {
             stableState.stablePoseLabel = currentValue
             return
         }
-        if (currentValue == PoseLabel.AWAY) {
-            stableState.stablePoseLabel = PoseLabel.AWAY
+
+        if (currentValue == PoseLabel.AWAY || currentValue == stableState.stablePoseLabel) {
+            stableState.stablePoseLabel = currentValue
             poseCount = 0
             return
         }
-        if (currentValue == stableState.stablePoseLabel) {
-            poseCount = 0
-            return
-        }
-        if (poseCount == 0 || currentValue != container.stateFlow.value.poseLabel) {
-            poseCount = 1
-        } else {
-            poseCount++
-        }
+
+        poseCount = if (currentValue != state.poseLabel) 1 else poseCount + 1
+
         if (poseCount >= requiredCount) {
             stableState.stablePoseLabel = currentValue
             poseCount = 0
@@ -186,18 +197,18 @@ class CameraViewModel @Inject constructor(
     }
 
     // studyState 업데이트
-    fun getStudyState(isPenInHand: Boolean, poseLabel: PoseLabel?): String {
+    private fun getStudyState(isPenInHand: Boolean, poseLabel: PoseLabel?): String {
         return when (poseLabel?.label) {
             "집중 자세" -> {
                 sleepCount = 0; prevPose = null
-                stablestudyState = if (isPenInHand) "집중 상태" else "공부 중지"
-                stablestudyState
+                stableStudyState = if (isPenInHand) "집중 상태" else "공부 중지"
+                stableStudyState
             }
 
             "집중도 저하 자세" -> {
                 sleepCount = 0; prevPose = null
-                stablestudyState = if (isPenInHand) "집중도 저하 상태" else "공부 중지"
-                stablestudyState
+                stableStudyState = if (isPenInHand) "집중도 저하 상태" else "공부 중지"
+                stableStudyState
             }
 
             "수면 자세" -> {
@@ -205,15 +216,15 @@ class CameraViewModel @Inject constructor(
                 sleepCount++
                 Log.d("sleepCount", sleepCount.toString())
                 if (sleepCount >= 6) {
-                    stablestudyState = "수면 상태"
+                    stableStudyState = "수면 상태"
                 }
-                stablestudyState
+                stableStudyState
             }
 
             "자리 비움" -> {
                 sleepCount = 0; prevPose = null
-                stablestudyState = ""
-                stablestudyState
+                stableStudyState = ""
+                stableStudyState
             }
 
             else -> ""
@@ -224,13 +235,15 @@ class CameraViewModel @Inject constructor(
         isPenInHand: Boolean? = null,
         poseLabel: PoseLabel? = null,
     ) = intent {
-        val newIsPen = isPenInHand ?: state.isPenInHand
-        val newPose = poseLabel ?: state.poseLabel
+        val uiState = state as? CameraUiState.Data ?: return@intent
+
+        val newIsPen = isPenInHand ?: uiState.isPenInHand
+        val newPose = poseLabel ?: uiState.poseLabel
 
         val newStudyState = getStudyState(newIsPen, newPose)
 
         reduce {
-            state.copy(
+            uiState.copy(
                 isPenInHand = newIsPen,
                 poseLabel = newPose,
                 studyState = newStudyState
@@ -363,7 +376,7 @@ class CameraViewModel @Inject constructor(
     }
 
     // 조건 확인
-    fun checkStates(): List<Int> {
+    private fun checkStates(): List<Int> {
         val result = mutableListOf<Int>()
         val poseState = getPoseState(stableState.stablePoseLabel)
         val hasPen = stableState.stablePenInHand
@@ -400,7 +413,7 @@ class CameraViewModel @Inject constructor(
     }
 
     // 상태 변화 감지 로그 저장
-    fun saveLog() {
+    private fun saveLog() {
         if (!recordingState.isRecording) return
 
         val currentStates = checkStates()
@@ -435,10 +448,10 @@ class CameraViewModel @Inject constructor(
     }
 
     // 로그 기록 시작
-    fun startRecordingLog() {
+    private fun startRecordingLog() {
         recordingState.isRecording = true
         recordingState.overallStart = LocalDateTime.now()
-        recordingState.prevState = CameraUiState(
+        recordingState.prevState = CameraUiState.Data(
             stableState.stablePenInHand,
             stableState.stablePoseLabel
         )
@@ -453,7 +466,7 @@ class CameraViewModel @Inject constructor(
     }
 
     // 로그 기록 종료
-    fun stopRecordingLog() {
+    private fun stopRecordingLog() {
         if (!recordingState.isRecording) return
         recordingState.overallEnd = LocalDateTime.now()
 

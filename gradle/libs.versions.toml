@@ -28,6 +28,7 @@ camera = "1.4.2"
 mediapipeTasks = "0.10.14"
 tensorflow = "2.13.0"
 phoenix = "3.0.0"
+lottie = "6.5.2"
 
 [libraries]
 gradlePlugin-android = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -80,6 +81,8 @@ mediapipe-vision = { group = "com.google.mediapipe", name = "tasks-vision", vers
 tensorflow-lite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tensorflow" }
 
 jakewharton-process-phoenix = { group = "com.jakewharton", name = "process-phoenix", version.ref = "phoenix" }
+
+lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
 
 [plugins]
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
