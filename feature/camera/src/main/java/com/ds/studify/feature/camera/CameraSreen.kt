@@ -48,11 +48,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 internal fun CameraRoute(
-    onRecordCloseClick: () -> Unit
+    onRecordCloseClick: (Long) -> Unit
 ) {
     val uiState =
         MutableStateFlow<CameraPermissionState>(CameraPermissionState.PermissionNotGranted)
@@ -68,15 +69,28 @@ internal fun CameraRoute(
 internal fun CheckCameraPermission(
     cameraState: State<CameraPermissionState>,
     setState: (CameraPermissionState) -> Unit,
-    onRecordCloseClick: () -> Unit
+    onRecordCloseClick: (Long) -> Unit
 ) {
+    val viewModel: CameraViewModel = hiltViewModel()
+
+    viewModel.collectSideEffect {
+        when (it) {
+            is CameraSideEffect.LoadStudyRecordId -> {
+                onRecordCloseClick(it.id)
+            }
+        }
+    }
+
     when (cameraState.value) {
         is CameraPermissionState.PermissionNotGranted -> {
             RequestPermission(setState)
         }
 
         is CameraPermissionState.Success -> {
-            CameraScreen(onRecordCloseClick = onRecordCloseClick)
+            CameraScreen(
+                viewModel = viewModel,
+                onEvent = viewModel::onEvent
+            )
         }
     }
 }
@@ -84,8 +98,7 @@ internal fun CheckCameraPermission(
 @Composable
 internal fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel(),
-    onRecordCloseClick: () -> Unit,
-    onEvent: (LogEvent) -> Unit = { event -> viewModel.onEvent(event) }
+    onEvent: (LogEvent) -> Unit
 ) {
     val uiState by viewModel.collectAsState()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -229,7 +242,6 @@ internal fun CameraScreen(
                         recordingState = recordingState.value,
                         onClick = {
                             cameraX.stopRecordVideo()
-                            onRecordCloseClick()
                             onEvent(LogEvent.SaveLogRequest)
                         }
                     )
@@ -337,7 +349,6 @@ private fun RequestPermission(
 @Composable
 private fun CameraScreenPreview() {
     CameraScreen(
-        onRecordCloseClick = {},
         onEvent = {}
     )
 }

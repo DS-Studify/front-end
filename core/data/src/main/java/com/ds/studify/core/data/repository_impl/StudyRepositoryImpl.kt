@@ -5,13 +5,12 @@ import com.ds.studify.core.data.dto.request.toDto
 import com.ds.studify.core.data.repository.StudyRepository
 import com.ds.studify.core.domain.entity.AnalysisEntity
 import com.ds.studify.core.domain.entity.CameraEntity
-import kotlinx.serialization.json.JsonElement
 import javax.inject.Inject
 
 class StudyRepositoryImpl @Inject constructor(
     private val studyDataSource: StudyDataSource
 ) : StudyRepository {
-    override suspend fun postRecord(entity: CameraEntity): Result<JsonElement?> =
+    override suspend fun postRecord(entity: CameraEntity): Result<Long> =
         runCatching {
             studyDataSource.postRecord(
                 request = entity.toDto()

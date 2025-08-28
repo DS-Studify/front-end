@@ -102,7 +102,9 @@ fun StudifyNavHost(
 
             cameraScreen(
                 navController,
-                navigateToAnalysis = { navController.navigateToAnalysis() }
+                navigateToAnalysis = { id ->
+                    navController.navigateToAnalysis(id)
+                }
             )
 
             analysisScreen(

@@ -52,13 +52,17 @@ data class LogRecordingState(
     val stateStartTimeMap: MutableMap<Int, LocalDateTime> = mutableMapOf()
 )
 
+sealed interface CameraSideEffect {
+    data class LoadStudyRecordId(val id: Long) : CameraSideEffect
+}
+
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     application: Application,
     private val studyRepository: StudyRepository
-) : ViewModel(), ContainerHost<CameraUiState, Nothing> {
+) : ViewModel(), ContainerHost<CameraUiState, CameraSideEffect> {
 
-    override val container: Container<CameraUiState, Nothing> = container(
+    override val container: Container<CameraUiState, CameraSideEffect> = container(
         CameraUiState(
             isPenInHand = false,
             poseLabel = null,
@@ -72,9 +76,10 @@ class CameraViewModel @Inject constructor(
         val entity = recordingState.toCameraEntity()
 
         studyRepository.postRecord(entity)
-            .onSuccess {
+            .onSuccess { id ->
                 recordingState.logMap.clear()
                 recordingState.stateStartTimeMap.clear()
+                postSideEffect(CameraSideEffect.LoadStudyRecordId(id))
             }
             .onFailure {
             }

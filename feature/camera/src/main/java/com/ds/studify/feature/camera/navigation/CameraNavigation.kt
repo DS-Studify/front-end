@@ -19,7 +19,7 @@ data object RouteCamera
 
 fun NavGraphBuilder.cameraScreen(
     navHostController: NavHostController,
-    navigateToAnalysis: () -> Unit
+    navigateToAnalysis: (Long) -> Unit
 ) {
     navigation<NavRouteCamera>(
         startDestination = RouteCameraGuide
