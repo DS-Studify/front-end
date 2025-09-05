@@ -82,7 +82,7 @@ fun formatTimeInKorean(seconds: Int): String {
 fun formatTimeToHM(seconds: Int): String {
     val hours = seconds / 3600
     val minutes = (seconds % 3600) / 60
-    return if (hours > 0) "%dH %02M".format(hours, minutes) else "%dM".format(minutes)
+    return if (hours > 0) "%dH %dM".format(hours, minutes) else "%dM".format(minutes)
 }
 
 fun Modifier.clickableWithoutRippleEffect(
