@@ -11,6 +11,10 @@
 - 덕성여자대학교 컴퓨터공학전공 졸업 프로젝트
 <br />
 
+https://github.com/user-attachments/assets/bd7d650b-9c57-4ec6-ac7f-7972262d6e04
+
+<br />
+
 ## 📃 프로젝트 소개
 ### 개발 배경 및 필요성
 🔥 대한민국의 높은 교육열
@@ -29,11 +33,6 @@
 
 ### 서비스명
 - study + amplify의 합성어로, **사용자 학습 효율 증진**을 의미
-<br />
-
-## :movie_camera: Preview
-https://github.com/user-attachments/assets/bd7d650b-9c57-4ec6-ac7f-7972262d6e04
-
 <br />
 
 ## :bulb: Key Features
