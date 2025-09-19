@@ -1,5 +1,6 @@
 package com.ds.studify.feature.calendar.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
@@ -17,13 +18,15 @@ fun NavController.navigateToStats(
 }
 
 fun NavGraphBuilder.statsScreen(
-    statsNavigationDelegator: StatsNavigationDelegator
+    statsNavigationDelegator: StatsNavigationDelegator,
+    paddingValues: PaddingValues
 ) {
     composable<RouteStats> {
         StatsRoute(
             onNavigateToFeedback = { studyId ->
                 statsNavigationDelegator.onTimeLineClick(studyId)
-            }
+            },
+            paddingValues = paddingValues
         )
     }
 }

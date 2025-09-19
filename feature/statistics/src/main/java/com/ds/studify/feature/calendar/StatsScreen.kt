@@ -4,13 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -38,7 +36,8 @@ import java.time.YearMonth
 @Composable
 internal fun StatsRoute(
     onNavigateToFeedback: (Long) -> Unit,
-    viewModel: StatsViewModel = hiltViewModel()
+    viewModel: StatsViewModel = hiltViewModel(),
+    paddingValues: PaddingValues
 ) {
     val uiState by viewModel.collectAsState()
 
@@ -50,7 +49,8 @@ internal fun StatsRoute(
                 onEvent = viewModel::onEvent,
                 onNavigateToFeedback = { id ->
                     onNavigateToFeedback(id)
-                }
+                },
+                paddingValues = paddingValues
             )
         }
 
@@ -68,10 +68,10 @@ internal fun StatsRoute(
 internal fun StatsScreen(
     uiState: StatsUiState.Data,
     onEvent: (StatsUiEvent) -> Unit,
-    onNavigateToFeedback: (Long) -> Unit
+    onNavigateToFeedback: (Long) -> Unit,
+    paddingValues: PaddingValues
 ) {
     val scrollState = rememberScrollState()
-    val insets = WindowInsets.statusBars.asPaddingValues()
 
     Column(
         modifier = Modifier
@@ -79,7 +79,7 @@ internal fun StatsScreen(
             .background(color = StudifyColors.WHITE)
             .padding(
                 top = 40.dp,
-                bottom = insets.calculateBottomPadding()
+                bottom = paddingValues.calculateBottomPadding()
             )
             .verticalScroll(scrollState)
     ) {
@@ -196,6 +196,7 @@ private fun StatsScreenPreview() {
             )
         ),
         onEvent = {},
-        onNavigateToFeedback = {}
+        onNavigateToFeedback = {},
+        paddingValues = PaddingValues(0.dp)
     )
 }
