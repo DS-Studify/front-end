@@ -127,7 +127,8 @@ fun StudifyNavHost(
                 navigationDelegator = MyPageNavigationDelegator(
                     onLogoutClick = {
                         navController.navigate(NavRouteAuth) {
-                            popUpTo(RouteMyPage) { inclusive = true }
+                            popUpTo<NavRouteMain> { inclusive = true }
+                            launchSingleTop = true
                         }
                     },
                     onChangePasswordClick = { navController.navigateToPasswordChange() },
