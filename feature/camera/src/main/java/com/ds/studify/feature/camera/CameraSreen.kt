@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -214,7 +215,8 @@ internal fun CameraScreen(
             FlipButton(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 32.dp, end = 38.dp),
+                    .navigationBarsPadding()
+                    .padding(top = 32.dp, end = 36.dp),
                 onClick = {
                     cameraX.flipCameraFacing()
                 }
@@ -224,7 +226,8 @@ internal fun CameraScreen(
         Column(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 22.dp)
+                .navigationBarsPadding()
+                .padding(end = 16.dp)
         ) {
             when (recordingState.value) {
                 is RecordingState.Idle -> {
