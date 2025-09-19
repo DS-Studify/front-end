@@ -22,7 +22,6 @@ import com.ds.studify.feature.login.navigation.LoginNavigationDelegator
 import com.ds.studify.feature.login.navigation.RouteLogin
 import com.ds.studify.feature.login.navigation.loginScreen
 import com.ds.studify.feature.mypage.navigation.MyPageNavigationDelegator
-import com.ds.studify.feature.mypage.navigation.RouteMyPage
 import com.ds.studify.feature.mypage.navigation.myPageScreen
 import com.ds.studify.feature.mypage.navigation.navigateToMyPage
 import com.ds.studify.feature.mypage.navigation.navigateToNicknameChange
@@ -74,7 +73,6 @@ fun StudifyNavHost(
             )
 
             signupScreen(
-                navHostController = navController,
                 onNavigateLogin = {
                     navController.navigate(RouteLogin) {
                         popUpTo(RouteSignup) { inclusive = true }
@@ -127,7 +125,8 @@ fun StudifyNavHost(
                 navigationDelegator = MyPageNavigationDelegator(
                     onLogoutClick = {
                         navController.navigate(NavRouteAuth) {
-                            popUpTo(RouteMyPage) { inclusive = true }
+                            popUpTo<NavRouteMain> { inclusive = true }
+                            launchSingleTop = true
                         }
                     },
                     onChangePasswordClick = { navController.navigateToPasswordChange() },
