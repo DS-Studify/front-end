@@ -52,4 +52,9 @@ class UserRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun deleteUser(): Result<String> =
+        runCatching {
+            dataSource.deleteUser().data
+        }
 }

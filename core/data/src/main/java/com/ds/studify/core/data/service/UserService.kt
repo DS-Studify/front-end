@@ -6,6 +6,7 @@ import com.ds.studify.core.data.dto.request.RequestChangePasswordDto
 import com.ds.studify.core.data.dto.response.BaseResponse
 import kotlinx.serialization.json.JsonElement
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 
@@ -23,4 +24,7 @@ interface UserService {
     suspend fun patchChangeNickname(
         @Body body: RequestChangeNicknameDto
     ): BaseResponse<ProfileDto>
+
+    @DELETE("user")
+    suspend fun deleteUser(): BaseResponse<String>
 }

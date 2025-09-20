@@ -19,4 +19,7 @@ class  UserDataSource @Inject constructor(
 
     suspend fun patchChangeNickname(body: RequestChangeNicknameDto): BaseResponse<ProfileDto> =
         service.patchChangeNickname(body)
+
+    suspend fun deleteUser(): BaseResponse<String> =
+        service.deleteUser()
 }

@@ -6,4 +6,5 @@ interface UserRepository {
     suspend fun getProfile(): Result<ProfileEntity>
     suspend fun patchChangePassword(originPassword: String, newPassword: String): Result<Unit>
     suspend fun patchChangeNickname(nickname: String): Result<ProfileEntity>
+    suspend fun deleteUser(): Result<String>
 }
