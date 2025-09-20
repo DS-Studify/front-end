@@ -64,5 +64,6 @@ fun NavHostController.navigateToNicknameChange() {
 class MyPageNavigationDelegator(
     val onLogoutClick: () -> Unit = {},
     val onChangePasswordClick: () -> Unit = {},
-    val onChangeNicknameClick: () -> Unit = {}
+    val onChangeNicknameClick: () -> Unit = {},
+    val onAccountDeletionClick: () -> Unit = {},
 )

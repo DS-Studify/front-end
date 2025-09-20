@@ -131,7 +131,12 @@ fun StudifyNavHost(
                         }
                     },
                     onChangePasswordClick = { navController.navigateToPasswordChange() },
-                    onChangeNicknameClick = { navController.navigateToNicknameChange() }
+                    onChangeNicknameClick = { navController.navigateToNicknameChange() },
+                    onAccountDeletionClick = {
+                        navController.navigate(NavRouteAuth) {
+                            popUpTo(NavRouteMain) { inclusive = true }
+                        }
+                    }
                 )
             )
         }

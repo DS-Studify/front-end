@@ -19,10 +19,12 @@ sealed interface MyPageUiState {
 
 sealed interface MyPageUiEvent {
     data object LogoutRequest : MyPageUiEvent
+    data object AccountDeletionRequest : MyPageUiEvent
 }
 
 sealed interface MyPageSideEffect {
     data object LogoutSuccess : MyPageSideEffect
+    data object AccountDeletionSuccess : MyPageSideEffect
     data class Toast(@androidx.annotation.StringRes val resId: Int) : MyPageSideEffect
 }
 
@@ -58,11 +60,24 @@ class MyPageViewModel @Inject constructor(
         postSideEffect(MyPageSideEffect.LogoutSuccess)
     }
 
+    private fun deleteUser() = intent {
+        val result = userRepository.deleteUser()
+        result.onSuccess {
+            tokenRepository.clearToken()
+            postSideEffect(MyPageSideEffect.AccountDeletionSuccess)
+        }. onFailure {
+            postSideEffect(MyPageSideEffect.Toast(StudifyString.mypage_account_deletion_failed))
+        }
+    }
+
     fun onEvent(event: MyPageUiEvent) {
         when (event) {
             is MyPageUiEvent.LogoutRequest -> {
                 logout()
             }
+            is MyPageUiEvent.AccountDeletionRequest -> deleteUser()
         }
     }
+
+
 }
