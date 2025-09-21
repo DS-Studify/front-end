@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -302,9 +303,8 @@ internal fun AnalysisScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 50.dp)
-                .padding(horizontal = 30.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(top = 50.dp),
+            horizontalArrangement = Arrangement.spacedBy(26.dp, Alignment.CenterHorizontally)
         ) {
             AnalysisOutlinedButton(
                 text = stringResource(StudifyString.analysis_restudy),
