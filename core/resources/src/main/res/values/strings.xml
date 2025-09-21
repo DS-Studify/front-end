@@ -126,5 +126,10 @@
     <string name="signup_verification_code_failed_message">인증 번호 전송에 실패하였습니다.</string>
     <string name="signup_duplicate_email">이미 존재하는 이메일입니다.</string>
     <string name="signup_register_failed">회원가입에 실패하였습니다.</string>
+    <string name="signup_terms_agree_all">아래 내용에 모두 동의합니다.</string>
+    <string name="signup_terms_service">(필수) 서비스 이용약관</string>
+    <string name="signup_terms_privacy">(필수) 개인정보 처리방침</string>
+    <string name="signup_terms_age">(필수) 만 14세 이상입니다.</string>
+    <string name="signup_terms_view">보기</string>
 
 </resources>
