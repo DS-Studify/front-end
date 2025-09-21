@@ -43,7 +43,7 @@ fun AccountDeletionModal(
                 ) {
                     Text(
                         text = stringResource(StudifyString.mypage_quit),
-                        color = StudifyColors.RED02
+                        color = StudifyColors.PK03
                     )
                 }
             },
