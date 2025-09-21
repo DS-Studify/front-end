@@ -35,8 +35,15 @@ data class SignupUiState(
     val isLoading: Boolean = false,
 
     val resendSecondsLeft: Int = 0,
-    val registerSuccess: Boolean = false
+    val registerSuccess: Boolean = false,
+
+    val isServiceTermsAgreed: Boolean = false,
+    val isPrivacyPolicyAgreed: Boolean = false,
+    val isAgeConfirmed: Boolean = false
 ){
+    private val areAllConsentsProvided: Boolean =
+        isServiceTermsAgreed && isPrivacyPolicyAgreed && isAgeConfirmed
+
     val isSignupEnabled: Boolean =
         isEmailValid &&
         isPasswordMatch &&
@@ -44,7 +51,8 @@ data class SignupUiState(
         verificationCode.isNotBlank() &&
         password.isNotBlank() &&
         confirmPassword.isNotBlank() &&
-        nickname.isNotBlank()
+        nickname.isNotBlank() &&
+        areAllConsentsProvided
 
     // 타이머
     val showTimer: Boolean = resendSecondsLeft > 0
@@ -65,6 +73,31 @@ class SignupViewModel @Inject constructor(
     override val container = container<SignupUiState, SignupSideEffect>(SignupUiState())
 
     private var timerJob: Job? = null
+
+
+    fun onAgreementChanged(
+        serviceTerms: Boolean? = null,
+        privacyPolicy: Boolean? = null,
+        ageConfirmed: Boolean? = null
+    ) = intent {
+        reduce {
+            state.copy(
+                isServiceTermsAgreed = serviceTerms ?: state.isServiceTermsAgreed,
+                isPrivacyPolicyAgreed = privacyPolicy ?: state.isPrivacyPolicyAgreed,
+                isAgeConfirmed = ageConfirmed ?: state.isAgeConfirmed
+            )
+        }
+    }
+
+    fun onAllAgreementsChanged(agreed: Boolean) = intent {
+        reduce {
+            state.copy(
+                isServiceTermsAgreed = agreed,
+                isPrivacyPolicyAgreed = agreed,
+                isAgeConfirmed = agreed
+            )
+        }
+    }
 
     fun updateEmail(email: String) = intent {
         val isValid = email.matches(Regex(EMAIL_REGEX))

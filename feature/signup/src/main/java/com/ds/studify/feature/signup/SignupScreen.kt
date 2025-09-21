@@ -3,6 +3,7 @@ package com.ds.studify.feature.signup
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -47,6 +50,7 @@ import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.designsystem.theme.Typography
 import com.ds.studify.core.resources.StudifyDrawable
 import com.ds.studify.core.resources.StudifyString
+import com.ds.studify.feature.signup.navigation.TermsType
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import kotlin.math.max
@@ -54,6 +58,7 @@ import kotlin.math.max
 @Composable
 internal fun SignupRoute(
     onNavigateLogin: () -> Unit,
+    onNavigateTerms: (TermsType) -> Unit,
     viewModel: SignupViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.collectAsState()
@@ -76,12 +81,15 @@ internal fun SignupRoute(
         updatePassword = viewModel::updatePassword,
         updateConfirmPassword = viewModel::updateConfirmPassword,
         updateNickname = viewModel::updateNickname,
+        onAgreementChanged = viewModel::onAgreementChanged,
+        onAllAgreementsChanged = viewModel::onAllAgreementsChanged,
         onSendVerificationClick = {
 //            if (uiState.showTimer) {
 //                viewModel.reverify()
 //            } else
                 viewModel.sendVerification()
         },
+        onNavigateTerms = onNavigateTerms,
         onSignupClick = { viewModel.onSignupClick() }
     )
 
@@ -96,7 +104,10 @@ internal fun SignupScreen(
     updatePassword: (String) -> Unit = {},
     updateConfirmPassword: (String) -> Unit = {},
     updateNickname: (String) -> Unit = {},
+    onAgreementChanged: (Boolean?, Boolean?, Boolean?) -> Unit = { _, _, _ -> },
+    onAllAgreementsChanged: (Boolean) -> Unit = {},
     onSendVerificationClick: () -> Unit = {},
+    onNavigateTerms: (TermsType) -> Unit = {},
     onSignupClick: () -> Unit = {}
 ) {
     val density = LocalDensity.current
@@ -346,6 +357,13 @@ internal fun SignupScreen(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
+            TermsAgreementSection(
+                uiState = uiState,
+                onAllAgreementsChanged = onAllAgreementsChanged,
+                onAgreementChanged = onAgreementChanged,
+                onNavigateTerms = onNavigateTerms
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
@@ -364,6 +382,95 @@ internal fun SignupScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp + extraScrollPaddingDp))
+        }
+    }
+}
+
+// 약관 전체
+@Composable
+private fun TermsAgreementSection(
+    uiState: SignupUiState,
+    onAllAgreementsChanged: (Boolean) -> Unit,
+    onAgreementChanged: (Boolean?, Boolean?, Boolean?) -> Unit,
+    onNavigateTerms: (TermsType) -> Unit
+) {
+    val areAllAgreed = uiState.isServiceTermsAgreed && uiState.isPrivacyPolicyAgreed && uiState.isAgeConfirmed
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp)
+                .clickable { onAllAgreementsChanged(!areAllAgreed) },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = areAllAgreed,
+                onCheckedChange = { onAllAgreementsChanged(it) },
+                colors = CheckboxDefaults.colors(checkedColor = StudifyColors.PK03),
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = stringResource(id = StudifyString.signup_terms_agree_all),
+                style = Typography.bodyMedium
+            )
+        }
+        AgreementItem(
+            checked = uiState.isServiceTermsAgreed,
+            onCheckedChange = { onAgreementChanged(it, null, null) },
+            text = stringResource(id = StudifyString.signup_terms_service),
+            onViewClick = { onNavigateTerms(TermsType.SERVICE) }
+        )
+        AgreementItem(
+            checked = uiState.isPrivacyPolicyAgreed,
+            onCheckedChange = { onAgreementChanged(null, it, null) },
+            text = stringResource(id = StudifyString.signup_terms_privacy),
+            onViewClick = { onNavigateTerms(TermsType.PRIVACY) }
+        )
+        AgreementItem(
+            checked = uiState.isAgeConfirmed,
+            onCheckedChange = { onAgreementChanged(null, null, it) },
+            text = stringResource(id = StudifyString.signup_terms_age),
+            onViewClick = null
+        )
+    }
+}
+
+// 각 약관 항목
+@Composable
+private fun AgreementItem(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    text: String,
+    onViewClick: (() -> Unit)? = null,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(28.dp)
+            .clickable { onCheckedChange(!checked) },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = CheckboxDefaults.colors(checkedColor = StudifyColors.PK03),
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = text, style = Typography.bodySmall, modifier = Modifier.weight(1f))
+
+        val viewClick = onViewClick
+        if (viewClick != null) {
+            Text(
+                text = stringResource(id = StudifyString.signup_terms_view),
+                style = Typography.bodySmall,
+                color = StudifyColors.G03,
+                modifier = Modifier
+                    .clickable { viewClick() }
+                    .padding(start = 8.dp)
+            )
         }
     }
 }

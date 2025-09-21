@@ -28,7 +28,7 @@ import com.ds.studify.feature.mypage.navigation.navigateToNicknameChange
 import com.ds.studify.feature.mypage.navigation.navigateToPasswordChange
 import com.ds.studify.feature.signup.navigation.RouteSignup
 import com.ds.studify.feature.signup.navigation.navigateToSignup
-import com.ds.studify.feature.signup.navigation.signupScreen
+import com.ds.studify.feature.signup.navigation.signupGraph
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -72,7 +72,16 @@ fun StudifyNavHost(
                 )
             )
 
-            signupScreen(
+//            signupScreen(
+//                onNavigateLogin = {
+//                    navController.navigate(RouteLogin) {
+//                        popUpTo(RouteSignup) { inclusive = true }
+//                        launchSingleTop = true
+//                    }
+//                }
+//            )
+            signupGraph(
+                navController = navController,
                 onNavigateLogin = {
                     navController.navigate(RouteLogin) {
                         popUpTo(RouteSignup) { inclusive = true }
