@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import com.ds.studify.core.designsystem.component.StudifyScaffoldWithTitle
+import com.ds.studify.core.designsystem.theme.StudifyColors
 import com.ds.studify.core.resources.StudifyString
 import com.ds.studify.feature.signup.navigation.RouteTerms
 import com.ds.studify.feature.signup.navigation.TermsType
@@ -78,7 +80,12 @@ internal fun TermsWebViewRoute(
         title = stringResource(viewModel.titleResId),
         onBackButtonClick = onBack
     ) { paddingValues ->
-        Box(Modifier.fillMaxSize().padding(paddingValues)) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(StudifyColors.WHITE)
+                .padding(paddingValues)
+        ) {
             AndroidView(
                 factory = { webView },
                 update = { it.loadUrl(viewModel.url) }
