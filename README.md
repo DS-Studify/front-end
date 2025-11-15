@@ -107,9 +107,10 @@ https://github.com/user-attachments/assets/bd7d650b-9c57-4ec6-ac7f-7972262d6e04
 <br />
 <br />
 
- ## Download
+ ## 📱 Download
 |       Type       |       Link        | 
 | :-----------------: | :-----------------: |
 |        ONE store      |       [https://m.onestore.co.kr/v2/ko-kr/app/0001002764](https://m.onestore.co.kr/v2/ko-kr/app/0001002764)        | 
+|        Google Play      |       준비 중        | 
  
 <br />
