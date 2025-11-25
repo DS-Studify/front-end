@@ -252,7 +252,7 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "＊",
+                    text = stringResource(id = StudifyString.camera_guide_precautions_partition),
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK,
                     modifier = Modifier.padding(top = 2.dp)
@@ -268,7 +268,7 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "＊",
+                    text = stringResource(id = StudifyString.camera_guide_precautions_partition),
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK,
                     modifier = Modifier.padding(top = 2.dp)
@@ -284,7 +284,7 @@ private fun CameraGuideContent() {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "＊",
+                    text = stringResource(id = StudifyString.camera_guide_precautions_partition),
                     style = Typography.headlineSmall,
                     color = StudifyColors.BLACK,
                     modifier = Modifier.padding(top = 2.dp)
