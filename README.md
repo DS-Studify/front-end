@@ -7,8 +7,9 @@
 >이를 바탕으로 **실제 공부 시간 기록** 및 **피드백을 제공**하는 학습 보조 애플리케이션입니다.
 
 ### Introduction
-- 2025 한이음 드림업 공모전 장려상🏆
+- [2025 한이음 드림업] 공모전 장려상🏆
 - 덕성여자대학교 컴퓨터공학전공 졸업 프로젝트
+- 한국저작권위원회 프로그램 저작권 등록
 <br />
 
 https://github.com/user-attachments/assets/bd7d650b-9c57-4ec6-ac7f-7972262d6e04
@@ -50,17 +51,19 @@ https://github.com/user-attachments/assets/bd7d650b-9c57-4ec6-ac7f-7972262d6e04
 <br />
 
  ## :computer: Tech Stack
-<img src="https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=Android&logoColor=white"> <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=flat-square&logo=Kotlin&logoColor=white"> <img src="https://img.shields.io/badge/mediapipe-0097A7.svg?style=flat-square&logo=mediapipe&logoColor=white">
+<img src="https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=Android&logoColor=white"> <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=flat-square&logo=Kotlin&logoColor=white"> <img src="https://img.shields.io/badge/mediapipe-0097A7.svg?style=flat-square&logo=mediapipe&logoColor=white"> <img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=flat-square&logo=TensorFlow&logoColor=white">
 - Jetpack Compose
 - MVI
 - Multi-Module
 - Hilt
 - Retrofit2, OkHttp3
 - Coroutine
+- Orbit
 - Flow
-- Coil, Lottie
+- Lottie
 - Gradle Version Catalog
 - CameraX
+- Tensorflow Lite
 <br />
 
  ## 📁 Folder
